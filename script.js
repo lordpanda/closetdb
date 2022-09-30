@@ -11,7 +11,7 @@ window.onload = function(){
 function displayRecentlyAdded() {
     
     var grid = document.querySelector(".grid_container"); 
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < 7; i++) {
         const item = document.createElement('div');
         item.className = 'grid_item';
         item.innerHTML = `<a href="#"><img src="./src/db/${i}.jpg"></a>`;

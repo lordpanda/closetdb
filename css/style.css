@@ -1,3 +1,68 @@
+/* #bg {
+    background: linear-gradient(319deg, #37bf9c, #6437bf, #6e3959, #39626e);
+    background-size: 800% 800%;
+
+    -webkit-animation: bg 33s ease infinite;
+    -moz-animation: bg 33s ease infinite;
+    animation: bg 33s ease infinite;
+}
+
+@-webkit-keyframes bg {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@-moz-keyframes bg {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+@keyframes bg {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+} */
+
+#bg {
+    width: 100%;
+    height: 100vh;
+    z-index: -10;
+    top: 0;
+    left: 0;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-size: 300% 300%;
+    background-image: linear-gradient(
+          -45deg, 
+          rgb(1, 23, 33) 0%, 
+          rgb(23, 35, 95) 25%, 
+          rgb(28, 84, 71) 51%, 
+          rgb(65, 29, 42) 100%
+    );  
+    animation: AnimateBG 20s ease infinite;
+    
+}
+  
+@keyframes AnimateBG { 
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+.overlay {
+    position: absolute;
+    z-index: -9;
+    top: 0;
+
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom left, rgb(0, 0, 0,0.75), pink);
+    mix-blend-mode: overlay;
+}
+
 video {
     width: 100%;
     height: 100%;
@@ -37,6 +102,7 @@ li {
     text-align: center;
     display: inline-block;
     font-family: 'Poppins', sans-serif;
+    font-weight: 600;
     background-color:rgba(0, 0, 0, 0.616);
     transition: 0.2s;
 }
@@ -51,21 +117,8 @@ li {
 }
 */
 
-.active {
-    background-color: green;
-}
 
-.overlay {
-    position: absolute;
-    z-index: -9;
-    top: 0;
 
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom right, rgb(12, 100, 201), pink);
-    mix-blend-mode: overlay;
-}
 
 .text {
     display: inline-block;
@@ -73,6 +126,32 @@ li {
     z-index: 1;
     color: rgb(256,256,256);
     font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.intro {
+    margin-top: 50px;
+    text-align: center;
+}
+.intro span {
+    vertical-align: middle;
+    display: inline-block;    
+    z-index: 1;
+    color: rgb(256,256,256);
+    display: flex;
+    justify-content: center;
+    font-size: 4em;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+.intro .sub {
+    font-family: 'Poppins';
+    font-weight: 300;
+    font-size: 2em;
 }
 
 
