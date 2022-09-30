@@ -22,6 +22,9 @@
     50%{background-position:100% 50%}
     100%{background-position:0% 50%}
 } */
+body {
+    overscroll-behavior: none;
+}
 
 #bg {
     width: 100%;
@@ -29,10 +32,11 @@
     z-index: -10;
     top: 0;
     left: 0;
-    position: absolute;
+    position: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-repeat: no-repeat;
     background-size: 300% 300%;
     background-image: linear-gradient(
           -45deg, 
@@ -52,7 +56,7 @@
 }
 
 .overlay {
-    position: absolute;
+    position: fixed;
     z-index: -9;
     top: 0;
 
@@ -93,7 +97,7 @@ li {
     float: left;
 }
 
-.header a {
+.header ul a {
     z-index: 1;
     color: white;
     text-decoration: none;
@@ -107,7 +111,7 @@ li {
     transition: 0.2s;
 }
 
-.header a:hover {
+.header ul a:hover {
     letter-spacing: 6px;
 }
 
@@ -127,6 +131,10 @@ li {
     color: rgb(256,256,256);
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
+}
+.text a{
+    color: rgb(256, 256, 256);
+    text-decoration: none;
 }
 h1 {
     font-family: 'Poppins', sans-serif;
@@ -171,9 +179,10 @@ h1 {
     display: block;
     width: 100%;
     padding: .375rem .75rem;
-    font-size: 1rem;
+    font-size: 1.7rem;
     font-weight: 400;
     line-height: 1.5;
+    letter-spacing: 1;
     color: #313131;
     background-color: rgb(256,256,256,0.7);
     /* background-clip: padding-box; */
@@ -183,6 +192,11 @@ h1 {
     appearance: none;
     border-radius: 2rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    outline: none;
+}
+
+.content {
+    position: absolute;
 }
 
 .recently_added {
@@ -199,14 +213,15 @@ h1 {
 .grid_container {
     display: grid;
     grid-template-columns: auto auto auto auto;
-    grid-template-rows: 580px 200px;
+    grid-template-rows: 520px 520px;
     justify-content: space-evenly;
-    grid-gap: 1em;
+    grid-gap: 1.5em;
 }
 
 .grid_item {
     border-radius: 30px;
-    position:relative;
+    position: relative;
+    height: auto;
     z-index:1;
     overflow: hidden;
 }
@@ -241,7 +256,7 @@ h1 {
 
 @media screen and (max-width: 960px) {
     .grid_container {
-        grid-template-rows: 360px 200px;
+        grid-template-rows: 1fr 1fr 1fr;
     }
 
 }
