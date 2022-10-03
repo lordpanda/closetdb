@@ -24,6 +24,7 @@
 } */
 body {
     overscroll-behavior: none;
+    margin: 0;
 }
 
 #bg {
@@ -120,12 +121,13 @@ li {
 }
 
 .header ul a:hover {
-    letter-spacing: 6px;
+    color: hotpink;
 }
 
 /*
 .header a:hover:not(){
     background-color: rgba(0, 0, 0, 0.616);
+    letter-spacing: 6px;
 }
 */
 
@@ -222,7 +224,7 @@ h1 {
 .grid_container {
     display: grid;
     grid-template-columns: auto auto auto auto;
-    grid-template-rows: 520px 520px;
+    grid-template-rows: auto auto;
     justify-content: space-evenly;
     grid-gap: 1.5em;
 }
@@ -253,6 +255,23 @@ h1 {
 }
 
 
+@media (-webkit-min-device-pixel-ratio:0) {
+    a {
+      background-color: skyBlue;
+      background-image: -webkit-linear-gradient(left, hotPink 0%, orange 50%, transparent 50%);
+      background-position: 100% 0;
+      background-size: 200% 200%;
+      color: transparent;
+      -webkit-transition: .1s .2s;
+      -webkit-background-clip: text;
+    }
+    a:hover {
+      background-position: 0 0;
+      color: transparent;
+      transition: .4s 0;
+    }
+  }
+
 
 
 /* Responsive layout - makes a two column-layout instead of four columns */
@@ -282,6 +301,12 @@ h1 {
 @media screen and (max-width: 620px) {
     .grid_container {
         grid-template-columns: auto auto;
+    }
+    .header {
+        padding: 5 20;
+    }
+    .logo h1 {
+font-size: 1.5em;
     }
     .intro {
         margin-top: 20px;
@@ -316,124 +341,124 @@ h1 {
           opacity: 0;
           display: inline-block;
           margin: 0;
-      }
+        }
       
-      .hamburger{
-          position: absolute;
-          top: 0;
-          right: 0;
-          height: 40px;
-          width: 42spx;
-          margin: 0;
+    .hamburger{
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 40px;
+        width: 42px;
+        margin: 0;
         
         /* FOR DISPLAYING EVERY ELEMENT IN THE CENTER : */
         
-          display: flex;
-          align-items: center;
-          justify-content: center;
-      }
-      
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
       /* CREATING THE MIDDLE LINE OF THE HAMBURGER : */
       
-      .hamburger > div{
-          position: relative;
-          top: 0;
-          right: 0;
-          background: white;
-          height: 2px;
-          width: 60%;
-          transition: all  0.4s ease;
-      }
-      
-      /* CREATING THE TOP AND BOTTOM LINES : 
-      TOP AT -10PX ABOVE THE MIDDLE ONE AND BOTTOM ONE IS 10PX BELOW THE MIDDLE: */
-      
-      .hamburger > div::before,
-      .hamburger > div::after{
-          content: '';
-          position: absolute;
-          top: -10px;
-          background: white;
-          width: 100%;
-          height: 2px;
-          transition: all  0.4s ease;
-      }
-      
-      .hamburger > div::after{
-          top: 10px;
-      }
-      
-      /* IF THE TOGGLER IS IN ITS CHECKED STATE, THEN SETTING THE BACKGROUND OF THE MIDDLE LAYER TO COMPLETE BLACK AND OPAQUE :  */
-      
-      .toggler:checked + .hamburger > div{
-          background: rgba(0,0,0,0);
-      }
-      
-      .toggler:checked + .hamburger > div::before{
-          top: 0;
-          transform: rotate(45deg);
-          background: white;
-          z-index: 20;
-      }
-      
-      /* AND ROTATING THE TOP AND BOTTOM LINES :  */
-      
-      .toggler:checked + .hamburger > div::after{
-          top: 0;
-          transform: rotate(135deg);
-          background: white;
-          z-index: 20;
-      }
-      
-      
-      /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
-      
-      .menu{
-            background: rgb(0,0,0,0.9);
-            width: 0%;
-            margin: 0;
-        /* APPLYING TRANSITION TO THE MENU :  */
-        
-          transition: all 0.4s ease;
-      }
-      
-      /* IF THE TOGGLER IS CHECKED, THEN INCREASE THE WIDTH OF THE MENU TO 30% , CREATING A SMOOTH EFFECT :  */
-      
-      .toggler:checked ~ .menu{
-          width: 30%;
-      }
-      
-      
-      /* STYLING THE LIST :  */
-      
-      .menu >  div > ul{
-          display: flex;
-          flex-direction: column;
-          position: fixed;
-          top: 70px;
-          padding-right: 10px;
-        
-        /* HIDDEN INITIALLY  :  */
-        
-          visibility: hidden;
-      }
-      
-      .menu > div > ul > li{
-          list-style: none;
-          padding: 0.5rem;
-      }
-      
-      /* WHEN THE TOGGLER IS CHECKED, CHANGE THE VISIBILITY TO VISIBLE :  */
-      
-      .toggler:checked ~ .menu > div > ul{
-          transition: visibility 0.4s ease;
-          transition-delay: 0.1s;
-          visibility: visible;
-      }
-      
-      .toggler:checked ~ .menu > div > ul > li > a:hover{
-          color: orange;
-      }
+    .hamburger > div{
+        position: relative;
+        top: 0;
+        right: 0;
+        background: white;
+        height: 2px;
+        width: 60%;
+        transition: all  0.4s ease;
+    }
+    
+    /* CREATING THE TOP AND BOTTOM LINES : 
+    TOP AT -10PX ABOVE THE MIDDLE ONE AND BOTTOM ONE IS 10PX BELOW THE MIDDLE: */
+    
+    .hamburger > div::before,
+    .hamburger > div::after{
+        content: '';
+        position: absolute;
+        top: -10px;
+        background: white;
+        width: 100%;
+        height: 2px;
+        transition: all  0.4s ease;
+    }
+    
+    .hamburger > div::after{
+        top: 10px;
+    }
+    
+    /* IF THE TOGGLER IS IN ITS CHECKED STATE, THEN SETTING THE BACKGROUND OF THE MIDDLE LAYER TO COMPLETE BLACK AND OPAQUE :  */
+    
+    .toggler:checked + .hamburger > div{
+        background: rgba(0,0,0,0);
+    }
+    
+    .toggler:checked + .hamburger > div::before{
+        top: 0;
+        transform: rotate(45deg);
+        background: white;
+        z-index: 30;
+    }
+    
+    /* AND ROTATING THE TOP AND BOTTOM LINES :  */
+    
+    .toggler:checked + .hamburger > div::after{
+        top: 0;
+        transform: rotate(135deg);
+        background: white;
+        z-index: 30;
+    }
+    
+    
+    /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
+    
+    .menu{
+        background: rgb(0,0,0,0.9);
+        width: 0%;
+        margin: 0;
+    /* APPLYING TRANSITION TO THE MENU :  */
+    
+        transition: all 0.4s ease;
+    }
+    
+    /* IF THE TOGGLER IS CHECKED, THEN INCREASE THE WIDTH OF THE MENU TO 30% , CREATING A SMOOTH EFFECT :  */
+    
+    .toggler:checked ~ .menu{
+        width: 40%;
+    }
+    
+    
+    /* STYLING THE LIST :  */
+    
+    .menu >  div > ul{
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 70px;
+        padding-right: 10px;
+    
+    /* HIDDEN INITIALLY  :  */
+    
+        visibility: hidden;
+    }
+    
+    .menu > div > ul > li{
+        list-style: none;
+        padding: 0.5rem;
+    }
+    
+    /* WHEN THE TOGGLER IS CHECKED, CHANGE THE VISIBILITY TO VISIBLE :  */
+    
+    .toggler:checked ~ .menu > div > ul{
+        transition: visibility 0.4s ease;
+        transition-delay: 0.1s;
+        visibility: visible;
+    }
+    
+    .toggler:checked ~ .menu > div > ul > li > a:hover{
+        color: orange;
+    }
 
 
 
