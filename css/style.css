@@ -22,6 +22,11 @@
     50%{background-position:100% 50%}
     100%{background-position:0% 50%}
 } */
+
+:root {
+    --black: #555555;
+  }
+
 body {
     overscroll-behavior: none;
     margin: 0;
@@ -41,10 +46,10 @@ body {
     background-size: 300% 300%;
     background-image: linear-gradient(
           -45deg, 
-          rgb(1, 23, 33) 0%, 
-          rgb(23, 35, 95) 25%, 
-          rgb(28, 84, 71) 51%, 
-          rgb(97, 17, 46) 100%
+          rgb(255, 255, 255) 0%, 
+          rgb(165, 180, 255) 25%, 
+          rgb(209, 255, 244) 51%, 
+          rgb(239, 229, 191) 100%
     );  
     animation: AnimateBG 20s ease infinite;
     
@@ -64,7 +69,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom left, rgb(0, 0, 0,0.75), pink);
+    background: linear-gradient(to bottom left, rgba(255, 255, 255, 0.85), rgb(200, 200, 200));
     mix-blend-mode: overlay;
 }
 
@@ -83,6 +88,10 @@ video {
     position: relative;
     z-index: 11;
     padding: 20;
+}
+
+.header h1 {
+    transition: 0.2s;
 }
 
 .toggler {
@@ -109,7 +118,7 @@ li {
 
 .header ul a {
     z-index: 1;
-    color: white;
+    color: var(--black);
     text-decoration: none;
     padding: 14 16;
     font-size: 1.2em;
@@ -120,7 +129,7 @@ li {
     transition: 0.2s;
 }
 
-.header ul a:hover {
+.header a:hover, .header h1:hover {
     color: hotpink;
 }
 
@@ -138,18 +147,16 @@ li {
     display: inline-block;
     position: relative;
     z-index: 1;
-    color: rgb(256,256,256);
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
 }
 .logo a{
-    color: rgb(256, 256, 256);
     text-decoration: none;
 }
 h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
-    color: white;
+    color: var(--black);
 }
 
 .intro {
@@ -160,7 +167,7 @@ h1 {
     vertical-align: middle;
     display: block;    
     z-index: 1;
-    color: rgb(256,256,256);
+    color: var(--black);
     /* display: flex; */
     justify-content: center;
     font-size: 4em;
@@ -210,13 +217,13 @@ h1 {
     position: absolute;
 }
 
-.recently_added {
+.subheader {
     padding: 40px;
     width: 100%;
     display: block;
 }
 
-.recently_added h1 {
+.subheader h1 {
     margin-bottom: 1em;
 }
 
@@ -252,6 +259,14 @@ h1 {
     display: flex;
     flex-wrap: wrap;
     padding: 0 4px;
+}
+
+/* filters */
+.filters {
+    position: relative;
+    display: block;
+    margin: auto;
+    width: 80%;
 }
 
 
@@ -364,7 +379,7 @@ font-size: 1.5em;
         position: relative;
         top: 0;
         right: 0;
-        background: white;
+        background: var(--black);
         height: 2px;
         width: 60%;
         transition: all  0.4s ease;
@@ -378,7 +393,7 @@ font-size: 1.5em;
         content: '';
         position: absolute;
         top: -10px;
-        background: white;
+        background: var(--black);
         width: 100%;
         height: 2px;
         transition: all  0.4s ease;
@@ -391,13 +406,13 @@ font-size: 1.5em;
     /* IF THE TOGGLER IS IN ITS CHECKED STATE, THEN SETTING THE BACKGROUND OF THE MIDDLE LAYER TO COMPLETE BLACK AND OPAQUE :  */
     
     .toggler:checked + .hamburger > div{
-        background: rgba(0,0,0,0);
+        background: rgba(255,255,255,0);
     }
     
     .toggler:checked + .hamburger > div::before{
         top: 0;
         transform: rotate(45deg);
-        background: white;
+        background: var(--black);
         z-index: 30;
     }
     
@@ -406,7 +421,7 @@ font-size: 1.5em;
     .toggler:checked + .hamburger > div::after{
         top: 0;
         transform: rotate(135deg);
-        background: white;
+        background: var(--black);
         z-index: 30;
     }
     
@@ -414,7 +429,7 @@ font-size: 1.5em;
     /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
     
     .menu{
-        background: rgb(0,0,0,0.9);
+        background: rgb(255,255,255,0.9);
         width: 0%;
         margin: 0;
     /* APPLYING TRANSITION TO THE MENU :  */
