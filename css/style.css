@@ -22,6 +22,9 @@
     50%{background-position:100% 50%}
     100%{background-position:0% 50%}
 } */
+body {
+    overscroll-behavior: none;
+}
 
 #bg {
     width: 100%;
@@ -29,17 +32,18 @@
     z-index: -10;
     top: 0;
     left: 0;
-    position: absolute;
+    position: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
+    background-repeat: no-repeat;
     background-size: 300% 300%;
     background-image: linear-gradient(
           -45deg, 
           rgb(1, 23, 33) 0%, 
           rgb(23, 35, 95) 25%, 
           rgb(28, 84, 71) 51%, 
-          rgb(65, 29, 42) 100%
+          rgb(97, 17, 46) 100%
     );  
     animation: AnimateBG 20s ease infinite;
     
@@ -52,7 +56,7 @@
 }
 
 .overlay {
-    position: absolute;
+    position: fixed;
     z-index: -9;
     top: 0;
 
@@ -80,9 +84,18 @@ video {
     padding: 20;
 }
 
+.toggler {
+    display: none;
+}
+.hamburger {
+    display: none;
+}
+
 ul {
-    display: block;
     float: right;
+    position: absolute;
+    right: 0;
+    top: 0;
     list-style-type: none;
     margin: 0;
     padding: 0;
@@ -93,7 +106,7 @@ li {
     float: left;
 }
 
-.header a {
+.header ul a {
     z-index: 1;
     color: white;
     text-decoration: none;
@@ -106,7 +119,7 @@ li {
     transition: 0.2s;
 }
 
-.header a:hover {
+.header ul a:hover {
     letter-spacing: 6px;
 }
 
@@ -119,7 +132,7 @@ li {
 
 
 
-.text {
+.logo {
     display: inline-block;
     position: relative;
     z-index: 1;
@@ -127,9 +140,14 @@ li {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
 }
+.logo a{
+    color: rgb(256, 256, 256);
+    text-decoration: none;
+}
 h1 {
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
+    color: white;
 }
 
 .intro {
@@ -138,10 +156,10 @@ h1 {
 }
 .intro span {
     vertical-align: middle;
-    display: inline-block;    
+    display: block;    
     z-index: 1;
     color: rgb(256,256,256);
-    display: flex;
+    /* display: flex; */
     justify-content: center;
     font-size: 4em;
     font-family: 'Poppins', sans-serif;
@@ -170,9 +188,10 @@ h1 {
     display: block;
     width: 100%;
     padding: .375rem .75rem;
-    font-size: 1rem;
+    font-size: 1.7rem;
     font-weight: 400;
     line-height: 1.5;
+    letter-spacing: 1;
     color: #313131;
     background-color: rgb(256,256,256,0.7);
     /* background-clip: padding-box; */
@@ -182,6 +201,11 @@ h1 {
     appearance: none;
     border-radius: 2rem;
     transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    outline: none;
+}
+
+.content {
+    position: absolute;
 }
 
 .recently_added {
@@ -198,14 +222,15 @@ h1 {
 .grid_container {
     display: grid;
     grid-template-columns: auto auto auto auto;
-    grid-template-rows: 580px 200px;
+    grid-template-rows: 520px 520px;
     justify-content: space-evenly;
-    grid-gap: 1em;
+    grid-gap: 1.5em;
 }
 
 .grid_item {
     border-radius: 30px;
-    position:relative;
+    position: relative;
+    height: auto;
     z-index:1;
     overflow: hidden;
 }
@@ -240,14 +265,178 @@ h1 {
 
 @media screen and (max-width: 960px) {
     .grid_container {
-        grid-template-rows: 360px 200px;
+        grid-template-rows: 1fr 1fr 1fr;
     }
-
+    .search {
+        padding-top: 30px;
+        width: 80%;
+    }
+    .search input {
+        font-size: 1.5em;
+    }
+    .intro span {
+        font-size: 3em;
+    }
 }
 
 @media screen and (max-width: 620px) {
     .grid_container {
         grid-template-columns: auto auto;
     }
+    .intro {
+        margin-top: 20px;
+    }
+    .intro span {
+        font-size: 2.5em;
+    }
+    .intro .sub {
+        font-size: 1.5em;
+    }
+    
+    .search {
+        padding-top: 20px;
+        width: 90%;
+    }
+    .search input {
+        font-size: 1em;
+    }
+    .recently_added {
+        padding: 30px;
+    }
+
+    .toggler{
+        /* ALWAYS KEEPING THE TOGGLER OR THE CHECKBOX ON TOP OF EVERYTHING :  */
+          z-index: 10;
+          height: 50px;
+          width: 50px;
+          position: absolute;
+          top: 0;
+          right: 0;
+          cursor: pointer;
+          opacity: 0;
+          display: inline-block;
+          margin: 0;
+      }
+      
+      .hamburger{
+          position: absolute;
+          top: 0;
+          right: 0;
+          height: 40px;
+          width: 42spx;
+          margin: 0;
+        
+        /* FOR DISPLAYING EVERY ELEMENT IN THE CENTER : */
+        
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+      
+      /* CREATING THE MIDDLE LINE OF THE HAMBURGER : */
+      
+      .hamburger > div{
+          position: relative;
+          top: 0;
+          right: 0;
+          background: white;
+          height: 2px;
+          width: 60%;
+          transition: all  0.4s ease;
+      }
+      
+      /* CREATING THE TOP AND BOTTOM LINES : 
+      TOP AT -10PX ABOVE THE MIDDLE ONE AND BOTTOM ONE IS 10PX BELOW THE MIDDLE: */
+      
+      .hamburger > div::before,
+      .hamburger > div::after{
+          content: '';
+          position: absolute;
+          top: -10px;
+          background: white;
+          width: 100%;
+          height: 2px;
+          transition: all  0.4s ease;
+      }
+      
+      .hamburger > div::after{
+          top: 10px;
+      }
+      
+      /* IF THE TOGGLER IS IN ITS CHECKED STATE, THEN SETTING THE BACKGROUND OF THE MIDDLE LAYER TO COMPLETE BLACK AND OPAQUE :  */
+      
+      .toggler:checked + .hamburger > div{
+          background: rgba(0,0,0,0);
+      }
+      
+      .toggler:checked + .hamburger > div::before{
+          top: 0;
+          transform: rotate(45deg);
+          background: white;
+          z-index: 20;
+      }
+      
+      /* AND ROTATING THE TOP AND BOTTOM LINES :  */
+      
+      .toggler:checked + .hamburger > div::after{
+          top: 0;
+          transform: rotate(135deg);
+          background: white;
+          z-index: 20;
+      }
+      
+      
+      /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
+      
+      .menu{
+            background: rgb(0,0,0,0.9);
+            width: 0%;
+            margin: 0;
+        /* APPLYING TRANSITION TO THE MENU :  */
+        
+          transition: all 0.4s ease;
+      }
+      
+      /* IF THE TOGGLER IS CHECKED, THEN INCREASE THE WIDTH OF THE MENU TO 30% , CREATING A SMOOTH EFFECT :  */
+      
+      .toggler:checked ~ .menu{
+          width: 30%;
+      }
+      
+      
+      /* STYLING THE LIST :  */
+      
+      .menu >  div > ul{
+          display: flex;
+          flex-direction: column;
+          position: fixed;
+          top: 70px;
+          padding-right: 10px;
+        
+        /* HIDDEN INITIALLY  :  */
+        
+          visibility: hidden;
+      }
+      
+      .menu > div > ul > li{
+          list-style: none;
+          padding: 0.5rem;
+      }
+      
+      /* WHEN THE TOGGLER IS CHECKED, CHANGE THE VISIBILITY TO VISIBLE :  */
+      
+      .toggler:checked ~ .menu > div > ul{
+          transition: visibility 0.4s ease;
+          transition-delay: 0.1s;
+          visibility: visible;
+      }
+      
+      .toggler:checked ~ .menu > div > ul > li > a:hover{
+          color: orange;
+      }
+
+
+
+
 
 }
