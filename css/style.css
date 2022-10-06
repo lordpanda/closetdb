@@ -463,7 +463,10 @@ h1 {
     .grid_item {
         border-radius: 20px;
     }
-    .grid_item img, a {
+    .grid_item a {
+        justify-self: flex-start;
+    }
+    .grid_item img {
         /* 이걸로 ios 해결함 */
         justify-self: flex-start;
         flex: 0 0 40%;
