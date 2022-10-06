@@ -312,10 +312,6 @@ h1 {
     .grid_item {
         display: flex;
     }
-    .grid_item img {
-        flex: 0 0 35%;
-        
-    }
 
     .header {
         padding: 5 20;
@@ -477,12 +473,16 @@ h1 {
 }
 
 
-@media screen and (max-width: 375px) {
+@media screen and (max-width: 400px) {
+    .grid_container {
+        grid-gap: 1em;
+    }
     .grid_item {
         border-radius: 20px;
     }
     .grid_item img {
         justify-self: flex-start;
+        flex: 0 0 40%;
     }
         
 }
