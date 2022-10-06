@@ -10,7 +10,7 @@ function displayRecentlyAdded() {
     for (var i = 0; i < 7; i++) {
         const item = document.createElement('div');
         item.className = 'grid_item';
-        item.innerHTML = `<a href="#"><img src="./src/db/${i}.jpg"></a>`;
+        item.innerHTML = `<img src="./src/db/${i}.jpg">`;
         grid.appendChild(item);
     }
 }

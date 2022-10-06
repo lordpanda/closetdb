@@ -246,6 +246,7 @@ h1 {
 .grid_item {
     border-radius: 30px;
     position: relative;
+    width: 100%;
     height: auto;
     z-index:1;
     overflow: hidden;
@@ -310,8 +311,6 @@ h1 {
     }
     .grid_item {
         display: flex;
-        height: 100%;
-        width: 100%;
     }
     .grid_item img {
         flex: 0 0 35%;
@@ -479,8 +478,11 @@ h1 {
 
 
 @media screen and (max-width: 375px) {
+    .grid_item {
+        border-radius: 20px;
+    }
     .grid_item img {
-        height: auto;
+        justify-self: flex-start;
     }
         
 }
