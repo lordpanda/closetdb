@@ -24,24 +24,24 @@ const corsOptions = {
     credentials: true,
 }
 
-const connection = mysql.createConnection({
-    host : config.db.host,
-    user : config.db.username,
-    password : config.db.password,
-    database : config.db.database,
-    port: config.db.port
-})
+// const connection = mysql.createConnection({
+//     host : config.db.host,
+//     user : config.db.username,
+//     password : config.db.password,
+//     database : config.db.database,
+//     port: config.db.port
+// })
 
 
 
-connection.connect(function(err) {
-    if (err) {
-      console.error('Database connection failed: ' + err.stack);
-      return;
-    }
+// connection.connect(function(err) {
+//     if (err) {
+//       console.error('Database connection failed: ' + err.stack);
+//       return;
+//     }
   
-    console.log('Connected to database.');
-  });
+//     console.log('Connected to database.');
+//   });
 
 app.get('/', (req, res) => {
     res.render('index.html');
