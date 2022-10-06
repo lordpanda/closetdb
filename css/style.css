@@ -271,25 +271,6 @@ h1 {
 }
 
 
-@media (-webkit-min-device-pixel-ratio:0) {
-    a {
-      background-color: skyBlue;
-      background-image: -webkit-linear-gradient(left, hotPink 0%, orange 50%, transparent 50%);
-      background-position: 100% 0;
-      background-size: 200% 200%;
-      color: transparent;
-      -webkit-transition: .1s .2s;
-      -webkit-background-clip: text;
-    }
-    a:hover {
-      background-position: 0 0;
-      color: transparent;
-      transition: .4s 0;
-    }
-  }
-
-
-
 /* Responsive layout - makes a two column-layout instead of four columns */
 @media screen and (max-width: 1200px) {
     .grid_container {
@@ -316,11 +297,13 @@ h1 {
 
 @media screen and (max-width: 620px) {
     .grid_container {
-        grid-template-columns: auto auto;
+        grid-template-columns: 1fr 1fr;
         grid-template-rows: 1fr 1fr 1fr 1fr;
     }
     .grid_item {
         display: flex;
+        height: 100%;
+        width: 100%;
     }
 
     .header {
