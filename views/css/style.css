@@ -1,0 +1,472 @@
+*, ::after, ::before {
+    box-sizing: border-box;
+}
+
+:root {
+    --black: #555555;
+  }
+
+body {
+    overscroll-behavior: none;
+    margin: 0;
+    display: block;
+}
+
+#bg {
+    width: 100%;
+    height: 100%;
+    z-index: -10;
+    top: 0;
+    left: 0;
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    background-image: linear-gradient(
+          -45deg, 
+          rgb(255, 255, 255) 0%, 
+          rgb(165, 180, 255) 25%, 
+          rgb(209, 255, 244) 51%, 
+          rgb(239, 229, 191) 100%
+    );  
+    animation: AnimateBG 20s ease infinite;
+    
+}
+  
+@keyframes AnimateBG { 
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+.overlay {
+    position: fixed;
+    z-index: -9;
+    top: 0;
+
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom left, rgba(255, 255, 255, 0.85), rgb(200, 200, 200));
+    mix-blend-mode: overlay;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    z-index: -10;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+    position: absolute;
+
+}
+
+.header {
+    position: relative;
+    z-index: 11;
+    padding: 20;
+}
+
+.header h1 {
+    transition: 0.2s;
+}
+
+.toggler {
+    display: none;
+}
+.hamburger {
+    display: none;
+}
+
+ul {
+    float: right;
+    position: absolute;
+    right: 0;
+    top: 0;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+li {
+    float: left;
+}
+
+.header ul a {
+    z-index: 1;
+    color: var(--black);
+    text-decoration: none;
+    padding: 14 16;
+    font-size: 1.2em;
+    text-align: center;
+    display: inline-block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.header a:hover, .header h1:hover {
+    color: hotpink;
+}
+
+/*
+.header a:hover:not(){
+    background-color: rgba(0, 0, 0, 0.616);
+    letter-spacing: 6px;
+}
+*/
+
+
+
+
+.logo {
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+.logo a{
+    text-decoration: none;
+}
+h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 2em;
+    color: var(--black);
+    margin: 0;
+}
+
+.intro {
+    margin-top: 50px;
+    text-align: center;
+}
+.intro span {
+    vertical-align: middle;
+    display: block;    
+    z-index: 1;
+    color: var(--black);
+    /* display: flex; */
+    justify-content: center;
+    font-size: 4em;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+.intro .sub {
+    font-family: 'Poppins';
+    font-weight: 300;
+    font-size: 2em;
+}
+
+
+/* search button */
+.search {
+    float: center;
+    position: relative;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 60%;
+    margin: auto;
+    display: block;
+    padding-top: 60;
+}
+
+.search_input {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 1;
+    color: #313131;
+    background-color: rgb(256,256,256,0.7);
+    /* background-clip: padding-box; */
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 2rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+    outline: none;
+}
+
+.content {
+    position: absolute;
+}
+
+.subheader {
+    padding: 40px;
+    width: 100%;
+    display: block;
+}
+
+.subheader h1 {
+    margin-bottom: 1em;
+}
+
+/* responsive image grid */
+.grid_container {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-template-rows: auto auto;
+    justify-content: space-evenly;
+    grid-gap: 1.5em;
+}
+
+.grid_item {
+    border-radius: 30px;
+    position: relative;
+    width: 100%;
+    height: auto;
+    z-index:1;
+    overflow: hidden;
+}
+
+.grid_item img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    align-self: flex-start;
+    transition: 0.3s all ease-in-out;
+}
+
+.grid_item img:hover{
+    transform: scale(1.1);
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 4px;
+}
+
+
+/* filters */
+.filters {
+    position: relative;
+    display: block;
+    margin: auto;
+    width: 80%;
+}
+
+
+/* Responsive layout - makes a two column-layout instead of four columns */
+@media screen and (max-width: 1200px) {
+    .grid_container {
+        grid-template-columns: auto auto auto;
+    }
+
+}
+
+@media screen and (max-width: 960px) {
+    .grid_container {
+        grid-template-rows: 1fr 1fr 1fr;
+    }
+    .search {
+        padding-top: 30px;
+        width: 80%;
+    }
+    .search input {
+        font-size: 1.5em;
+    }
+    .intro span {
+        font-size: 3em;
+    }
+}
+
+@media screen and (max-width: 620px) {
+    .grid_container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr 1fr 1fr;
+    }
+    .grid_item {
+        display: flex;
+    }
+
+    .header {
+        padding: 5 20;
+    }
+    .logo h1 {
+        font-size: 1.5em;
+    }
+    .intro {
+        margin-top: 20px;
+    }
+    .intro span {
+        font-size: 2.5em;
+    }
+    .intro .sub {
+        font-size: 1.5em;
+    }
+    
+    .search {
+        padding-top: 20px;
+        width: 90%;
+    }
+    .search input {
+        font-size: 1em;
+    }
+    .recently_added {
+        padding: 30px;
+    }
+
+    .toggler{
+        /* ALWAYS KEEPING THE TOGGLER OR THE CHECKBOX ON TOP OF EVERYTHING :  */
+          z-index: 10;
+          height: 50px;
+          width: 50px;
+          position: absolute;
+          top: 0;
+          right: 0;
+          cursor: pointer;
+          opacity: 0;
+          display: inline-block;
+          margin: 0;
+        }
+      
+    .hamburger{
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 40px;
+        width: 42px;
+        margin: 0;
+        
+        /* FOR DISPLAYING EVERY ELEMENT IN THE CENTER : */
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+      /* CREATING THE MIDDLE LINE OF THE HAMBURGER : */
+      
+    .hamburger > div{
+        position: relative;
+        top: 0;
+        right: 0;
+        background: var(--black);
+        height: 2px;
+        width: 60%;
+        transition: all  0.4s ease;
+    }
+    
+    /* CREATING THE TOP AND BOTTOM LINES : 
+    TOP AT -10PX ABOVE THE MIDDLE ONE AND BOTTOM ONE IS 10PX BELOW THE MIDDLE: */
+    
+    .hamburger > div::before,
+    .hamburger > div::after{
+        content: '';
+        position: absolute;
+        top: -10px;
+        background: var(--black);
+        width: 100%;
+        height: 2px;
+        transition: all  0.4s ease;
+    }
+    
+    .hamburger > div::after{
+        top: 10px;
+    }
+    
+    /* IF THE TOGGLER IS IN ITS CHECKED STATE, THEN SETTING THE BACKGROUND OF THE MIDDLE LAYER TO COMPLETE BLACK AND OPAQUE :  */
+    
+    .toggler:checked + .hamburger > div{
+        background: rgba(255,255,255,0);
+    }
+    
+    .toggler:checked + .hamburger > div::before{
+        top: 0;
+        transform: rotate(45deg);
+        background: var(--black);
+        z-index: 30;
+    }
+    
+    /* AND ROTATING THE TOP AND BOTTOM LINES :  */
+    
+    .toggler:checked + .hamburger > div::after{
+        top: 0;
+        transform: rotate(135deg);
+        background: var(--black);
+        z-index: 30;
+    }
+    
+    
+    /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
+    
+    .menu{
+        background: rgb(255,255,255,0.9);
+        width: 0%;
+        margin: 0;
+    /* APPLYING TRANSITION TO THE MENU :  */
+    
+        transition: all 0.4s ease;
+    }
+    
+    /* IF THE TOGGLER IS CHECKED, THEN INCREASE THE WIDTH OF THE MENU TO 30% , CREATING A SMOOTH EFFECT :  */
+    
+    .toggler:checked ~ .menu{
+        width: 40%;
+    }
+    
+    
+    /* STYLING THE LIST :  */
+    
+    .menu >  div > ul{
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 70px;
+        padding-right: 10px;
+    
+    /* HIDDEN INITIALLY  :  */
+    
+        visibility: hidden;
+    }
+    
+    .menu > div > ul > li{
+        list-style: none;
+        padding: 0.5rem;
+    }
+    
+    /* WHEN THE TOGGLER IS CHECKED, CHANGE THE VISIBILITY TO VISIBLE :  */
+    
+    .toggler:checked ~ .menu > div > ul{
+        transition: visibility 0.4s ease;
+        transition-delay: 0.1s;
+        visibility: visible;
+    }
+    
+    .toggler:checked ~ .menu > div > ul > li > a:hover{
+        color: orange;
+    }
+}
+
+
+@media screen and (max-width: 400px) {
+    .subheader {
+        padding: 20px;
+    }
+    .subheader h1 {
+        margin-bottom: 0.5em;
+        font-size: 1.5em;
+    }
+
+    .grid_container {
+        grid-gap: 1em;
+    }
+    .grid_item {
+        border-radius: 20px;
+    }
+    .grid_item img {
+        /* 이걸로 ios 해결함 */
+        justify-self: flex-start;
+        flex: 0 0 50%;
+    }
+        
+}
