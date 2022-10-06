@@ -474,6 +474,9 @@ h1 {
 
 
 @media screen and (max-width: 400px) {
+    .subheader {
+        padding: 20px;
+    }
     .grid_container {
         grid-gap: 1em;
     }
@@ -482,7 +485,7 @@ h1 {
     }
     .grid_item img {
         justify-self: flex-start;
-        flex: 0 0 40%;
+        flex: 0 0 50%;
     }
         
 }
