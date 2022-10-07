@@ -4,12 +4,21 @@
 
 :root {
     --black: #555555;
+    --gray: #dcdcdc;
+    --purple: rgb(109, 35, 255);
   }
 
 body {
     overscroll-behavior: none;
     margin: 0;
     display: block;
+    font-family: 'Poppins';
+    color: var(--black);
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
 }
 
 #bg {
@@ -29,7 +38,7 @@ body {
           rgb(255, 255, 255) 0%, 
           rgb(165, 180, 255) 25%, 
           rgb(209, 255, 244) 51%, 
-          rgb(239, 229, 191) 100%
+          rgb(232, 191, 239) 100%
     );  
     animation: AnimateBG 20s ease infinite;
     
@@ -109,11 +118,11 @@ li {
 }
 
 .header a:hover, .header h1:hover {
-    color: hotpink;
+    color: var(--purple);
 }
 
 .menu_selected {
-    color: hotpink;
+    color: var(--purple);
 }
 .menu_unselected {
     color: var(--black);
@@ -204,16 +213,27 @@ h1 {
 
 .content {
     position: absolute;
+    padding: 40px;
+    
+    margin-bottom: 60px;
+}
+.narrow {
+    position: relative;
+    display: block;
+    margin: auto;
+    max-width: 800px;
+    
+    margin-bottom: 60px;
 }
 
 .subheader {
-    padding: 40px;
+    padding: 30px 10px 10px 10px;
     width: 100%;
     display: block;
 }
 
 .subheader h1 {
-    margin-bottom: 1em;
+    margin: 0.5em 0;
 }
 
 /* responsive image grid */
@@ -251,16 +271,6 @@ h1 {
     flex-wrap: wrap;
     padding: 0 4px;
 }
-
-
-/* filters */
-.filters {
-    position: relative;
-    display: block;
-    margin: auto;
-    width: 80%;
-}
-
 
 /* Responsive layout - makes a two column-layout instead of four columns */
 @media screen and (max-width: 1200px) {

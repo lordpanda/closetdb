@@ -9,7 +9,7 @@ function displayGlobalMenu(parm1) {
     }
     document.write(`
     <div class="logo">
-        <a href="https://lordpanda.github.io/closetdb"><h1>DressRoom</h1></a>
+        <a href="./index.html"><h1>DressRoom</h1></a>
     </div>
     <input type="checkbox" class="toggler">
     <div class="hamburger"><div></div></div>
@@ -32,11 +32,14 @@ function displayRecentlyAdded() {
     }
 }
 
-function displayFilterCategory() {
-    var grid = document.querySelector(".grid_container"); 
-    for (var i = 0; i < 9; i++) {
 
+function displayFilterCategory() {
+    var grid = document.querySelector(".grid_container_category"); 
+    const category = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "underwear", "etc."];
+    for (var i = 0; i < 9; i++) {
         const item = document.createElement('div');
-        item.className = ""
+        item.className = "grid_item grid_category";
+        item.innerHTML = `<div class="category_image"><span>`+category[i]+`</span></div>`;
+        grid.appendChild(item);
     }
 }
