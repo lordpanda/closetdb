@@ -98,7 +98,6 @@ li {
 
 .header ul a {
     z-index: 1;
-    color: var(--black);
     text-decoration: none;
     padding: 14 16;
     font-size: 1.2em;
@@ -111,6 +110,13 @@ li {
 
 .header a:hover, .header h1:hover {
     color: hotpink;
+}
+
+.menu_selected {
+    color: hotpink;
+}
+.menu_unselected {
+    color: var(--black);
 }
 
 /*
@@ -140,6 +146,7 @@ h1 {
     color: var(--black);
     margin: 0;
 }
+
 
 .intro {
     margin-top: 50px;
