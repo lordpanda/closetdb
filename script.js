@@ -30,7 +30,7 @@ function displayRecentlyAdded() {
     for (var i = 0; i < 8; i++) {
         const item = document.createElement('div');
         item.className = 'grid_item';
-        item.innerHTML = `<img src="./src/db/${i}.jpg">`;
+        item.innerHTML = `<img src="./src/db/${i}.jpg" onClick="location.href='./item.html?id=`+i+`'">`;
         grid.appendChild(item);
     }
 }
@@ -39,9 +39,12 @@ function displayRecentlyAdded() {
 /* add */
 
 window.onload = function() {
-    const fileUpload = document.querySelector(".file_uploader");
-    const fileUploadButton = document.querySelector(".add_image");
-    fileUploadButton.addEventListener('click', () => fileUpload.click());
+    const bodyHasFileUploader = document.body.classList.contains(".file_uploader");
+    if (bodyHasFileUploader){
+        const fileUpload = document.querySelector(".file_uploader");
+        const fileUploadButton = document.querySelector(".add_image");
+        fileUploadButton.addEventListener('click', () => fileUpload.click());
+    }
 }
 
 function displayFilterCategory() {
@@ -105,4 +108,16 @@ function displayMeasurementInput(selectedCategory) {
         item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input"></div>`;
         grid.appendChild(item);
     }
+}
+
+function displayItemImage() {
+    let query = window.location.search;
+    let param = new URLSearchParams(query);
+    let id = param.get('id');
+
+    var placeHolder = document.querySelector(".view_item_image");
+
+    const item = document.createElement('img');
+    item.src = `./src/db/`+id+`.jpg`;
+    placeHolder.appendChild(item);
 }

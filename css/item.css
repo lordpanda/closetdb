@@ -1,0 +1,31 @@
+#page_item {
+    padding: 40px;
+    margin-top: 20px;
+}
+.content {
+    background-color: white;
+    border-radius: 30px;
+}
+.view_item_image img {
+    width: 100%;
+    border-radius: 30px;
+}
+.view_brand {
+    margin-top: 20px;
+    text-align: center;
+}
+.view_category {
+    text-align: center;
+}
+.view_details {
+    margin-top: 40px;
+}
+.grid_container_view_details {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    grid-gap: 1.5em;
+}
+.view_measurement {
+    max-width: 520px;
+}
