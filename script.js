@@ -30,6 +30,7 @@ function displayRecentlyAdded() {
     for (var i = 0; i < 8; i++) {
         const item = document.createElement('div');
         item.className = 'grid_item';
+        item.setAttribute("onClick", "location.href='./item.html?id="+i+"'");
         item.innerHTML = `<img src="./src/db/${i}.jpg" onClick="location.href='./item.html?id=`+i+`'">`;
         grid.appendChild(item);
     }
