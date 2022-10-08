@@ -115,12 +115,6 @@ video {
     position: relative;
     z-index: 11;
     padding: 20;
-
-    padding:
-    env(safe-area-inset-top)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
 }
 
 .header h1 {

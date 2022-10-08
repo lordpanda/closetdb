@@ -19,7 +19,7 @@
 }
 .view_details {
     margin-top: 40px;
-    border-top: solid 1px var(--black);
+    border-top: solid 1px rgb(197, 197, 197);
     padding-top: 40px;
 }
 .grid_container_view_details {

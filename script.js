@@ -42,13 +42,16 @@ function displayRecentlyAdded() {
 /* add */
 
 window.onload = function() {
-    const bodyHasFileUploader = document.body.classList.contains(".file_uploader");
-    if (bodyHasFileUploader){
+    const input = document.querySelector('input[class="file_uploader"]');
+    if (input){
+        console.log("there it is");
         const fileUpload = document.querySelector(".file_uploader");
         const fileUploadButton = document.querySelector(".add_image");
         fileUploadButton.addEventListener('click', () => fileUpload.click());
     }
 }
+
+
 
 function displayFilterCategory() {
     var grid = document.querySelector(".grid_container_category"); 
