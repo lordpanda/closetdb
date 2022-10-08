@@ -1,5 +1,11 @@
 const category = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "underwear", "etc."];
 
+// First we check if you support touch, otherwise it's click:
+let touchEvent = 'ontouchstart' in window ? 'touchstart' : 'click';
+
+// Then we bind via thát event. This way we only bind one event, instead of the two as below
+document.querySelector(".grid_item").addEventListener(touchEvent, someFunction);
+
 
 function displayGlobalMenu(parm1) {
     var activeItem = [];
@@ -31,7 +37,9 @@ function displayRecentlyAdded() {
         const item = document.createElement('div');
         item.className = 'grid_item';
         item.setAttribute("onClick", "location.href='./item.html?id="+i+"'");
-        item.innerHTML = `<img src="./src/db/${i}.jpg" onClick="location.href='./item.html?id=`+i+`'">`;
+        item.className += ' clickable';
+        item.innerHTML = `<img src="./src/db/${i}.jpg">`;
+        // item.innerHTML = `<img src="./src/db/${i}.jpg" onClick="location.href='./item.html?id=`+i+`'">`;
         grid.appendChild(item);
     }
 }

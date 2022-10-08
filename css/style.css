@@ -300,6 +300,10 @@ h1 {
     padding: 0 4px;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 /* Responsive layout - makes a two column-layout instead of four columns */
 @media screen and (max-width: 1200px) {
     .grid_container {
