@@ -469,11 +469,10 @@ h1 {
         margin: 0;
     /* APPLYING TRANSITION TO THE MENU :  */
     
-        transition: all 0.4s ease;
+        transition: all 0s ease;
     }
     
     /* IF THE TOGGLER IS CHECKED, THEN INCREASE THE WIDTH OF THE MENU TO 30% , CREATING A SMOOTH EFFECT :  */
-    
     .toggler:checked ~ .menu{
         width: 40%;
     }
