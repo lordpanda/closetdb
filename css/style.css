@@ -173,6 +173,7 @@ li {
     z-index: 1;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
+    letter-spacing: -1px;
 }
 .logo a{
     text-decoration: none;

@@ -19,6 +19,8 @@
 }
 .view_details {
     margin-top: 40px;
+    border-top: solid 1px var(--black);
+    padding-top: 40px;
 }
 .grid_container_view_details {
     margin-top: 20px;
@@ -28,4 +30,17 @@
 }
 .view_measurement {
     max-width: 520px;
+}
+.view_measurement img {
+    width: 100%;
+}
+.label_with_value {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    grid-template-rows: auto;
+    width: 200px;
+    margin-bottom: 10px;
+}
+.comp_label {
+    font-weight: 600;
 }
