@@ -20,7 +20,7 @@
     </section>
     <div id="bg"></div>
     <div class="overlay"></div>
-    <section class="content narrow">
+    <section class="content narrow" id="page_add">
 
             <div class="subheader">
                 <div class="text">
@@ -28,16 +28,10 @@
                 </div>
                 
             </div>
-            <div class="grid_container">
-                <div class="grid_item">
-                    <div class="add_image"></div>
-                </div>
-                <div class="grid_item">
-                    <div class="add_image"></div>
-                </div>
-                <div class="grid_item">
-                    <div class="add_image"></div>
-                </div>
+            <div class="container_images">
+                <div class="add_image"></div>
+                <div class="add_image"></div>
+                <div class="add_image"></div>
             </div>
 
             <div class="subheader">
@@ -51,22 +45,45 @@
                 <h1>size</h1>
             </div>
             <div class="grid_container_size">
-                <div class="size_region">
+                <button class="size_region" onclick="show()">
                     US
+                </button>
+                <div class="size_region_dropdown">
+                    <button class="size_region">
+                        UK
+                    </button>
+                    <button class="size_region">
+                        IT
+                    </button>
+                    <button class="size_region">
+                        WW
+                    </button>
+                    <button class="size_region">
+                        EU
+                    </button>
                 </div>
-                <div class="size_value">
+                <div class="size_key clikable">
                      00
                 </div>
-                <div class="size_value">0</div>
-                <div class="size_value">2</div>
+                <div class="size_key">0</div>
+                <div class="size_key">2</div>
             </div>
 
             <div class="subheader">
                 <h1>brand</h1>
             </div>
+            <div class="brand">
+                <input type="text" id="form2" class="brand_input" />
+            </div>
 
             <div class="subheader">
-                <h1>details</h1>
+                <h1>measurement</h1>
+            </div>
+            <div class="grid_container_measurement"> 
+                <script>displayMeasurementInput("dress");</script>
+                <!-- <div class="label_with_input">
+                    <div class="part">가슴너비</div> <input type="number" id="form3" class="measurement_input">
+                </div> -->
             </div>
 
             <div class="subheader">

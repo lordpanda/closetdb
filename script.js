@@ -1,3 +1,6 @@
+const category = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "underwear", "etc."];
+
+
 function displayGlobalMenu(parm1) {
     var activeItem = [];
     for(var i = 0; i < 3; i++){
@@ -35,11 +38,44 @@ function displayRecentlyAdded() {
 
 function displayFilterCategory() {
     var grid = document.querySelector(".grid_container_category"); 
-    const category = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "underwear", "etc."];
     for (var i = 0; i < 9; i++) {
         const item = document.createElement('div');
         item.className = "grid_item grid_category";
-        item.innerHTML = `<div class="category_image"><span>`+category[i]+`</span></div>`;
+        item.innerHTML = `<button class="category_image"><span>`+category[i]+`</span></button>`;
+        grid.appendChild(item);
+    }
+}
+
+
+/* myFunction toggles between adding and removing the show class, which is used to hide and show the dropdown content */
+function show() {
+    console.log("ok");
+  document.querySelector(".size_region_dropdown").classList.toggle("show");
+}
+
+
+function displayMeasurementInput(selectedCategory) {
+    var selected = selectedCategory;
+    var accordingSizes = [];
+
+    
+    if (selected == "top" || selected == "dress" || selected == "outer") {
+        accordingSizes.push("가슴너비", "어깨너비", "소매길이", "소매통", "암홀", "허리너비", "총장");
+    } else if (selected == "pants") {
+        accordingSizes = ["허리둘레", "엉덩이둘레", "밑위", "밑단", "총장"];
+    } else if (selected == "skirt") {
+        accordingSizes = ["허리둘레", "엉덩이둘레", "총장"];
+    } else if (selected == "shoes") {
+        accordingSizes = ["굽높이"];
+    } else if (selected == "jewerly") {
+        accordingSizes = ["가로", "세로", "길이", "높이", "둘레"];
+    }
+    
+    var grid = document.querySelector(".grid_container_measurement"); 
+    for (var i = 0; i < accordingSizes.length; i++) {
+        const item = document.createElement('div');
+        item.className = "label_with_input";
+        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input"></div>`;
         grid.appendChild(item);
     }
 }
