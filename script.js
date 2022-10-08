@@ -1,11 +1,5 @@
 const category = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "underwear", "etc."];
 
-// First we check if you support touch, otherwise it's click:
-let touchEvent = 'ontouchstart' in window ? 'touchstart' : 'click';
-
-// Then we bind via thát event. This way we only bind one event, instead of the two as below
-document.querySelector(".grid_item").addEventListener(touchEvent, someFunction);
-
 
 function displayGlobalMenu(parm1) {
     var activeItem = [];
