@@ -36,6 +36,14 @@ function displayRecentlyAdded() {
 }
 
 
+/* add */
+
+window.onload = function() {
+    const fileUpload = document.querySelector(".file_uploader");
+    const fileUploadButton = document.querySelector(".add_image");
+    fileUploadButton.addEventListener('click', () => fileUpload.click());
+}
+
 function displayFilterCategory() {
     var grid = document.querySelector(".grid_container_category"); 
     for (var i = 0; i < 9; i++) {
@@ -45,12 +53,31 @@ function displayFilterCategory() {
         grid.appendChild(item);
     }
 }
-
-
 /* myFunction toggles between adding and removing the show class, which is used to hide and show the dropdown content */
 function show() {
     console.log("ok");
   document.querySelector(".size_region_dropdown").classList.toggle("show");
+}
+
+
+
+function displaySizesByRegion(region) {
+    var accordingSizes = [];
+    if (region == "US") {
+        accordingSizes.push(00, 0, 2);
+    } else if (region == "UK") {
+        accordingSizes.push(4, 6, 8, 10);
+    } else if (region == "EU") {
+        accordingSizes.push(35, 35.5, 36, 36.5, 37);
+    } else if (region == "FR") {
+        accordingSizes.push(32, 34, 36);
+    } else if (region == "IT") {
+        accordingSizes.push(34, 36, 38);
+    } else if (region == "WW") {
+        accordingSizes.push("XXS", "XXS", "XS", "S", "M", "L", "XL");
+    } else if (region == "KR") {
+        accordingSizes.push(230, 235, 240);
+    }
 }
 
 

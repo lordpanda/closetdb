@@ -29,7 +29,9 @@
                 
             </div>
             <div class="container_images">
-                <div class="add_image"></div>
+                <div class="add_image">
+                    <input type="file" class="file_uploader" accept="image/*" required multiple>
+                </div>
                 <div class="add_image"></div>
                 <div class="add_image"></div>
             </div>
@@ -45,6 +47,7 @@
                 <h1>size</h1>
             </div>
             <div class="grid_container_size">
+                <script>displaySizesByRegion("US");</script>
                 <button class="size_region" onclick="show()">
                     US
                 </button>

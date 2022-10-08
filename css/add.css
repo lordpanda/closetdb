@@ -1,11 +1,18 @@
 /* add new */
-.clikable {
+.clickable {
 
 }
 #page_add {
     padding: 0 40px 40px 40px;
     margin-top: 20px;
 }
+.content {
+    background-color: white;
+    border-radius: 30px;
+}
+
+
+/* image upload */
 .container_images {
     width: 100%;
     overflow: scroll;
@@ -23,9 +30,8 @@
     background-color: var(--gray);
     margin-right: 20px;
 }
-.content {
-    background-color: white;
-    border-radius: 30px;
+.file_uploader {
+    display: none;
 }
 
 .grid_container_category {
