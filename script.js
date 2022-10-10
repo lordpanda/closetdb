@@ -1,5 +1,5 @@
 const category = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "underwear", "etc."];
-
+const sizeRegion = ["WW", "US", "EU", "FR", "IT", "DE", "UK", "KR", "JP"];
 
 function displayGlobalMenu(parm1) {
     var activeItem = [];
@@ -69,6 +69,12 @@ function show() {
 }
 
 
+function displaySizeRegionDropdown() {
+
+    <button class="size_region">
+    UK
+</button>
+}
 
 function displaySizesByRegion(region) {
     var accordingSizes = [];
@@ -114,6 +120,10 @@ function displayMeasurementInput(selectedCategory) {
         item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input"></div>`;
         grid.appendChild(item);
     }
+}
+
+function displayCompositionInput() {
+
 }
 
 function displayItemImage() {
