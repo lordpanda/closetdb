@@ -70,10 +70,16 @@ function show() {
 
 
 function displaySizeRegionDropdown() {
-
-    <button class="size_region">
-    UK
-</button>
+    var drop = document.querySelector(".size_region_dropdown"); 
+    console.log(drop);
+    for (var i = 0; i < sizeRegion.length; i++) {
+        
+        const item = document.createElement('button');
+        item.className = "size_region";
+        item.innerHTML = sizeRegion[i]+`</button>`;
+        drop.appendChild(item);
+        console.log(drop);
+    }
 }
 
 function displaySizesByRegion(region) {
