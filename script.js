@@ -64,28 +64,28 @@ function displayFilterCategory() {
 }
 /* myFunction toggles between adding and removing the show class, which is used to hide and show the dropdown content */
 function show() {
-    console.log("ok");
   document.querySelector(".size_region_dropdown").classList.toggle("show");
 }
 
 
 function displaySizeRegionDropdown() {
-    var drop = document.querySelector(".size_region_dropdown"); 
-    console.log(drop);
+    var drop = document.getElementById("size_region_select"); 
+    
     for (var i = 0; i < sizeRegion.length; i++) {
         
-        const item = document.createElement('button');
+        const item = document.createElement('option');
         item.className = "size_region";
-        item.innerHTML = sizeRegion[i]+`</button>`;
+        item.value = sizeRegion[i];
+        item.innerHTML = sizeRegion[i]+`</option>`;
         drop.appendChild(item);
-        console.log(drop);
     }
 }
 
-function displaySizesByRegion(region) {
+function displaySizesByRegion(selectedRegion) {
+    const region = selectedRegion.value;
     var accordingSizes = [];
     if (region == "US") {
-        accordingSizes.push(00, 0, 2);
+        accordingSizes.push("00", 0, 2);
     } else if (region == "UK") {
         accordingSizes.push(4, 6, 8, 10);
     } else if (region == "EU") {
@@ -94,10 +94,21 @@ function displaySizesByRegion(region) {
         accordingSizes.push(32, 34, 36);
     } else if (region == "IT") {
         accordingSizes.push(34, 36, 38);
+    }else if (region == "DE") {
+            accordingSizes.push(32, 34, 36);
     } else if (region == "WW") {
         accordingSizes.push("XXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
-        accordingSizes.push(230, 235, 240);
+        accordingSizes.push(230, 235, 240, 43, 54);
+    }
+    var grid = document.querySelector(".size_key_container");
+    grid.innerHTML = ``;
+    for (var i = 0; i < accordingSizes.length; i++) {
+        
+        const item = document.createElement('button');
+        item.className = "size_key";
+        item.innerHTML = accordingSizes[i]+`</button>`;
+        grid.appendChild(item);
     }
 }
 

@@ -69,6 +69,8 @@
     height: 80px;
     line-height: 60px;
     padding: 10px;
+    display: grid;
+    grid-template-columns: 120px 1fr;
 }
 .size_region {
     width: 80px;
@@ -82,17 +84,26 @@
 
 
 .size_region_dropdown {
-    display: none;
-    position: absolute;
-    background-color: white;
-    width: 80px;
+    /* display: none;
+    position: absolute; */
+    background-color: var(--gray);
+    width: 100px;
     height: 60px;
+    border: none;
+    font-size: 1.2em;
+}
+.size_region_dropdown:after {
+    display:none;
 }
 .grid_container_size .show {
     display: block;
 }
+.size_key_container {
+    display: inline-block;
+}
 .size_key {
     width: 100px;
+    height: 60px;
     display: inline-block;
     text-align: center;
     font-size: 1.2em;
@@ -100,6 +111,7 @@
     background-color: white;
     border-radius: 40px;
     margin-right: 20px;
+    line-height: 40px;
 }
 
 .brand {
@@ -193,7 +205,7 @@
     }
     .add_image {
         width: 120px;
-        height: 220px;
+        height: 200px;
         border-radius: 20px;
     }
     .grid_container_category {
@@ -207,11 +219,38 @@
         line-height: 50px;
         font-size: 1em;
     }
+    .grid_container_size {
+        height: 60px;
+        line-height: 40px;
+        grid-template-columns: 80px 1fr;
+    }
+    .size_region_dropdown {
+        width: 80px;
+    }
+    .size_region {
+        width: 60px;
+        HEIGHT: 40PX;
+        font-size: 1em;
+    }
+    .size_key {
+        width: 60px;
+        margin-right: 10px;        
+        font-size: 1em;
+    }
+    .brand_input {
+        font-size: 1.2em;
+    }
+
     .label_with_input {
         width: 150px;
         grid-template-columns: 60px 1fr;
+        
     }
     .label_with_input .part {
         font-size: 1em;
+    }
+    .measurement_input {
+        margin: 0 16px 0 10px;
+        font-size: 1.2em;
     }
 }
