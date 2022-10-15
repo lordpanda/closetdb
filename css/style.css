@@ -210,6 +210,7 @@ h1 {
     font-size: 4em;
     font-family: 'Poppins', sans-serif;
     font-weight: 600;
+    letter-spacing: -1px;
 }
 .intro .sub {
     font-family: 'Poppins';

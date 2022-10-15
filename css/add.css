@@ -66,13 +66,15 @@
     font-size: 1.2em;
 }
 .grid_container_size {
+    display: grid;
     height: 80px;
     line-height: 60px;
     padding: 10px;
+    grid-template-columns: 120px 1fr;
 }
 .size_region {
     width: 80px;
-    height: 100%;
+    height: 60px;
     background-color: var(--gray);
     display: inline-block;
     text-align: center;
@@ -87,12 +89,18 @@
     background-color: white;
     width: 80px;
     height: 60px;
+    margin-top: 60px;
 }
 .grid_container_size .show {
     display: block;
 }
+.size_key_container {
+    display: inline-block;
+    display: 100%;
+}
 .size_key {
     width: 100px;
+    height: 60px;
     display: inline-block;
     text-align: center;
     font-size: 1.2em;
@@ -100,6 +108,7 @@
     background-color: white;
     border-radius: 40px;
     margin-right: 20px;
+    margin-bottom: 6px;
 }
 
 .brand {
@@ -150,6 +159,8 @@
     display: block;
     width: 100%;
     padding: .375rem .75rem;
+    margin: 0 16px 0 10px;
+
     font-size: 1.7rem;
     font-weight: 400;
     line-height: 1.5;
@@ -193,7 +204,7 @@
     }
     .add_image {
         width: 120px;
-        height: 220px;
+        height: 200px;
         border-radius: 20px;
     }
     .grid_container_category {

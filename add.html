@@ -2,6 +2,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
     <script src="./script.js"> </script>
+    <script src="./script/db.js"></script>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/add.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
@@ -48,31 +49,22 @@
                 <h1>size</h1>
             </div>
             <div class="grid_container_size">
-                <script>displaySizesByRegion("US");</script>
-                <button class="size_region" onclick="show()">
+
+                <button class="size_region size_region_selected" onclick="show()">
                     US
                 </button>
                 
                 <div class="size_region_dropdown">
-                    <script>displaySizeRegionDropdown();</script>  
-                    <!-- <button class="size_region">
-                        UK
-                    </button>
-                    <button class="size_region">
-                        IT
-                    </button>
-                    <button class="size_region">
-                        WW
-                    </button>
-                    <button class="size_region">
-                        EU
-                    </button> -->
                 </div>
-                <div class="size_key clikable">
+                <div class="size_key_container">
+                    <script>displaySizesByRegion("US");</script>
+                    <script>displaySizeRegionDropdown();</script>  
+                </div>
+                <!-- <div class="size_key clikable">
                      00
                 </div>
                 <div class="size_key">0</div>
-                <div class="size_key">2</div>
+                <div class="size_key">2</div> -->
             </div>
 
             <div class="subheader">
