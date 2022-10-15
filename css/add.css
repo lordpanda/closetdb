@@ -135,7 +135,7 @@
     border: none;
 }
 
-.grid_container_measurement {
+.grid_container_measurement, .grid_container_composition {
     display: grid;
     grid-template-columns: auto auto auto;
     justify-content: space-evenly;
@@ -144,7 +144,7 @@
 
 .label_with_input {
     display: grid;
-    grid-template-columns: 80px 1fr;
+    grid-template-columns: 90px 1fr;
     grid-template-rows: auto;
     width: 200px;
 }
@@ -155,7 +155,7 @@
     align-items: center;
 }
 
-.measurement_input {
+.measurement_input, .composition_input {
     display: block;
     width: 100%;
     padding: .375rem .75rem;
@@ -173,6 +173,23 @@
     outline: none;
     border: none;
     text-align: center;
+}
+
+.submit_button {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 60px;
+}
+.generate_script {
+    width: 200px;
+    height: 60px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2em;
+    border-radius: 2rem;
+    outline: none;
+    border: none;
+    background-color: var(--purple);
 }
 
 @media screen and (max-width: 620px) {

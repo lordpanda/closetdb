@@ -72,6 +72,7 @@ function displaySizeRegionDropdown() {
         
         const item = document.createElement('button');
         item.className = "size_region";
+        item.type = "radio";
         item.innerHTML = sizeRegionList[i]+`</button>`;
         item.value = sizeRegionList[i];
         drop.appendChild(item);
@@ -154,7 +155,12 @@ function displayMeasurementInput(selectedCategory) {
 
 function displayCompositionInput() {
     var grid = document.querySelector(".grid_container_composition");
-    
+    for (var i = 0; i < compositionList.length; i++) {
+        const item = document.createElement('div');
+        item.className = "label_with_input";
+        item.innerHTML = `<div class="part">`+compositionList[i]+`</div> <input type="number" id="compositionInput`+i+`" class="composition_input"></div>`;
+        grid.appendChild(item);
+    }
 }
 
 function displayItemImage() {
