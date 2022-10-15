@@ -5,8 +5,6 @@
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/add.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
     <title>Panda's' DressRoom</title>
 </head>
 
@@ -50,15 +48,32 @@
                 <h1>size</h1>
             </div>
             <div class="grid_container_size">
-                <select class="size_region_dropdown" id="size_region_select" onchange="displaySizesByRegion(this)"></select>
-                <script>displaySizeRegionDropdown();</script>  
-
-                <div class="size_key_container"></div>
-                <script>displaySizesByRegion();</script>
-                </script>
+                <script>displaySizesByRegion("US");</script>
+                <button class="size_region" onclick="show()">
+                    US
+                </button>
+                
+                <div class="size_region_dropdown">
+                    <script>displaySizeRegionDropdown();</script>  
+                    <!-- <button class="size_region">
+                        UK
+                    </button>
+                    <button class="size_region">
+                        IT
+                    </button>
+                    <button class="size_region">
+                        WW
+                    </button>
+                    <button class="size_region">
+                        EU
+                    </button> -->
+                </div>
+                <div class="size_key clikable">
+                     00
+                </div>
+                <div class="size_key">0</div>
+                <div class="size_key">2</div>
             </div>
-
-
 
             <div class="subheader">
                 <h1>brand</h1>
@@ -78,7 +93,7 @@
                 <h1>composition</h1>
             </div>
             <div class="grid_container_composition">
-
+                
             </div>
 
     </section>
