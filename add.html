@@ -42,9 +42,18 @@
                 <h1>category</h1>
             </div>    
             <div class="grid_container_category">
-                <script>displayFilterCategory();</script>
             </div>
+            
+            <div class="sub_category">
+                <div class="subheader">
+                    <h1>sub</h1>
+                </div>    
+                <div class="grid_container_sub_category">
 
+                    <script>displayFilterCategory();</script>
+                    <script>displayFilterSubCategory();</script>
+                </div>
+            </div>
             <div class="subheader">
                 <h1>size</h1>
             </div>
@@ -60,11 +69,6 @@
                     <script>displaySizesByRegion("US");</script>
                     <script>displaySizeRegionDropdown();</script>  
                 </div>
-                <!-- <div class="size_key clikable">
-                     00
-                </div>
-                <div class="size_key">0</div>
-                <div class="size_key">2</div> -->
             </div>
 
             <div class="subheader">
@@ -86,6 +90,28 @@
             </div>
             <div class="grid_container_composition">
                 <script>displayCompositionInput();</script>
+            </div>
+
+            <div class="subheader">
+                <h1>season</h1>
+            </div>
+            <div class="grid_container_season">
+                <div class="label_with_input">
+                    <div class="part">year</div>
+                    <input type="number" id="" class="season_input">
+                </div>
+                <div class="label_with_input">
+                    <div class="part">season</div>
+                    <select name="seasons" id="" class="season_input">
+                        <option value="N/A">N/A</option>
+                        <option value="SS">SS</option>
+                        <option value="FW">FW</option>
+                    </select>
+                </div>
+                <div class="label_with_input">
+                    <div class="part">purchase</div>
+                    <input type="number" id="" class="season_input">
+                </div>
             </div>
 
     </section>
