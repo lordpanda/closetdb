@@ -54,19 +54,18 @@
 }
 .view_measurement .chest {
     top: 36%;
-    left: 48%;
+    left: 46%;
 }
 .view_measurement .shoulder {
-    top: 16%;
-    left: 19%;
+    top: 12%;
+    left: 46%;
 }
 .view_measurement .sleeve {
-    top: 36%;
-    left: 79%;
+    top: 20%;
+    left: 83%;
 }
 .measurement_base {
     width: 100%;
-
     top: 0;
     left: 0;
 }
