@@ -39,8 +39,8 @@
     max-width: 520px;
 }
 .view_measurement .box {
-
     position: absolute;
+    z-index: 11;
     width: calc(1.6vw + 16px); height: calc(1.6vw + 10px);
     border-radius: 50%;
     background-color: var(--black);
@@ -51,7 +51,6 @@
             justify-content: center;
     -webkit-box-align: center;
             align-items: center;
-
 }
 .view_measurement .chest {
     top: 36%;
@@ -65,8 +64,20 @@
     top: 36%;
     left: 79%;
 }
-.view_measurement img {
+.measurement_base {
     width: 100%;
+
+    top: 0;
+    left: 0;
+}
+.measurement_guideline {
+    z-index: 10;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    stroke-width: 0px;
+    background-color: transparent;
 }
 .label_with_value {
     display: grid;
