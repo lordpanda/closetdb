@@ -185,7 +185,7 @@ function displayMeasurementInput(selectedCategory) {
 
     
     if (selected == "top" || selected == "dress" || selected == "outer") {
-        accordingSizes.push("가슴너비", "어깨너비", "소매길이", "소매통", "암홀", "허리너비", "총장");
+        accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length");
     } else if (selected == "pants") {
         accordingSizes = ["허리둘레", "엉덩이둘레", "밑위", "밑단", "총장"];
     } else if (selected == "skirt") {

@@ -238,11 +238,45 @@
         line-height: 50px;
         font-size: 1em;
     }
+    .grid_container_sub_category {
+        grid-template-columns: 1fr 1fr;
+    }
     .label_with_input {
         width: 150px;
-        grid-template-columns: 60px 1fr;
+        grid-template-columns: 80px 1fr;
     }
     .label_with_input .part {
         font-size: 1em;
+    }
+    
+    .grid_container_size{
+        grid-template-columns: 80px 1fr;
+    }   
+    .size_region {
+        width: 60px;
+        height: 40px;
+    }
+    .size_region_dropdown {
+        margin-top: 40px;
+    }
+    .size_key {
+        width: 60px;
+        height: 40px;
+        margin-right: 10px;
+    }
+    .size_key_container label {
+        padding: 0;
+        line-height: 40px;
+    }
+    .grid_container_composition {
+        grid-template-columns: auto auto;
+    }
+    .grid_container_season {
+        grid-template-columns: auto auto;
+    }
+    .measurement_input, .composition_input, .season_input {
+        font-size: 1.4em;
+        padding: 0.3em 0;
+        letter-spacing: 0;
     }
 }
