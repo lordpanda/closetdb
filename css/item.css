@@ -66,6 +66,7 @@
     width: 100%;
     top: 0;
     left: 0;
+    border-radius: 30px;
 }
 .measurement_guideline {
     z-index: 10;
@@ -101,6 +102,9 @@
     }
     .view_item_image img {
         width: 100%;
+    }
+    .view_details {
+        padding-top: 10px;
     }
     .grid_container_view_details {
         grid-template-columns: 1fr;

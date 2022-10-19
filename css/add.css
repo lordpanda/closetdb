@@ -138,6 +138,42 @@
     border: none;
 }
 
+.brand_autocomplete {
+    /*the container must be positioned relative:*/
+    position: relative;
+    display: inline-block;
+}
+.brand_autocomplete_items {
+    position: absolute;
+    border: none;
+
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+    perspective: 1px;
+    
+    border-radius: 30px;
+    overflow: hidden;
+}
+.brand_autocomplete_items div {
+    padding: 10px 1.75rem;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: var(--gray);
+}
+.brand_autocomplete_items div:hover {
+    /*when hovering an item:*/
+    background-color:var(--black);
+    color: white;
+}
+.brand_autocomplete_active {
+    background-color:var(--black) !important;
+    color: white;
+}
+
+
 .grid_container_measurement, .grid_container_composition, .grid_container_season {
     display: grid;
     grid-template-columns: auto auto auto;
@@ -147,7 +183,7 @@
 
 .label_with_input {
     display: grid;
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 100px 1fr;
     grid-template-rows: auto;
     width: 200px;
 }

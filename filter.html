@@ -2,8 +2,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="./script.js"> </script>
+    <script src="./script/db.js"></script>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/add.css">
+    <link rel="stylesheet" href="./css/filter.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
     <title>Panda Joe Closet</title>
 </head>
@@ -16,9 +18,6 @@
             <span class="main">Apply filters</span>
             <span class="sub">to find what you want</span>
         </div>
-        <div class="search">
-            <input type="search" id="form1" class="search_input" />
-        </div>
     </section>
     <div id="bg"></div>
     <div class="overlay"></div>
@@ -30,9 +29,17 @@
             <h1>category</h1>
         </div>    
         <div class="grid_container_category">
-            <script>displayFilterCategory();</script>
         </div>
-
+        <div class="sub_category">
+            <div class="subheader">
+                <h1>sub</h1>
+            </div>    
+            <div class="grid_container_sub_category">
+                
+                <script>displayFilterCategory();</script>
+                <script>displayFilterSubCategory();</script>
+            </div>
+        </div>
         
         <div class="filter_category">
             <div class="grid_container">
@@ -46,18 +53,28 @@
         <div class="filter_size">
         </div>
         <div class="subheader">
-
             <h1>brand</h1>
         </div>
-        <div class="filter_brand">
+        <div class="brand">
+            <div class="brand_autocomplete">
+                
+            <input type="text" id="brand_search" class="brand_input" name="brand" placeholder="Brand"/>
+            <script>    autocomplete(document.getElementById("brand_search"), brandList);</script>
+            </div>
         </div>
         <div class="subheader">
 
             <h1>details</h1>
         </div>
-        <div class="filter_details">
+        <div class="filter_composition_container">
+            <script>displayCompositionFilter();</script>
+            <div class="filter_composition">
+            </div>
         </div>
     </section>
+    <div class="submit_button">
+        <button class="generate_script">Apply filters</button>
+    </div>
 </body>
 <footer>
 

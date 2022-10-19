@@ -72,7 +72,23 @@ input[type="radio"]{
     transition: 0.1s;
     font-family: 'Poppins', 'Pretendard-Regular', 'sans-serif';
 }
+.filter_composition_container input[type="checkbox"]{
+    /* perfectly removes the remnant of radio bullet */
+    position: fixed;
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    width: 0;
+    border: none;
+    font-size: 1em;
+    transition: 0.1s;
+    font-family: 'Poppins', 'Pretendard-Regular', 'sans-serif';
+}
 input[type="radio"]:checked + label{
+    background-color: var(--black);
+    color: white;
+}
+.filter_composition_container input[type="checkbox"]:checked + label{
     background-color: var(--black);
     color: white;
 }

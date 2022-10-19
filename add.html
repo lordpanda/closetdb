@@ -75,7 +75,11 @@
                 <h1>brand</h1>
             </div>
             <div class="brand">
-                <input type="text" id="form2" class="brand_input" />
+                <div class="brand_autocomplete">
+                
+                    <input type="text" id="brand_search" class="brand_input" name="brand" placeholder="Brand"/>
+                    <script>autocomplete(document.getElementById("brand_search"), brandList);</script>
+                </div>
             </div>
 
             <div class="subheader">

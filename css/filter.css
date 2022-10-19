@@ -1,0 +1,12 @@
+.filter_composition_container {
+
+}
+.filter_composition {
+    display: inline-block;
+    
+    margin: 0 20px 10px 0;
+}
+.filter_composition label{
+    padding: 0px 20px;
+    border-radius: 30px;
+}
