@@ -10,7 +10,7 @@ function displayGlobalMenu(parm1) {
     }
     document.write(`
     <div class="logo">
-        <a href="./index.html"><h1>DressRoom</h1></a>
+        <a href="./index.html"><h1>CLOSETDB</h1></a>
     </div>
     <input type="checkbox" class="toggler">
     <div class="hamburger"><div></div></div>
