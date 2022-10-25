@@ -26,6 +26,16 @@
     font-style: normal;
 }
 @font-face {
+    font-family: 'GmarketSansBold';
+    font-style: normal;
+    font-weight: 700;
+    src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.eot');
+    src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.eot?#iefix') format('embedded-opentype'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff2') format('woff2'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff') format('woff'),
+         url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.ttf') format("truetype");
+}
+@font-face {
     font-family: 'LeferiPointBlackOblique';
     src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/LeferiPoint-BlackObliqueA.woff') format('woff');
     font-weight: normal;
@@ -282,6 +292,7 @@ li {
 }
 .logo a{
     text-decoration: none;
+
 }
 h1 {
     font-family: var(--header-bold), sans-serif;
@@ -305,11 +316,13 @@ h1 {
     font-family: var(--header-bold);
     text-transform: uppercase;
     letter-spacing: -1px;
-}
-.intro .main {
-    background: -webkit-linear-gradient(45deg, #58abb8, rgb(138, 115, 222));
+
+    background: -webkit-linear-gradient(30deg, rgba(24, 154, 124, 0.7), rgba(69, 32, 204, 0.7));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+}
+.intro .main {
+
 }
 .intro .sub {
     font-family: var(--header-normal);
@@ -353,8 +366,7 @@ h1 {
 
 .content {
     position: absolute;
-    padding: 40px;
-    
+    padding: 20px 40px 40px 40px;
     margin-bottom: 60px;
 }
 .narrow {
@@ -362,6 +374,7 @@ h1 {
     display: block;
     margin: auto;
     max-width: 800px;
+    margin-top: 30px;
     margin-bottom: 30px;
 }
 
