@@ -7,8 +7,9 @@
     --darkgray: #717171;
     --gray: #f1f1f1;
     --purple: rgb(109, 35, 255);
+    --menu-link: 'Sequel45';
     --header-bold: 'Sequel85';
-    --header-normal: 'Sequel45';
+    --header-normal: 'LeferiPointBlackOblique';
     --header-bold-oblique: 'LeferiPointBlackOblique';
   }
 
@@ -28,12 +29,8 @@
 @font-face {
     font-family: 'GmarketSansBold';
     font-style: normal;
-    font-weight: 700;
-    src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.eot');
-    src: url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.eot?#iefix') format('embedded-opentype'),
-         url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff2') format('woff2'),
-         url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.woff') format('woff'),
-         url('https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansBold.ttf') format("truetype");
+    font-weight: normal;
+    src: url('./fonts/GmarketSansBold.otf');
 }
 @font-face {
     font-family: 'LeferiPointBlackOblique';
@@ -64,6 +61,14 @@
 @font-face {
     font-family: 'Sequel45';
     src: url('./fonts/Sequel100Black-45.ttf');
+}
+@font-face {
+    font-family: 'OstrichRegular';
+    src: url('./fonts/ostrich-sans-regular.woff');
+}
+@font-face {
+    font-family: 'OstrichBlack';
+    src: url('./fonts/ostrich-sans-black.woff');
 }
 
 body {
@@ -193,7 +198,6 @@ input::-webkit-inner-spin-button {
     position: fixed;
     z-index: -9;
     top: 0;
-
     left: 0;
     width: 100%;
     height: 100%;
@@ -217,10 +221,8 @@ video {
     z-index: 11;
     padding: 20;
 }
-
 .header h1 {
-    font-family: var(--header-bold);
-    font-weight: bold;
+    font-family: 'Sequel45';
     transition: 0.2s;
 }
 
@@ -253,8 +255,8 @@ li {
     font-size: 1.2em;
     text-align: center;
     display: inline-block;
-    font-family: var(--header-normal), sans-serif;
-    text-transform: uppercase;
+    font-family: var(--menu-link), sans-serif;
+    text-transform: lowercase;
     transition: 0.2s;
 }
 
@@ -314,12 +316,12 @@ h1 {
     justify-content: center;
     font-size: 4em;
     font-family: var(--header-bold);
-    text-transform: uppercase;
+    /* text-transform: uppercase; */
     letter-spacing: -1px;
 
-    background: -webkit-linear-gradient(30deg, rgba(24, 154, 124, 0.7), rgba(69, 32, 204, 0.7));
+    /* background: -webkit-linear-gradient(30deg, rgba(24, 154, 124, 0.7), rgba(69, 32, 204, 0.7));
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: transparent; */
 }
 .intro .main {
 
@@ -386,7 +388,7 @@ h1 {
 
 .subheader h1 {
     font-family: var(--header-normal), sans-serif;
-    text-transform: uppercase;
+    text-transform: lowercase;
     color: var(--black);
     margin: 0.5em 0;
 }
