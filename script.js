@@ -338,7 +338,8 @@ function input(){
     var sub_category_sleeve = document.querySelector('input[name="sub_category_input_sleeve"]:checked'.value); 
     var size_region = document.querySelector(".size_region").textContent;
     var size_key = document.querySelector('input[name="size_key"]:checked').value;
-    alert(category+` `+sub_category_length+` `+size_region+` `+size_key);
+    var brand = document.querySelector('input[name="brand"]').value;
+    alert(category+` `+sub_category_length+` `+size_region+` `+size_key+` `+brand);
 }
 
 function addItem(thumbnail, img, imgs, category, subcategory, sizeRegion, sizeKey, brand, ){
