@@ -1,4 +1,5 @@
 
+
 function displayGlobalMenu(parm1) {
     var activeItem = [];
     for(var i = 0; i < 3; i++){
@@ -89,21 +90,21 @@ function displayFilterSubCategory(cat) {
         for (var i = 3; i < 5; i++) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
-            item.innerHTML = `<input type="radio" name="sub_category_input_sleeve" class="category_image" id="sub_category_list_`+i+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            item.innerHTML = `<input type="radio" name="sub_category_input_sleeve" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     } if (cat == "dress" || cat == "skirt") {
         for (var i = 0; i < 3; i++) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
-            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     } if (cat == "pants") {
         for (var i = 5; i < 7; i++) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
-            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     }
@@ -121,6 +122,7 @@ function displaySizeRegionDropdown() {
         
         const item = document.createElement('button');
         item.className = "size_region";
+        item.setAttribute("id", "size_region_selected");
         item.innerHTML = sizeRegionList[i]+`</button>`;
         item.value = sizeRegionList[i];
         drop.appendChild(item);
@@ -160,7 +162,7 @@ function displaySizesByRegion(region) {
         
         const item = document.createElement('div');
         item.className = "size_key";
-        item.innerHTML = `<input type="radio" name="size_key" id="size_key_`+i+`"/><label for="size_key_`+i+`">`+accordingSizes[i]+`</label></input>`;
+        item.innerHTML = `<input type="radio" name="size_key" id="size_key_`+i+`" value="`+accordingSizes[i]+`"/><label for="size_key_`+i+`">`+accordingSizes[i]+`</label></input>`;
         grid.appendChild(item);
     }
     var cont = document.querySelector(".grid_container_size");
@@ -327,12 +329,16 @@ function displayItemImage() {
     placeHolder.appendChild(item);
 }
 
+// ADD =========================================================================================
+
 function input(){
     // var pic = document.getElementById('myFile').files[0].name;
-    var category =document.querySelector('input[name="category_input"]:checked').value;
-    var name = document.getElementById('myName').value;
-    var age = document.getElementById('myAge').value;
-    window.prompt("아래 내용을 복사 하세요", 'addItem("'+name+'","'+age+'","./img/'+pic+'");');
+    var category = document.querySelector('input[name="category_input"]:checked').value;
+    var sub_category_length = document.querySelector('input[name="sub_category_input_length"]:checked'.value);
+    var sub_category_sleeve = document.querySelector('input[name="sub_category_input_sleeve"]:checked'.value); 
+    var size_region = document.querySelector(".size_region").textContent;
+    var size_key = document.querySelector('input[name="size_key"]:checked').value;
+    alert(category+` `+sub_category_length+` `+size_region+` `+size_key);
 }
 
 function addItem(thumbnail, img, imgs, category, subcategory, sizeRegion, sizeKey, brand, ){

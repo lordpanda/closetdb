@@ -222,7 +222,6 @@ video {
     padding: 20;
 }
 .header h1 {
-    font-family: 'Sequel45';
     transition: 0.2s;
 }
 
@@ -290,7 +289,8 @@ li {
     position: relative;
     z-index: 1;
     font-weight: 600;
-    letter-spacing: -1px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 .logo a{
     text-decoration: none;
