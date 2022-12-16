@@ -332,14 +332,37 @@ function displayItemImage() {
 // ADD =========================================================================================
 
 function input(){
-    // var pic = document.getElementById('myFile').files[0].name;
+    var file = document.querySelector('input[name="images"]').files[0].name;
     var category = document.querySelector('input[name="category_input"]:checked').value;
-    var sub_category_length = document.querySelector('input[name="sub_category_input_length"]:checked'.value);
-    var sub_category_sleeve = document.querySelector('input[name="sub_category_input_sleeve"]:checked'.value); 
+    var sub_category_length;
+    if (document.querySelector('input[name="sub_category_input_length"]')) {
+        sub_category_length = document.querySelector('input[name="sub_category_input_length"]:checked').value;
+    }
+    var sub_category_input_sleeve;
+    if (document.querySelector('input[name="sub_category_input_sleeve"]')) {
+        sub_category_sleeve = document.querySelector('input[name="sub_category_input_sleeve"]:checked').value; 
+    }
+
     var size_region = document.querySelector(".size_region").textContent;
     var size_key = document.querySelector('input[name="size_key"]:checked').value;
     var brand = document.querySelector('input[name="brand"]').value;
-    alert(category+` `+sub_category_length+` `+size_region+` `+size_key+` `+brand);
+    var name = document.querySelector('input[name="name"]').value;
+    var year = document.querySelector('input[name="year"]').value;;
+    var season = document.querySelector('select[name="seasons"]').value;
+    var purchase_year = document.querySelector('input[name="purchase_year"]').value;;
+
+    for (var i=1 ; i < compositionList.length; i++){
+        compositionList[i];
+    }
+    var chest;
+    var shoulder;
+    var sleeve;
+    var sleeveOpening;
+    var armhole;
+    var waist;
+    var length;
+
+    alert(category+` `+sub_category_length+` `+sub_category_sleeve+` `+size_region+` `+size_key+` `+brand+` `+name+` `+year+season+` `+purchase_year);
 }
 
 function addItem(thumbnail, img, imgs, category, subcategory, sizeRegion, sizeKey, brand, ){
