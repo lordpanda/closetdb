@@ -278,13 +278,13 @@ function displayMeasurementInput(selectedCategory) {
     if (selected == "top" || selected == "dress" || selected == "outer") {
         accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length");
     } else if (selected == "pants") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "밑위", "밑단", "총장"];
+        accordingSizes = ["waist", "hip", "rise", "legOpening", "length"];
     } else if (selected == "skirt") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "총장"];
+        accordingSizes = ["waist", "hip", "length"];
     } else if (selected == "shoes") {
-        accordingSizes = ["굽높이"];
+        accordingSizes = ["heel"];
     } else if (selected == "jewerly" || selected == ".etc") {
-        accordingSizes = ["가로", "세로", "길이", "높이", "둘레"];
+        accordingSizes = ["width", "세로", "길이", "높이", "circumference"];
     }
     
     var grid = document.querySelector(".grid_container_measurement"); 
@@ -292,7 +292,7 @@ function displayMeasurementInput(selectedCategory) {
     for (var i = 0; i < accordingSizes.length; i++) {
         const item = document.createElement('div');
         item.className = "label_with_input";
-        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input"></div>`;
+        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input" name="`+accordingSizes[i]+`"></div>`;
         grid.appendChild(item);
     }
 }
@@ -332,7 +332,7 @@ function displayItemImage() {
 // ADD =========================================================================================
 
 function input(){
-    var file = document.querySelector('input[name="images"]').files[0].name;
+//    var file = document.querySelector('input[name="images"]').files[0].name;
     var category = document.querySelector('input[name="category_input"]:checked').value;
     var sub_category_length;
     if (document.querySelector('input[name="sub_category_input_length"]')) {
@@ -351,18 +351,15 @@ function input(){
     var season = document.querySelector('select[name="seasons"]').value;
     var purchase_year = document.querySelector('input[name="purchase_year"]').value;;
 
-    for (var i=1 ; i < compositionList.length; i++){
-        compositionList[i];
+    for (var i=0 ; i < measurementList.length; i++){
+        if (document.querySelector('input[name="'+measurementList[i]+'"]')) {
+            measurementList[i] = document.querySelector('input[name="'+measurementList[i]+'"]').value;   
+        }
+        console.log(measurementList[i]);
     }
-    var chest;
-    var shoulder;
-    var sleeve;
-    var sleeveOpening;
-    var armhole;
-    var waist;
-    var length;
 
-    alert(category+` `+sub_category_length+` `+sub_category_sleeve+` `+size_region+` `+size_key+` `+brand+` `+name+` `+year+season+` `+purchase_year);
+
+    alert(category+` `+sub_category_length+` `+sub_category_sleeve+` `+size_region+` `+size_key+` `+brand+` `+name+` `+year+season+` `+purchase_year+` `+length);
 }
 
 function addItem(thumbnail, img, imgs, category, subcategory, sizeRegion, sizeKey, brand, ){

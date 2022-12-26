@@ -7,8 +7,8 @@ const compositionList = ["cotton", "silk", "wool", "cashmere", "leather", "visco
 "elastane", "acryl", "acetate", "spandex", "metallic", "brass", "rubber", "sterling silver", "gold 14K", "gold 18K"];
 var brandList = ["APIECE APART", "Burberry", "Derek Lam 10 Crosby", "HAUS OF PBK", "Juun.J", "KIMHEKIM", "Maison Margiela", "MM6", "MSGM", 
 "Opening Ceremony", "Palm Angels", "Sandro", "Stella McCartney", "Tibi", "Tory Burch", "Versace", "ZARA"];
-const measurementList = [chest, shoulder, sleeve, sleeveOpening, armhole, waist, hip, rise, inseam, legOpening, length, heel, width, height,
-depth, circumference];
+const measurementList = ["chest", "shoulder", "sleeve", "sleeveOpening", "armhole", "waist", "hip", "rise", "inseam", "legOpening", "length", "heel", "width", "height",
+"depth", "circumference"];
 
 const measurementPerCategory = [];
 
@@ -33,7 +33,7 @@ heel,
 width,
 height,
 depth,
-circumference = [];
+circumference;
 
 var cotton,
 silk,
@@ -53,8 +53,8 @@ sterlingSilver,
 metal,
 gold14K,
 gold18K,
-glass = [];
+glass;
 
-var year, season = [];
+var year, season;
 
 
