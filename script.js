@@ -353,13 +353,14 @@ function input(){
 
     for (var i=0 ; i < measurementList.length; i++){
         if (document.querySelector('input[name="'+measurementList[i]+'"]')) {
-            measurementList[i] = document.querySelector('input[name="'+measurementList[i]+'"]').value;   
+            measurementDict[measurementList[i]] = document.querySelector('input[name="'+measurementList[i]+'"]').value;   
+            console.log(document.querySelector('input[name="'+measurementList[i]+'"]').value);
         }
-        console.log(measurementList[i]);
+
     }
+    console.log(measurementDict);
 
-
-    alert(category+` `+sub_category_length+` `+sub_category_sleeve+` `+size_region+` `+size_key+` `+brand+` `+name+` `+year+season+` `+purchase_year+` `+length);
+    alert(category+` `+sub_category_length+` `+sub_category_sleeve+` `+size_region+` `+size_key+` `+brand+` `+name+` `+year+season+` `+purchase_year+` `+measurementDict[length]);
 }
 
 function addItem(thumbnail, img, imgs, category, subcategory, sizeRegion, sizeKey, brand, ){

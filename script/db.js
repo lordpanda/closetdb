@@ -10,6 +10,9 @@ var brandList = ["APIECE APART", "Burberry", "Derek Lam 10 Crosby", "HAUS OF PBK
 const measurementList = ["chest", "shoulder", "sleeve", "sleeveOpening", "armhole", "waist", "hip", "rise", "inseam", "legOpening", "length", "heel", "width", "height",
 "depth", "circumference"];
 
+var measurementDict = ["chest", "shoulder", "sleeve", "sleeveOpening", "armhole", "waist", "hip", "rise", "inseam", "legOpening", "length", "heel", "width", "height",
+"depth", "circumference"];
+
 const measurementPerCategory = [];
 
 var category = [];
