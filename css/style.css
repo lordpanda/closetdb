@@ -288,16 +288,16 @@ li {
     display: inline-block;
     position: relative;
     z-index: 1;
-    font-weight: 600;
     letter-spacing: 1px;
-    text-transform: uppercase;
+    /*text-transform: uppercase;
+    */
 }
 .logo a{
     text-decoration: none;
 
 }
 h1 {
-    font-family: var(--header-bold), sans-serif;
+    font-family: var(--menu-link), sans-serif;
     font-size: 2em;
     color: var(--black);
     margin: 0;
@@ -581,7 +581,7 @@ h1 {
     /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
     
     .menu{
-        background: rgb(255,255,255,0.9);
+        background: rgb(255,255,255,0.95);
         width: 0%;
         margin: 0;
     /* APPLYING TRANSITION TO THE MENU :  */
@@ -642,7 +642,10 @@ h1 {
         margin-bottom: 0.5em;
         font-size: 1.5em;
     }
-
+    .header ul a {
+        font-size: 1em;
+        padding: 10 12;
+    }
     .grid_container {
         grid-gap: 1em;
     }
