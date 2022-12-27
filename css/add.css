@@ -147,7 +147,7 @@
     position: absolute;
     border: none;
 
-    z-index: 99;
+    z-index: 10;
     /*position the autocomplete items to be the same width as the container:*/
     top: 100%;
     left: 0;
@@ -291,9 +291,13 @@
     .size_region {
         width: 60px;
         height: 40px;
+        
+        z-index: 99;
     }
     .size_region_dropdown {
         margin-top: 40px;
+    
+        z-index: 99;
     }
     .size_key {
         width: 60px;
