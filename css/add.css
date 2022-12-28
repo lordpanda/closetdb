@@ -109,7 +109,9 @@
     position: relative;
     z-index: 20;
 }
-
+.size_region button {
+    text-align: center;
+}
 
 .size_region_dropdown {
     display: none;
@@ -282,6 +284,7 @@
         width: 160px;
         height: 240px;
         border-radius: 20px;
+        margin-right: 10px;
     }
     .grid_container_category {
         grid-template-columns: auto auto auto;

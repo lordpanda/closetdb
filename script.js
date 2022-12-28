@@ -93,6 +93,10 @@ function readImages() {
             document.querySelector(".add_image_blank").remove();
         }
         preview.appendChild(img);
+        preview.addEventListener('click', () => {
+            preview.remove();
+        });
+    
         /*
         var reader  = new FileReader();
         reader.onload = function(event){
