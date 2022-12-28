@@ -59,9 +59,13 @@ function readImages() {
     reader.onloadend = function () {
         var img = document.createElement("img");
         img.src = reader.result;
-        container.prepend(preview);
+        if (document.querySelector(".preview_image")){
+            document.querySelector(".add_image").before(preview);
+        } else {
+            container.prepend(preview);
+            document.querySelector(".add_image_blank").remove();
+        }
         preview.appendChild(img);
-        document.querySelector(".add_image_blank").remove();
     }
 
     if (file) {
