@@ -367,6 +367,16 @@ function displayMeasurementInput(selectedCategory) {
     }
 }
 
+function displayMeasurementFilter() {
+    var grid = document.querySelector(".filter_measurement_container");
+    for (var i = 0; i < measurementList.length; i++) {
+        const item = document.createElement('div');
+        item.className = "filter_measurement";
+        item.innerHTML = `<input type="checkbox" name="measurement_filter" id="measurement_`+i+`"/><label for="measurement_`+i+`">`+measurementList[i]+`</label></input>`;
+        grid.appendChild(item);
+    }
+}
+
 function displayCompositionInput() {
     var grid = document.querySelector(".grid_container_composition");
     for (var i = 0; i < compositionList.length; i++) {

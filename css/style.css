@@ -127,7 +127,7 @@ input[type="radio"]{
     transition: 0.1s;
     font-family: 'Poppins', 'Pretendard-Regular', 'sans-serif';
 }
-.filter_composition_container input[type="checkbox"]{
+.filter_composition_container input[type="checkbox"], .filter_measurement_container input[type="checkbox"]{
     /* perfectly removes the remnant of radio bullet */
     position: fixed;
     opacity: 0;
@@ -144,6 +144,10 @@ input[type="radio"]:checked + label{
     color: white;
 }
 .filter_composition_container input[type="checkbox"]:checked + label{
+    background-color: var(--black);
+    color: white;
+}
+.filter_measurement_container input[type="checkbox"]:checked + label{
     background-color: var(--black);
     color: white;
 }
