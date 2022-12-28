@@ -32,10 +32,9 @@
             <div class="container_images">
                 <div class="add_image clickable">
                     <img src="./src/img/plus.png">
-                    <input type="file" class="file_uploader" name="images" accept="image/*" required multiple>
+                    <input type="file" class="file_uploader" name="images" accept="image/*" required multiple onchange="readImages()">
                 </div>
-                <div class="add_image"></div>
-                <div class="add_image"></div>
+                <div class="add_image add_image_blank"></div>
             </div>
 
             <div class="subheader">

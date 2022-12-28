@@ -41,10 +41,41 @@ function displayRecentlyAdded() {
 window.onload = function() {
     const input = document.querySelector('input[class="file_uploader"]');
     if (input){
-        console.log("there it is");
         const fileUpload = document.querySelector(".file_uploader");
         const fileUploadButton = document.querySelector(".add_image");
         fileUploadButton.addEventListener('click', () => fileUpload.click());
+    }
+}
+
+
+function readImages() {
+    var file = document.querySelector('input[class="file_uploader"]').files[0];
+    console.log(file);
+    var container = document.querySelector(".container_images");
+    const preview = document.createElement('div');
+    preview.className = "preview_image";
+    var reader  = new FileReader();
+
+    reader.onloadend = function () {
+        var img = document.createElement("img");
+        img.src = reader.result;
+        container.prepend(preview);
+        preview.appendChild(img);
+        document.querySelector(".add_image_blank").remove();
+    }
+
+    if (file) {
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = "";
+    }
+
+//    preview.src = URL.createObjectURL(imgSelected.currentTarget.files[0]); //파일 객체에서 이미지 데이터 가져옴.
+    // document.querySelector('.dellink').style.display = 'block'; // 이미지 삭제 링크 표시
+  
+    //이미지 로딩 후 객체를 메모리에서 해제
+    preview.onload = function() {
+      URL.revokeObjectURL(preview.src);
     }
 }
 
