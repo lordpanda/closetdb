@@ -218,11 +218,11 @@ function displaySizesByRegion(region) {
     } else if (region == "IT") {
         accordingSizes.push(34, 36, 38);
     } else if (region == "WW") {
-        accordingSizes.push("one size", "XXS", "XXS", "XS", "S", "M", "L", "XL");
+        accordingSizes.push("One", "XXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
         accordingSizes.push(230, 235, 240);
     } else if (region == "Ring") {
-        accordingSizes.push(48, 50, 52, 4, 5, 6, "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J");
+        accordingSizes.push(48, 50, 52, 4, 5, 6, "KR5", "KR6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J", "IT5");
     }
     var grid = document.querySelector(".size_key_container");
     grid.innerHTML = ``;
@@ -234,10 +234,12 @@ function displaySizesByRegion(region) {
         grid.appendChild(item);
     }
     var cont = document.querySelector(".grid_container_size");
-    if (accordingSizes.length > 5){
-        cont.style.height = "120px";
+    if (accordingSizes.length > 15){
+        cont.style.height = "240px";
     } else if (accordingSizes.length > 10){
         cont.style.height = "180px";
+    } else if (accordingSizes.length > 5){
+        cont.style.height = "120px";
     } else {
         cont.style.height = "80px";
     }

@@ -50,8 +50,6 @@
 .preview_image img {
     max-height: 100%;
     object-fit: cover;
-    margin: auto;
-    text-align: center;
     vertical-align: top;
 }
 .preview_image:before {
