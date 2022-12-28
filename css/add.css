@@ -254,7 +254,7 @@
     #page_add h1 {
         font-size: 1.5em;
     }
-    .add_image .preview_image{
+    .add_image, .preview_image{
         width: 180px;
         height: 260px;
         border-radius: 30px;
@@ -277,7 +277,7 @@
     #page_add .subheader {
         padding: 20px 0 0 0;
     }
-    .add_image .preview_image{
+    .add_image, .preview_image{
         width: 160px;
         height: 240px;
         border-radius: 20px;
