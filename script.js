@@ -50,12 +50,13 @@ window.onload = function() {
 
 function readImages() {
     var file = document.querySelector('input[class="file_uploader"]').files[0];
-    console.log(file);
     var container = document.querySelector(".container_images");
-    const preview = document.createElement('div');
-    preview.className = "preview_image";
+
+
+    /*
     var reader  = new FileReader();
 
+    console.log(reader);
     reader.onloadend = function () {
         var img = document.createElement("img");
         img.src = reader.result;
@@ -73,14 +74,42 @@ function readImages() {
     } else {
         preview.src = "";
     }
+    */
+    
+    var files = document.querySelector('input[class="file_uploader"]').files;
+    for (let i = 0; i < files.length; i++) {
+        const preview = document.createElement('div');
+        preview.className = "preview_image";
+
+        const currentImageUrl = URL.createObjectURL(files[i]);
+        var img = document.createElement("img");
+        img.src = currentImageUrl;
+        
+        preview.appendChild(img);
+        if (document.querySelector(".preview_image")){
+            document.querySelector(".add_image").before(preview);
+        } else {
+            container.prepend(preview);
+            document.querySelector(".add_image_blank").remove();
+        }
+        preview.appendChild(img);
+        /*
+        var reader  = new FileReader();
+        reader.onload = function(event){
+            img.setAttribute("src", event.target.result);
+        }
+        */
+    }
 
 //    preview.src = URL.createObjectURL(imgSelected.currentTarget.files[0]); //파일 객체에서 이미지 데이터 가져옴.
     // document.querySelector('.dellink').style.display = 'block'; // 이미지 삭제 링크 표시
   
+    /*
     //이미지 로딩 후 객체를 메모리에서 해제
     preview.onload = function() {
       URL.revokeObjectURL(preview.src);
     }
+    */
 }
 
 
