@@ -59,7 +59,7 @@
     vertical-align: middle;
 }
 
-.grid_container_category, .grid_container_sub_category {
+.grid_container_category, .grid_container_sub_category, .grid_container_sub_category_2 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: auto auto;
@@ -259,6 +259,7 @@
         width: 180px;
         height: 260px;
         border-radius: 30px;
+        overflow: hidden;
     }
     .grid_container_category {
         grid-template-columns: auto auto auto;
@@ -295,7 +296,7 @@
         line-height: 50px;
         font-size: 1em;
     }
-    .grid_container_sub_category {
+    .grid_container_sub_category, .grid_container_sub_category_2 {
         grid-template-columns: 1fr 1fr;
     }
     .label_with_input {

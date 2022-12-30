@@ -133,7 +133,6 @@ function displayFilterCategory() {
         const temp = categoryList[i];
         if (temp == "dress" || temp == "top" || temp == "outer" || temp == "skirt" || temp == "pants") {
             item.addEventListener('click', showSub);
-            console.log(temp);
         } else {
             item.addEventListener('click', hideSub);
         }
@@ -144,12 +143,43 @@ function displayFilterCategory() {
         item.addEventListener('click', function() {
             displayFilterSubCategory(temp);}, false);
         item.addEventListener('click', function() {
-            displayMeasurementInput(temp);}, false);
-        
-        }
+            displayMeasurementInput(temp);}, false);    
+    }
     
 }
-
+function displayFilterCategoryWithoutEventListener() {
+    var grid = document.querySelector(".grid_container_category"); 
+    for (var i = 0; i < categoryList.length; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_category";
+        item.innerHTML = `<input type="radio" name="category_input" class="category_image" id="category_list_`+i+`" value="`+categoryList[i]+`"/><label for="category_list_`+i+`">`+categoryList[i]+`</label></input>`;
+        grid.appendChild(item);
+        const temp = categoryList[i];
+    }
+    
+}
+function displayFilterLength() {
+    var grid = document.querySelector(".grid_container_sub_category");
+    var grid2 = document.querySelector(".grid_container_sub_category_2");
+    grid.innerHTML = ``;
+    grid2.innerHTML = ``;
+    for (var i = 3; i < 5; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_sub_category";
+        item.innerHTML = `<input type="radio" name="sub_category_input_sleeve" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+        grid.appendChild(item);
+    } 
+    for (var i = 0; i < 3; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_sub_category";
+        item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+        grid2.appendChild(item);
+    }
+    const item = document.createElement('div');
+    item.className = "grid_sub_category";
+    item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+5+`" value="`+subCategoryList[5]+`" /><label for="sub_category_list_`+5+`">`+subCategoryList[5]+`</label></input>`;
+    grid2.appendChild(item);
+}
 function displayFilterSubCategory(cat) {
     var grid = document.querySelector(".grid_container_sub_category");
     grid.innerHTML = ``;
@@ -373,8 +403,16 @@ function displayMeasurementFilter() {
         const item = document.createElement('div');
         item.className = "filter_measurement";
         item.innerHTML = `<input type="checkbox" name="measurement_filter" id="measurement_`+i+`"/><label for="measurement_`+i+`">`+measurementList[i]+`</label></input>`;
+        
         grid.appendChild(item);
     }
+}
+
+function displayMeasurementFilterValue() {
+    var container = document.createElement('div');
+    container.className = "filter_measurement_value";
+    container.innerHTML = `<input type="range" name="measurement_filter_value" min="10" max="120" value="20" step="5"></input>`
+
 }
 
 function displayCompositionInput() {
