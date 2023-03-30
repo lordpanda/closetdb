@@ -412,9 +412,7 @@ function displayMeasurementFilterValue(i) {
     var container = document.createElement('div');
     container.className = "filter_measurement_value";
     container.innerHTML = `
-    
     <input type="number" name="measurement_filter_value_min_`+index+`" placeholder="min" min="0" max="200">
-     -
     <input type="number" name="measurement_filter_value_max_`+index+`" placeholder="max" min="0" max="200">
     `;
     var item = document.getElementById('measurement_'+index);

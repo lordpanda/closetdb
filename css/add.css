@@ -342,4 +342,10 @@
         padding: 0.3em 0;
         letter-spacing: 0;
     }
+    .filter_measurement_value input[type=number] {
+        font-size: 1em;
+        line-height: 44px;
+        border-radius: 30px;
+    }
+    
 }
