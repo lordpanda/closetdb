@@ -1,5 +1,6 @@
 .filter_composition_container {
-
+    display: inline-block;
+    margin: 20px;
 }
 .filter_composition, .filter_measurement {
     display: inline-block;
@@ -9,4 +10,8 @@
 .filter_composition label, .filter_measurement label{
     padding: 0px 20px;
     border-radius: 30px;
+}
+
+.filter_measurement_value {
+    display: inline-block;
 }

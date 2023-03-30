@@ -402,17 +402,33 @@ function displayMeasurementFilter() {
     for (var i = 0; i < measurementList.length; i++) {
         const item = document.createElement('div');
         item.className = "filter_measurement";
-        item.innerHTML = `<input type="checkbox" name="measurement_filter" id="measurement_`+i+`"/><label for="measurement_`+i+`">`+measurementList[i]+`</label></input>`;
-        
+        item.innerHTML = `<input type="checkbox" onClick="displayMeasurementFilterValue(`+i+`);" name="measurement_filter" id="measurement_`+i+`"/><label for="measurement_`+i+`">`+measurementList[i]+`</label></input>`;
         grid.appendChild(item);
     }
 }
 
-function displayMeasurementFilterValue() {
+function displayMeasurementFilterValue(i) {
+    var index = i;
     var container = document.createElement('div');
     container.className = "filter_measurement_value";
-    container.innerHTML = `<input type="range" name="measurement_filter_value" min="10" max="120" value="20" step="5"></input>`
-
+    container.innerHTML = `
+    
+    <input type="number" name="measurement_filter_value_min_`+index+`" placeholder="min" min="0" max="200">
+     -
+    <input type="number" name="measurement_filter_value_max_`+index+`" placeholder="max" min="0" max="200">
+    `;
+    var item = document.getElementById('measurement_'+index);
+    var item_label = item.nextElementSibling;
+    if (item.checked){
+        item.parentNode.setAttribute('style', 'display: block');
+        item_label.setAttribute('style', 'width: auto');
+        item_label.insertAdjacentElement('afterend', container);
+    } else {
+        item.parentNode.setAttribute('style', 'display: inline-block');
+        item_label.setAttribute('style', 'width: 100%');
+        var valueContainer = item.parentNode.querySelector('.filter_measurement_value');
+        valueContainer.remove();
+    }
 }
 
 function displayCompositionInput() {
