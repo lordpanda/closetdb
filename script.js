@@ -461,6 +461,49 @@ function displayItemImage() {
     placeHolder.appendChild(item);
 }
 
+function displayCustomSelect() {
+    const select = document.querySelector('select');
+    const customSelect = document.querySelector('.custom_select');
+    const selectedOption = customSelect.querySelector('.selected_option');
+    const options = customSelect.querySelectorAll('.option');
+
+    // Populate custom dropdown with options
+    for (let i = 0; i < select.options.length; i++) {
+        const option = document.createElement('div');
+        option.classList.add('option');
+        option.setAttribute('data_value', select.options[i].value);
+        option.innerText = select.options[i].innerText;
+        customSelect.querySelector('.options').appendChild(option);
+    }
+
+    // Update selected option
+    function updateSelectedOption() {
+        selectedOption.innerText = select.options[select.selectedIndex].innerText;
+    }
+
+    // Handle user interactions
+    selectedOption.addEventListener('click', () => {
+        customSelect.classList.toggle('open');
+    });
+
+    for (const option of options) {
+        option.addEventListener('click', () => {
+            select.value = option.getAttribute('data_value');
+            updateSelectedOption();
+            customSelect.classList.remove('open');
+        });
+    }
+
+    document.addEventListener('click', (event) => {
+        if (!customSelect.contains(event.target)) {
+            customSelect.classList.remove('open');
+        }
+    });
+
+    // Set initial selected option
+    updateSelectedOption();
+}
+
 // ADD =========================================================================================
 
 function input(){
