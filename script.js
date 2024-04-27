@@ -1,4 +1,5 @@
 
+
 function displayGlobalMenu(parm1) {
     var activeItem = [];
     for(var i = 0; i < 3; i++){
@@ -10,7 +11,7 @@ function displayGlobalMenu(parm1) {
     }
     document.write(`
     <div class="logo">
-        <a href="./index.html"><h1>ClosetDB</h1></a>
+        <a href="./index.html"><h1>closetDB</h1></a>
     </div>
     <input type="checkbox" class="toggler">
     <div class="hamburger"><div></div></div>
@@ -40,11 +41,79 @@ function displayRecentlyAdded() {
 window.onload = function() {
     const input = document.querySelector('input[class="file_uploader"]');
     if (input){
-        console.log("there it is");
         const fileUpload = document.querySelector(".file_uploader");
         const fileUploadButton = document.querySelector(".add_image");
         fileUploadButton.addEventListener('click', () => fileUpload.click());
     }
+}
+
+
+function readImages() {
+    var file = document.querySelector('input[class="file_uploader"]').files[0];
+    var container = document.querySelector(".container_images");
+
+
+    /*
+    var reader  = new FileReader();
+
+    console.log(reader);
+    reader.onloadend = function () {
+        var img = document.createElement("img");
+        img.src = reader.result;
+        if (document.querySelector(".preview_image")){
+            document.querySelector(".add_image").before(preview);
+        } else {
+            container.prepend(preview);
+            document.querySelector(".add_image_blank").remove();
+        }
+        preview.appendChild(img);
+    }
+
+    if (file) {
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = "";
+    }
+    */
+    
+    var files = document.querySelector('input[class="file_uploader"]').files;
+    for (let i = 0; i < files.length; i++) {
+        const preview = document.createElement('div');
+        preview.className = "preview_image";
+
+        const currentImageUrl = URL.createObjectURL(files[i]);
+        var img = document.createElement("img");
+        img.src = currentImageUrl;
+        
+        preview.appendChild(img);
+        if (document.querySelector(".preview_image")){
+            document.querySelector(".add_image").before(preview);
+        } else {
+            container.prepend(preview);
+            document.querySelector(".add_image_blank").remove();
+        }
+        preview.appendChild(img);
+        preview.addEventListener('click', () => {
+            preview.remove();
+        });
+    
+        /*
+        var reader  = new FileReader();
+        reader.onload = function(event){
+            img.setAttribute("src", event.target.result);
+        }
+        */
+    }
+
+//    preview.src = URL.createObjectURL(imgSelected.currentTarget.files[0]); //파일 객체에서 이미지 데이터 가져옴.
+    // document.querySelector('.dellink').style.display = 'block'; // 이미지 삭제 링크 표시
+  
+    /*
+    //이미지 로딩 후 객체를 메모리에서 해제
+    preview.onload = function() {
+      URL.revokeObjectURL(preview.src);
+    }
+    */
 }
 
 
@@ -64,7 +133,6 @@ function displayFilterCategory() {
         const temp = categoryList[i];
         if (temp == "dress" || temp == "top" || temp == "outer" || temp == "skirt" || temp == "pants") {
             item.addEventListener('click', showSub);
-            console.log(temp);
         } else {
             item.addEventListener('click', hideSub);
         }
@@ -75,12 +143,43 @@ function displayFilterCategory() {
         item.addEventListener('click', function() {
             displayFilterSubCategory(temp);}, false);
         item.addEventListener('click', function() {
-            displayMeasurementInput(temp);}, false);
-        
-        }
+            displayMeasurementInput(temp);}, false);    
+    }
     
 }
-
+function displayFilterCategoryWithoutEventListener() {
+    var grid = document.querySelector(".grid_container_category"); 
+    for (var i = 0; i < categoryList.length; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_category";
+        item.innerHTML = `<input type="radio" name="category_input" class="category_image" id="category_list_`+i+`" value="`+categoryList[i]+`"/><label for="category_list_`+i+`">`+categoryList[i]+`</label></input>`;
+        grid.appendChild(item);
+        const temp = categoryList[i];
+    }
+    
+}
+function displayFilterLength() {
+    var grid = document.querySelector(".grid_container_sub_category");
+    var grid2 = document.querySelector(".grid_container_sub_category_2");
+    grid.innerHTML = ``;
+    grid2.innerHTML = ``;
+    for (var i = 3; i < 5; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_sub_category";
+        item.innerHTML = `<input type="radio" name="sub_category_input_sleeve" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+        grid.appendChild(item);
+    } 
+    for (var i = 0; i < 3; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_sub_category";
+        item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+        grid2.appendChild(item);
+    }
+    const item = document.createElement('div');
+    item.className = "grid_sub_category";
+    item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+5+`" value="`+subCategoryList[5]+`" /><label for="sub_category_list_`+5+`">`+subCategoryList[5]+`</label></input>`;
+    grid2.appendChild(item);
+}
 function displayFilterSubCategory(cat) {
     var grid = document.querySelector(".grid_container_sub_category");
     grid.innerHTML = ``;
@@ -89,21 +188,21 @@ function displayFilterSubCategory(cat) {
         for (var i = 3; i < 5; i++) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
-            item.innerHTML = `<input type="radio" name="sub_category_input_sleeve" class="category_image" id="sub_category_list_`+i+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            item.innerHTML = `<input type="radio" name="sub_category_input_sleeve" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     } if (cat == "dress" || cat == "skirt") {
         for (var i = 0; i < 3; i++) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
-            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     } if (cat == "pants") {
         for (var i = 5; i < 7; i++) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
-            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            item.innerHTML = `<input type="radio" name="sub_category_input_length" class="category_image" id="sub_category_list_`+i+`" value="`+subCategoryList[i]+`" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     }
@@ -121,6 +220,7 @@ function displaySizeRegionDropdown() {
         
         const item = document.createElement('button');
         item.className = "size_region";
+        item.setAttribute("id", "size_region_selected");
         item.innerHTML = sizeRegionList[i]+`</button>`;
         item.value = sizeRegionList[i];
         drop.appendChild(item);
@@ -148,11 +248,11 @@ function displaySizesByRegion(region) {
     } else if (region == "IT") {
         accordingSizes.push(34, 36, 38);
     } else if (region == "WW") {
-        accordingSizes.push("one size", "XXS", "XXS", "XS", "S", "M", "L", "XL");
+        accordingSizes.push("One", "XXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
         accordingSizes.push(230, 235, 240);
     } else if (region == "Ring") {
-        accordingSizes.push(48, 50, 52, 4, 5, 6, "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J");
+        accordingSizes.push(48, 50, 52, 4, 5, 6, "KR5", "KR6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J", "IT5");
     }
     var grid = document.querySelector(".size_key_container");
     grid.innerHTML = ``;
@@ -160,14 +260,16 @@ function displaySizesByRegion(region) {
         
         const item = document.createElement('div');
         item.className = "size_key";
-        item.innerHTML = `<input type="radio" name="size_key" id="size_key_`+i+`"/><label for="size_key_`+i+`">`+accordingSizes[i]+`</label></input>`;
+        item.innerHTML = `<input type="radio" name="size_key" id="size_key_`+i+`" value="`+accordingSizes[i]+`"/><label for="size_key_`+i+`">`+accordingSizes[i]+`</label></input>`;
         grid.appendChild(item);
     }
     var cont = document.querySelector(".grid_container_size");
-    if (accordingSizes.length > 5){
-        cont.style.height = "120px";
+    if (accordingSizes.length > 15){
+        cont.style.height = "240px";
     } else if (accordingSizes.length > 10){
         cont.style.height = "180px";
+    } else if (accordingSizes.length > 5){
+        cont.style.height = "120px";
     } else {
         cont.style.height = "80px";
     }
@@ -276,13 +378,13 @@ function displayMeasurementInput(selectedCategory) {
     if (selected == "top" || selected == "dress" || selected == "outer") {
         accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length");
     } else if (selected == "pants") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "밑위", "밑단", "총장"];
+        accordingSizes = ["waist", "hip", "rise", "legOpening", "length"];
     } else if (selected == "skirt") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "총장"];
+        accordingSizes = ["waist", "hip", "length"];
     } else if (selected == "shoes") {
-        accordingSizes = ["굽높이"];
+        accordingSizes = ["heel"];
     } else if (selected == "jewerly" || selected == ".etc") {
-        accordingSizes = ["가로", "세로", "길이", "높이", "둘레"];
+        accordingSizes = ["width", "세로", "길이", "높이", "circumference"];
     }
     
     var grid = document.querySelector(".grid_container_measurement"); 
@@ -290,8 +392,40 @@ function displayMeasurementInput(selectedCategory) {
     for (var i = 0; i < accordingSizes.length; i++) {
         const item = document.createElement('div');
         item.className = "label_with_input";
-        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input"></div>`;
+        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input" name="`+accordingSizes[i]+`"></div>`;
         grid.appendChild(item);
+    }
+}
+
+function displayMeasurementFilter() {
+    var grid = document.querySelector(".filter_measurement_container");
+    for (var i = 0; i < measurementList.length; i++) {
+        const item = document.createElement('div');
+        item.className = "filter_measurement";
+        item.innerHTML = `<input type="checkbox" onClick="displayMeasurementFilterValue(`+i+`);" name="measurement_filter" id="measurement_`+i+`"/><label for="measurement_`+i+`">`+measurementList[i]+`</label></input>`;
+        grid.appendChild(item);
+    }
+}
+
+function displayMeasurementFilterValue(i) {
+    var index = i;
+    var container = document.createElement('div');
+    container.className = "filter_measurement_value";
+    container.innerHTML = `
+    <input type="number" name="measurement_filter_value_min_`+index+`" placeholder="min" min="0" max="200">
+    <input type="number" name="measurement_filter_value_max_`+index+`" placeholder="max" min="0" max="200">
+    `;
+    var item = document.getElementById('measurement_'+index);
+    var item_label = item.nextElementSibling;
+    if (item.checked){
+        item.parentNode.setAttribute('style', 'display: block');
+        item_label.setAttribute('style', 'width: auto');
+        item_label.insertAdjacentElement('afterend', container);
+    } else {
+        item.parentNode.setAttribute('style', 'display: inline-block');
+        item_label.setAttribute('style', 'width: 100%');
+        var valueContainer = item.parentNode.querySelector('.filter_measurement_value');
+        valueContainer.remove();
     }
 }
 
@@ -327,12 +461,81 @@ function displayItemImage() {
     placeHolder.appendChild(item);
 }
 
+function displayCustomSelect() {
+    const select = document.querySelector('select');
+    const customSelect = document.querySelector('.custom_select');
+    const selectedOption = customSelect.querySelector('.selected_option');
+    const options = customSelect.querySelectorAll('.option');
+
+    // Populate custom dropdown with options
+    for (let i = 0; i < select.options.length; i++) {
+        const option = document.createElement('div');
+        option.classList.add('option');
+        option.setAttribute('data_value', select.options[i].value);
+        option.innerText = select.options[i].innerText;
+        customSelect.querySelector('.options').appendChild(option);
+    }
+
+    // Update selected option
+    function updateSelectedOption() {
+        selectedOption.innerText = select.options[select.selectedIndex].innerText;
+    }
+
+    // Handle user interactions
+    selectedOption.addEventListener('click', () => {
+        customSelect.classList.toggle('open');
+    });
+
+    for (const option of options) {
+        option.addEventListener('click', () => {
+            select.value = option.getAttribute('data_value');
+            updateSelectedOption();
+            customSelect.classList.remove('open');
+        });
+    }
+
+    document.addEventListener('click', (event) => {
+        if (!customSelect.contains(event.target)) {
+            customSelect.classList.remove('open');
+        }
+    });
+
+    // Set initial selected option
+    updateSelectedOption();
+}
+
+// ADD =========================================================================================
+
 function input(){
-    // var pic = document.getElementById('myFile').files[0].name;
-    var category =document.querySelector('input[name="category_input"]:checked').value;
-    var name = document.getElementById('myName').value;
-    var age = document.getElementById('myAge').value;
-    window.prompt("아래 내용을 복사 하세요", 'addItem("'+name+'","'+age+'","./img/'+pic+'");');
+//    var file = document.querySelector('input[name="images"]').files[0].name;
+    var category = document.querySelector('input[name="category_input"]:checked').value;
+    var sub_category_length;
+    if (document.querySelector('input[name="sub_category_input_length"]')) {
+        sub_category_length = document.querySelector('input[name="sub_category_input_length"]:checked').value;
+    }
+    var sub_category_input_sleeve;
+    if (document.querySelector('input[name="sub_category_input_sleeve"]')) {
+        sub_category_sleeve = document.querySelector('input[name="sub_category_input_sleeve"]:checked').value; 
+    }
+
+    var size_region = document.querySelector(".size_region").textContent;
+    var size_key = document.querySelector('input[name="size_key"]:checked').value;
+    var brand = document.querySelector('input[name="brand"]').value;
+    var name = document.querySelector('input[name="name"]').value;
+    var year = document.querySelector('input[name="year"]').value;;
+    var season = document.querySelector('select[name="seasons"]').value;
+    var purchase_year = document.querySelector('input[name="purchase_year"]').value;;
+
+    for (var i=0 ; i < measurementList.length; i++){
+        if (document.querySelector('input[name="'+measurementList[i]+'"]')) {
+            measurementDict[measurementList[i]] = document.querySelector('input[name="'+measurementList[i]+'"]').value;   
+            console.log(document.querySelector('input[name="'+measurementList[i]+'"]').value);
+        }
+
+    }
+    console.log(measurementDict);
+
+    alert(category+` `+sub_category_length+` `+sub_category_sleeve+` `+size_region+` `+size_key+` `+brand+` `+name+` `+year+season+` `+purchase_year+` `+measurementDict[length]);
 }
 
 function addItem(thumbnail, img, imgs, category, subcategory, sizeRegion, sizeKey, brand, ){

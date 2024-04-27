@@ -32,10 +32,9 @@
             <div class="container_images">
                 <div class="add_image clickable">
                     <img src="./src/img/plus.png">
-                    <input type="file" class="file_uploader" accept="image/*" required multiple>
+                    <input type="file" class="file_uploader" name="images" accept="image/*" required multiple onchange="readImages()">
                 </div>
-                <div class="add_image"></div>
-                <div class="add_image"></div>
+                <div class="add_image add_image_blank"></div>
             </div>
 
             <div class="subheader">
@@ -59,7 +58,7 @@
             </div>
             <div class="grid_container_size">
 
-                <button class="size_region size_region_selected" onclick="show()">
+                <button class="size_region size_region_selected" id="size_region_selected" onclick="show()">
                     US
                 </button>
                 
@@ -107,7 +106,7 @@
             <div class="grid_container_season">
                 <div class="label_with_input">
                     <div class="part">year</div>
-                    <input type="number" id="" class="season_input">
+                    <input type="number" name="year" id="" class="season_input">
                 </div>
                 <div class="label_with_input">
                     <div class="part">season</div>
@@ -119,13 +118,13 @@
                 </div>
                 <div class="label_with_input">
                     <div class="part">purchase</div>
-                    <input type="number" id="" class="season_input">
+                    <input type="number" name="purchase_year" id="" class="season_input">
                 </div>
             </div>
 
     </section>
     <div class="submit_button">
-        <button class="generate_script">Generate script</button>
+        <button class="generate_script" type="submit" onclick="input()">Generate script</button>
     </div>
 
 </body>

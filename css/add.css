@@ -19,7 +19,7 @@
 .container_images::-webkit-scrollbar{
     display: none; 
 }
-.add_image {
+.add_image, .preview_image {
     display: inline-block;
     border-radius: 60px;
     width: 250px;
@@ -42,8 +42,24 @@
 .file_uploader {
     display: none;
 }
+.preview_image {
+    border: 1px solid var(--gray);   
+    border-color: var(--gray);
+    overflow: clip;
+}
+.preview_image img {
+    max-height: 100%;
+    object-fit: cover;
+    vertical-align: top;
+}
+.preview_image:before {
+    content: "";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
 
-.grid_container_category, .grid_container_sub_category {
+.grid_container_category, .grid_container_sub_category, .grid_container_sub_category_2 {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: auto auto;
@@ -88,8 +104,12 @@
     text-align: center;
     font-size: 1.2em;
     margin-right: 20px;
+    position: relative;
+    z-index: 20;
 }
-
+.size_region button {
+    text-align: center;
+}
 
 .size_region_dropdown {
     display: none;
@@ -147,7 +167,7 @@
     position: absolute;
     border: none;
 
-    z-index: 99;
+    z-index: 10;
     /*position the autocomplete items to be the same width as the container:*/
     top: 100%;
     left: 0;
@@ -214,6 +234,31 @@
     text-align: center;
 }
 
+/* select drop down to replace ios native */
+select {
+  /* removes default appearance */
+  appearance: none;
+  -webkit-appearance: none;
+  /* adds custom background and border */
+  background-color: #fff;
+  border: 1px solid #ddd;
+  /* adds custom padding and margin */
+  padding: 0.5rem;
+  margin: 0;
+  /* adds custom font and color */
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+  color: #333;
+  /* adds custom arrow */
+  background-image: url(arrow.png);
+  background-repeat: no-repeat;
+  background-position: right center;
+  /* adds hover effect */
+  cursor: pointer;
+}
+
+/*  submit button */
+
 .submit_button {
     width: 100%;
     text-align: center;
@@ -235,10 +280,11 @@
     #page_add h1 {
         font-size: 1.5em;
     }
-    .add_image {
+    .add_image, .preview_image{
         width: 180px;
         height: 260px;
         border-radius: 30px;
+        overflow: hidden;
     }
     .grid_container_category {
         grid-template-columns: auto auto auto;
@@ -258,10 +304,11 @@
     #page_add .subheader {
         padding: 20px 0 0 0;
     }
-    .add_image {
-        width: 120px;
-        height: 200px;
+    .add_image, .preview_image{
+        width: 160px;
+        height: 240px;
         border-radius: 20px;
+        margin-right: 10px;
     }
     .grid_container_category {
         grid-template-columns: auto auto auto;
@@ -274,7 +321,7 @@
         line-height: 50px;
         font-size: 1em;
     }
-    .grid_container_sub_category {
+    .grid_container_sub_category, .grid_container_sub_category_2 {
         grid-template-columns: 1fr 1fr;
     }
     .label_with_input {
@@ -291,9 +338,13 @@
     .size_region {
         width: 60px;
         height: 40px;
+        
+        z-index: 99;
     }
     .size_region_dropdown {
         margin-top: 40px;
+    
+        z-index: 99;
     }
     .size_key {
         width: 60px;
@@ -315,4 +366,10 @@
         padding: 0.3em 0;
         letter-spacing: 0;
     }
+    .filter_measurement_value input[type=number] {
+        font-size: 1em;
+        line-height: 44px;
+        border-radius: 30px;
+    }
+    
 }

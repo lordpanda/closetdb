@@ -127,7 +127,7 @@ input[type="radio"]{
     transition: 0.1s;
     font-family: 'Poppins', 'Pretendard-Regular', 'sans-serif';
 }
-.filter_composition_container input[type="checkbox"]{
+.filter_composition_container input[type="checkbox"], .filter_measurement_container input[type="checkbox"]{
     /* perfectly removes the remnant of radio bullet */
     position: fixed;
     opacity: 0;
@@ -144,6 +144,10 @@ input[type="radio"]:checked + label{
     color: white;
 }
 .filter_composition_container input[type="checkbox"]:checked + label{
+    background-color: var(--black);
+    color: white;
+}
+.filter_measurement_container input[type="checkbox"]:checked + label{
     background-color: var(--black);
     color: white;
 }
@@ -165,6 +169,18 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+.filter_measurement_value input[type=number] {
+    font-size: 1.2em;
+    line-height: 58px;
+    text-align: center;
+    margin: 0 0 0 10px;
+    border: solid 1px var(--gray);
+    background-color: var(--gray);
+    border-radius: 60px;
+    font-size: 1.2em;
+    font-family: 'Poppins', 'Pretendard-Regular', 'sans-serif';
+}
+
 #bg {
     width: 100%;
     height: 100%;
@@ -222,7 +238,6 @@ video {
     padding: 20;
 }
 .header h1 {
-    font-family: 'Sequel45';
     transition: 0.2s;
 }
 
@@ -289,15 +304,16 @@ li {
     display: inline-block;
     position: relative;
     z-index: 1;
-    font-weight: 600;
-    letter-spacing: -1px;
+    /* letter-spacing: 1px;
+    text-transform: uppercase;
+    */
 }
 .logo a{
     text-decoration: none;
 
 }
 h1 {
-    font-family: var(--header-bold), sans-serif;
+    font-family: var(--menu-link), sans-serif;
     font-size: 2em;
     color: var(--black);
     margin: 0;
@@ -396,9 +412,10 @@ h1 {
 /* responsive image grid */
 .grid_container {
     display: grid;
+    grid-auto-rows: 1fr;
     grid-template-columns: auto auto auto auto;
-    grid-template-rows: auto auto;
-    justify-content: space-evenly;
+/*    grid-template-rows: auto auto;
+*/    justify-content: space-evenly;
     grid-gap: 1.5em;
 }
 
@@ -581,7 +598,7 @@ h1 {
     /* MAIN MENU WITH THE WHITE BACKGROUND AND THE TEXT :  */
     
     .menu{
-        background: rgb(255,255,255,0.9);
+        background: rgb(255,255,255,0.95);
         width: 0%;
         margin: 0;
     /* APPLYING TRANSITION TO THE MENU :  */
@@ -642,7 +659,10 @@ h1 {
         margin-bottom: 0.5em;
         font-size: 1.5em;
     }
-
+    .header ul a {
+        font-size: 1em;
+        padding: 10 12;
+    }
     .grid_container {
         grid-gap: 1em;
     }

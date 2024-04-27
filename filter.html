@@ -3,6 +3,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="./script.js"> </script>
     <script src="./script/db.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/add.css">
     <link rel="stylesheet" href="./css/filter.css">
@@ -30,31 +32,22 @@
         </div>    
         <div class="grid_container_category">
         </div>
-        <div class="sub_category">
+        <div class="sub_category" style="display:block;">
             <div class="subheader">
-                <h1>sub</h1>
+                <h1>length</h1>
             </div>    
             <div class="grid_container_sub_category">
-                
-                <script>displayFilterCategory();</script>
-                <script>displayFilterSubCategory();</script>
+            </div>
+            <div class="grid_container_sub_category_2">
             </div>
         </div>
-        
-        <div class="filter_category">
-            <div class="grid_container">
-                
-            </div>
-        </div>
-        <div class="subheader">
+        <script>displayFilterCategoryWithoutEventListener();</script>       
+        <script>displayFilterLength();</script>
 
-            <h1>size</h1>
-        </div>
-        <div class="filter_size">
-        </div>
         <div class="subheader">
             <h1>brand</h1>
         </div>
+        
         <div class="brand">
             <div class="brand_autocomplete">
                 
@@ -62,9 +55,20 @@
             <script>    autocomplete(document.getElementById("brand_search"), brandList);</script>
             </div>
         </div>
+
+
+        <div class="subheader">
+            <h1>measurement</h1>
+        </div>
+        <div class="filter_measurement_container">
+                <script>displayMeasurementFilter();</script>
+                <div class="filter_measurement">
+                </div>
+        </div>
+
         <div class="subheader">
 
-            <h1>details</h1>
+            <h1>composition</h1>
         </div>
         <div class="filter_composition_container">
             <script>displayCompositionFilter();</script>
