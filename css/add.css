@@ -234,30 +234,6 @@
     text-align: center;
 }
 
-/* select drop down to replace ios native */
-select {
-  /* removes default appearance */
-  appearance: none;
-  -webkit-appearance: none;
-  /* adds custom background and border */
-  background-color: #fff;
-  border: 1px solid #ddd;
-  /* adds custom padding and margin */
-  padding: 0.5rem;
-  margin: 0;
-  /* adds custom font and color */
-  font-family: Arial, sans-serif;
-  font-size: 1rem;
-  color: #333;
-  /* adds custom arrow */
-  background-image: url(arrow.png);
-  background-repeat: no-repeat;
-  background-position: right center;
-  /* adds hover effect */
-  cursor: pointer;
-}
-
-/*  submit button */
 
 .submit_button {
     width: 100%;
