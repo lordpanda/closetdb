@@ -1,0 +1,49 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/item.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
+    <title>Panda's' DressRoom</title>
+</head>
+
+<body>
+
+
+    <section class="header">
+        <script>displayGlobalMenu();</script>
+    </section>
+
+    <div id="bg"></div>
+    <div class="overlay"></div>
+    
+
+    <div class="intro">
+        <span class="main" id="item-brand">Brand Name</span>
+        <span class="sub" id="item-category">sub category category</span>
+    </div>
+    <div class="view_item_image">
+        <script>displayItemImage();</script>
+    </div>
+    <section class="content" id="page_item">
+        <div class="view_details narrow">
+            <div class="grid_container_view_details">
+                <div class="view_measurement" id="measurement_container">
+                    <!-- 카테고리별 measurement가 동적으로 생성됩니다 -->
+                </div>
+                <div class="view_composition">
+                    <div class="view_size" style="display: none;">US 0</div>
+                    <!-- 더미 데이터는 JavaScript로 실제 데이터로 교체됨 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit 버튼 -->
+        <div class="edit-section">
+            <button class="edit-button" onclick="editItem()">
+                Edit
+            </button>
+        </div>
+    </section>
+</body>

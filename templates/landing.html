@@ -1,0 +1,42 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/landing.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
+    <title>Panda's' DressRoom</title>
+</head>
+
+<body>
+    <section class="header">
+        <script>displayGlobalMenu();</script>
+        <div class="intro">
+            <span class="main">Explore</span>
+            <span class="sub">your closet</span>
+        </div>
+    </section>
+    <div id="bg"></div>
+    <div class="overlay"></div>
+
+    <section class="content landing-content">
+        <div class="carousel-container">
+            <div class="carousel-track" id="carousel-track">
+                <!-- 캐러셀 아이템들이 JavaScript로 동적 생성됩니다 -->
+            </div>
+        </div>
+        
+        <div class="sign-in-section">
+            <button class="sign-in-button" onclick="window.location.href='/auth/google'">
+                Sign In
+            </button>
+        </div>
+    </section>
+
+    <script>
+        // 랜딩 페이지용 캐러셀 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initLandingCarousel();
+        });
+    </script>
+</body>

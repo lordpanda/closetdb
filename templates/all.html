@@ -1,0 +1,38 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
+    <title>Panda's' DressRoom</title>
+</head>
+
+<body>
+
+
+    <section class="header">
+            <script>displayGlobalMenu(0);</script>
+        <div class="intro">
+            <span class="main">Browse</span>
+            <span class="sub">your closet</span>
+        </div>
+        <div class="search">
+            <input type="search" id="form1" class="search_input" />
+        </div>
+    </section>
+    
+    <div id="bg"></div>
+    <div class="overlay"></div>
+
+    <section class="content">
+        <div class="subheader">
+            <div class="text">
+                <h1>View all</h1>
+            </div>
+            <div class="grid_container">
+                <script>displayAllItems();</script>
+            </div>
+
+        </div>
+    </section>
+</body>

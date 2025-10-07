@@ -1,0 +1,59 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.784.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@latest/dist/amazon-cognito-identity.min.js"></script>
+
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/add.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
+
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.13.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.13.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.13.0/firebase-firestore.js"></script> -->
+    <title>Panda's' DressRoom</title>
+</head>
+
+<body>
+
+
+    <section class="header">
+        <script>displayGlobalMenu();</script>
+        <div class="intro">
+            <span class="main">Login</span>
+            <span class="sub">only for panda</span>
+        </div>
+    </section>
+    <div id="bg"></div>
+    <!-- <video src="./src/set the mood.mp4" autoplay loop muted></video> -->
+    <div class="overlay"></div>
+
+      
+
+    <section class="content_login">
+
+        <div id="intro">
+            <div></div>
+        </div>
+
+        <div class="login_form">
+            <div class="group">
+                <label for="pass" class="label">Password</label>
+                <input id="pass" name="password" type="password" class="input" data-type="password" autocomplete="current-password">
+            </div>
+            <div class="group">
+                <button class="button" onclick="initiateGoogleLogin()">Sign In</button>
+            </div>
+            <div id="login-error" style="color: red; margin-top: 10px; display: none;"></div>
+        </div>
+
+
+ 
+
+    </section>
+</body>
+<footer>
+
+</footer>

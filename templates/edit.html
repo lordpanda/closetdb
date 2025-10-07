@@ -1,0 +1,205 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.784.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@latest/dist/amazon-cognito-identity.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=3.0"></script>
+    <script src="{{ url_for('static', filename='js/db.js') }}?v=2.0"></script>
+
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('send_static', filename='css/add.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
+    <title>Panda's' DressRoom</title>
+</head>
+
+<body>
+
+    <section class="header">
+            <script>displayGlobalMenu(2);</script>
+        <div class="intro">
+            <span class="main">Edit item</span>
+            <span class="sub">in your closet</span>
+        </div>
+    </section>
+    <div id="bg"></div>
+    <div class="overlay"></div>
+    <section class="content narrow" id="page_add">
+
+            <div class="subheader">
+                <div class="text">
+                    <h1>images</h1>
+                </div>
+                
+                <!-- 이미지 업로드 모드 토글 스위치 -->
+                <div class="image_mode_toggle">
+                    <div class="toggle_switch_container">
+                        <span class="toggle_label_text">Individual Images</span>
+                        <label class="toggle_switch">
+                            <input type="checkbox" name="image_mode" id="image_mode_switch" checked>
+                            <span class="toggle_slider"></span>
+                        </label>
+                        <span class="toggle_label_text">Stitched Image</span>
+                    </div>
+                </div>
+                
+            </div>
+            <!-- Stitched Image Mode -->
+            <div class="container_images" id="stitched_mode">
+                <div class="add_image clickable" onclick="document.querySelector('.file_uploader_stitched').click()">
+                    <img src="/static/src/img/plus.png">
+                    <input type="file" class="file_uploader_stitched" accept="image/*" onchange="readStitchedImage()" style="display: none;">
+                </div>
+                <div class="stitched_info">
+                    <div class="subheader">
+                        <h1>sections</h1>
+                    </div>
+                    <div class="grid_container_sections">
+                        <input type="radio" name="section_count" id="section_2" value="2" checked>
+                        <label for="section_2" class="category_item">2</label>
+                        
+                        <input type="radio" name="section_count" id="section_3" value="3">
+                        <label for="section_3" class="category_item">3</label>
+                        
+                        <input type="radio" name="section_count" id="section_4" value="4">
+                        <label for="section_4" class="category_item">4</label>
+                        
+                        <input type="radio" name="section_count" id="section_5" value="5">
+                        <label for="section_5" class="category_item">5</label>
+                        
+                        <input type="radio" name="section_count" id="section_6" value="6">
+                        <label for="section_6" class="category_item">6</label>
+                        
+                        <input type="radio" name="section_count" id="section_7" value="7">
+                        <label for="section_7" class="category_item">7</label>
+                        
+                        <input type="radio" name="section_count" id="section_8" value="8">
+                        <label for="section_8" class="category_item">8</label>
+                        
+                        <input type="radio" name="section_count" id="section_9" value="9">
+                        <label for="section_9" class="category_item">9</label>
+                        
+                        <input type="radio" name="section_count" id="section_10" value="10">
+                        <label for="section_10" class="category_item">10</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Individual Images Mode -->
+            <div class="container_images" id="individual_mode" style="display: none;">
+                <div class="add_image clickable" onclick="document.querySelector('.file_uploader').click()">
+                    <img src="/static/src/img/plus.png">
+                    <input type="file" class="file_uploader" accept="image/*" multiple onchange="readImages()" style="display: none;">
+                </div>
+                <div class="individual_info">
+                    <p>Upload multiple individual images and select main image</p>
+                </div>
+            </div>
+
+            <div class="subheader">
+                <h1>category</h1>
+            </div>    
+            <div class="grid_container_category">
+            </div>
+            
+            <div class="sub_category">
+                <div class="subheader">
+                    <h1>sub</h1>
+                </div>    
+                <div class="grid_container_sub_category">
+
+                    <script>displayFilterCategory();</script>
+                    <script>displayFilterSubCategory();</script>
+                </div>
+            </div>
+            <div class="subheader">
+                <h1>size</h1>
+            </div>
+            <div class="grid_container_size">
+
+                <button class="size_region size_region_selected" onclick="show()">
+                    Select
+                </button>
+                
+                <div class="size_region_dropdown">
+                </div>
+                <div class="size_key_container">
+                    <script>displaySizesByRegion("");</script>
+                    <script>displaySizeRegionDropdown();</script>  
+                    
+                    <!-- etc 선택 시 나타날 텍스트 입력창 -->
+                    <input type="text" id="size_etc_input" name="size_etc" class="size_etc_input" style="display: none;"/>
+                </div>
+            </div>
+
+            <div class="subheader">
+                <h1>brand</h1>
+            </div>
+            <div class="brand">
+                <div class="brand_autocomplete">
+                
+                    <input type="text" id="brand_search" class="brand_input" name="brand" placeholder="" autocomplete="off"/>
+                    <script>autocomplete(document.getElementById("brand_search"), brandList);</script>
+                </div>
+            </div>
+            <div class="subheader">
+                <h1>measurement</h1>
+            </div>
+            <div class="grid_container_measurement"> 
+                <script>displayMeasurementInput("dress");</script>
+            </div>
+
+            <div class="subheader">
+                <div class="text">
+                    <h1>composition</h1>
+                </div>
+                <button type="button" class="add_composition_set_btn" onclick="addCompositionSet()">
+                    <img src="/static/src/img/plus.png" style="width: 20px; height: 20px;">
+                </button>
+            </div>
+            <div class="composition_sets_container" id="composition_sets_container">
+                <script>displayCompositionInput();</script>
+            </div>
+
+            <div class="subheader">
+                <h1>season</h1>
+            </div>
+            <div class="grid_container_season">
+                <div class="label_with_input">
+                    <div class="part">year</div>
+                    <input type="number" id="" class="season_input">
+                </div>
+                <div class="label_with_input">
+                    <div class="part">season</div>
+                    <div style="position: relative;">
+                        <button class="size_region season_selected" onclick="showSeasonDropdown()">
+                            N/A
+                        </button>
+                        <div class="size_region_dropdown season_dropdown">
+                            <button class="size_region" onclick="selectSeason('N/A')">N/A</button>
+                            <button class="size_region" onclick="selectSeason('SF')">SF</button>
+                            <button class="size_region" onclick="selectSeason('Summer')">Summer</button>
+                            <button class="size_region" onclick="selectSeason('Winter')">Winter</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="label_with_input">
+                    <div class="part">purchase</div>
+                    <input type="number" id="" class="season_input">
+                </div>
+            </div>
+
+    </section>
+    <form id="edit_item_form" onsubmit="submitEditForm(event)">
+        <div class="submit_button">
+            <button type="submit" class="button">Update</button>
+        </div>
+    </form>
+    
+    <script>
+        // Edit 페이지 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initEditPage();
+        });
+    </script>
+</body>

@@ -1,0 +1,155 @@
+/* Landing Page 전용 스타일 */
+
+.landing-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 20px 0;
+    width: 100%;
+}
+
+/* 캐러셀 컨테이너 */
+.carousel-container {
+    width: 100vw;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 20px 0;
+}
+
+/* 캐러셀 트랙 */
+.carousel-track {
+    display: flex;
+    gap: 1.5em;
+    animation: carousel-scroll 20s linear infinite;
+    width: calc(200% + 1.5em); /* 원활한 무한 스크롤을 위해 */
+    padding: 0 1.5em;
+    will-change: transform; /* GPU 가속 힌트 */
+    backface-visibility: hidden; /* 성능 최적화 */
+}
+
+/* 캐러셀 아이템 */
+.carousel-item {
+    flex: 0 0 300px; /* 고정 너비 300px */
+    height: 400px; /* 고정 높이 400px */
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    background-color: var(--gray);
+    transition: transform 0.3s ease;
+}
+
+.carousel-item:hover {
+    transform: scale(1.05);
+}
+
+.carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    will-change: transform; /* GPU 가속 힌트 */
+    backface-visibility: hidden; /* 성능 최적화 */
+}
+
+.carousel-item:hover img {
+    transform: scale(1.1);
+}
+
+/* 캐러셀 애니메이션 - GPU 가속 및 성능 최적화 */
+@keyframes carousel-scroll {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+/* 호버시 애니메이션 일시정지 제거 - 계속 동작 */
+
+/* Sign In 섹션 */
+.sign-in-section {
+    text-align: center;
+    margin-top: auto;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sign-in-button {
+    padding: 15px 40px;
+    font-size: 1.3em;
+    font-family: 'Sequel85', sans-serif;
+    color: white;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.sign-in-button:hover {
+    background: linear-gradient(45deg, #764ba2 0%, #667eea 100%);
+}
+
+/* 반응형 디자인 */
+@media screen and (max-width: 1200px) {
+    .carousel-item {
+        flex: 0 0 250px; /* 더 작은 고정 너비 */
+        height: 333px; /* 비율 유지 (250/300 * 400) */
+    }
+}
+
+@media screen and (max-width: 960px) {
+    .carousel-item {
+        flex: 0 0 200px; /* 더 작은 고정 너비 */
+        height: 267px; /* 비율 유지 (200/300 * 400) */
+    }
+}
+
+@media screen and (max-width: 620px) {
+    .carousel-item {
+        flex: 0 0 180px; /* 모바일용 고정 너비 */
+        height: 240px; /* 비율 유지 (180/300 * 400) */
+    }
+    
+    .carousel-container {
+        padding: 15px 0;
+        margin-bottom: 40px;
+    }
+    
+    .carousel-track {
+        padding: 0 15px;
+    }
+    
+    .sign-in-button {
+        padding: 12px 30px;
+        font-size: 1.1em;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .carousel-item {
+        flex: 0 0 160px; /* 작은 화면용 고정 너비 */
+        height: 213px; /* 비율 유지 (160/300 * 400) */
+        border-radius: 15px;
+    }
+    
+    .carousel-container {
+        padding: 10px 0;
+        margin-bottom: 30px;
+    }
+    
+    .carousel-track {
+        gap: 1em;
+        padding: 0 10px;
+    }
+}

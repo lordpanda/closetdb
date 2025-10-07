@@ -1,0 +1,689 @@
+/* add new */
+
+#page_add {
+    padding: 0 40px 50px 40px;
+    margin-top: 20px;
+}
+
+/* 이미지 모드 토글 스위치 */
+.image_mode_toggle {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+    padding: 15px;
+    background-color: var(--gray);
+    border-radius: 15px;
+}
+
+.toggle_switch_container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.toggle_label_text {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: 1.1em;
+    color: #333;
+}
+
+.toggle_switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+.toggle_switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle_slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 30px;
+    transition: .4s;
+}
+
+.toggle_slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .toggle_slider {
+    background-color: #667eea;
+}
+
+input:checked + .toggle_slider:before {
+    transform: translateX(30px);
+}
+
+/* 이미지 모드별 정보 */
+.stitched_info, .individual_info {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Stitched 이미지 미리보기 */
+.stitched_preview {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 15px;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: var(--gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.stitched_preview:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.stitched_preview img {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+    display: block;
+    background-color: white;
+}
+
+.section_info {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.stitched_info label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+.stitched_info select {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+}
+
+
+.main_image_badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.7em;
+    font-weight: bold;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.preview_image .main_image_badge {
+    top: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    padding: 4px 8px;
+}
+
+.content {
+    background-color: white;
+    border-radius: 30px;
+}
+
+
+/* image upload */
+.container_images {
+    width: 100%;
+    overflow: scroll;
+    white-space: nowrap;
+}
+.container_images::-webkit-scrollbar{
+    display: none; 
+}
+.add_image, .preview_image {
+    display: inline-block;
+    border-radius: 60px;
+    width: 250px;
+    height: 400px;
+    background-color: var(--gray);
+    margin-right: 20px;
+    text-align: center;
+}
+.add_image:before {
+    content: "";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+.add_image img {
+    width: 30%;
+    margin: auto;
+    vertical-align: middle;
+}
+.file_uploader {
+    display: none;
+}
+.preview_image {
+    border: 1px solid var(--gray);   
+    border-color: var(--gray);
+    overflow: clip;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preview_image.main_image {
+    /* 메인 이미지도 동일한 스타일 */
+}
+
+.preview_image:hover {
+    transform: scale(1.02);
+}
+.preview_image img {
+    max-height: 100%;
+    object-fit: cover;
+    vertical-align: top;
+}
+.preview_image:before {
+    content: "";
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+.grid_container_category, .grid_container_sub_category, .grid_container_sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    justify-content: space-evenly;
+    grid-gap: 1.5em;
+}
+.grid_category, .grid_sub_category {
+    width: 100%;
+    display: table;
+    text-align: center;
+}
+.category_image {
+    width: 120px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+}
+.category_image span {
+    font-family: 'Poppins';
+    font-size: 1.2em;
+}
+.sub_category {
+    display: none;
+    width: 100%;
+    transition: 0.2s;
+}
+#page_add .show_sub {
+    display: block;
+}
+.grid_container_size {
+    display: grid;
+    height: 80px;
+    line-height: 60px;
+    padding: 10px;
+    grid-template-columns: 120px 1fr;
+}
+.size_region {
+    width: 80px;
+    height: 60px;
+    background-color: var(--gray);
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    margin-right: 20px;
+    border-radius: 2rem;
+    border: none;
+    cursor: pointer;
+    padding: 0 14px;
+    box-sizing: content-box;
+}
+
+
+.size_region_dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 80px;
+    height: 60px;
+    margin-top: 60px;
+    z-index: 1000;
+    border-radius: 0 !important;
+}
+
+.size_region_dropdown .size_region {
+    border-radius: 0 !important;
+}
+.size_region_dropdown .size_region:first-child {
+    border-radius: 2rem 2rem 0 0 !important;
+}
+.size_region_dropdown .size_region:last-child {
+    border-radius: 0 0 2rem 2rem !important;
+}
+.grid_container_size .show {
+    display: block;
+}
+
+/* Season dropdown 스타일 - size dropdown과 동일 */
+.season_dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 80px;
+    margin-top: 0px;
+    z-index: 1000;
+    border-radius: 0 !important;
+}
+.season_dropdown .size_region {
+    border-radius: 0 !important;
+    width: 100%;
+    margin: 0;
+}
+.season_dropdown .size_region:first-child {
+    border-radius: 2rem 2rem 0 0 !important;
+}
+.season_dropdown .size_region:last-child {
+    border-radius: 0 0 2rem 2rem !important;
+}
+.season_dropdown.show {
+    display: block;
+}
+.size_key_container {
+    display: inline-block;
+    display: 100%;
+}
+.size_key {
+    width: 90px;
+    display: inline-block;
+    text-align: center;
+    margin-right: 20px;
+    margin-bottom: 6px;
+    height: 60px;
+}
+
+.size_etc_input {
+    width: 90px;
+    height: 60px;
+    text-align: center;
+    margin-right: 20px;
+    margin-bottom: 6px;
+    padding: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    border: 2px solid var(--gray);
+    background-color: transparent;
+    border-radius: 2rem;
+    outline: none;
+    display: none;
+}
+
+.brand {
+    display: block;
+    padding: 0px 10px;
+}
+
+.brand_input {
+    display: block;
+    width: 100%;
+    padding: .375rem 1.75rem;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 1;
+    background-color: var(--gray);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 2rem;
+    /* transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out; */
+    outline: none;
+    border: none;
+}
+
+.brand_autocomplete {
+    /*the container must be positioned relative:*/
+    position: relative;
+    display: inline-block;
+}
+.brand_autocomplete_items {
+    position: absolute;
+    border: none;
+
+    z-index: 99;
+    /*position the autocomplete items to be the same width as the container:*/
+    top: 100%;
+    left: 0;
+    right: 0;
+    perspective: 1px;
+    
+    border-radius: 30px;
+    overflow: hidden;
+}
+.brand_autocomplete_items div {
+    padding: 10px 1.75rem;
+    font-size: 1.2em;
+    cursor: pointer;
+    background-color: var(--gray);
+}
+.brand_autocomplete_items div:hover {
+    /*when hovering an item:*/
+    background-color:var(--black);
+    color: white;
+}
+.brand_autocomplete_active {
+    background-color:var(--black) !important;
+    color: white;
+}
+
+
+.grid_container_measurement, .grid_container_composition, .grid_container_season {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-evenly;
+    grid-gap: 1.5em;
+}
+
+/* Composition Sets 스타일 */
+.composition_sets_container {
+    margin-bottom: 20px;
+}
+
+.composition_set {
+    background-color: var(--gray);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.composition_set_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.composition_set_name {
+    flex: 1;
+    padding: 8px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.1em;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background-color: white;
+    outline: none;
+    margin-right: 10px;
+}
+
+.composition_set_name:focus {
+    border-color: #667eea;
+}
+
+.remove_composition_set_btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: background-color 0.3s;
+}
+
+.remove_composition_set_btn:hover {
+    background-color: #c82333;
+}
+
+.grid_container_composition {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-evenly;
+    grid-gap: 1.5em;
+}
+
+.add_composition_set_btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s;
+}
+
+.add_composition_set_btn:hover {
+    transform: scale(1.1);
+}
+
+/* Composition 섹션의 subheader만 특별히 처리 */
+.subheader:has(.add_composition_set_btn) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.subheader .text {
+    flex: 1;
+}
+
+
+.label_with_input {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    grid-template-rows: auto;
+    width: 200px;
+}
+.label_with_input .part {
+    font-size: 1.2em;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.measurement_input, .composition_input, .season_input {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    margin: 0 16px 0 10px;
+
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 1;
+    background-color: var(--gray);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 2rem;
+    outline: none;
+    border: none;
+    text-align: center;
+}
+
+.submit_button {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.submit_button .button {
+    width: 200px;
+    height: 58px;
+    text-align: center;
+    border: none;
+    font-size: 1.2em;
+    line-height: 58px;
+    border-radius: 30px;
+    transition: 0.5s;
+    font-family: 'Sequel85';
+    margin-top: 30px;
+    color: white;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% auto;
+    cursor: pointer;
+}
+
+.submit_button .button:hover {
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
+}
+.generate_script {
+    width: 200px;
+    height: 60px;
+    color: white;
+    font-weight: 600;
+    font-size: 1.2em;
+    border-radius: 2rem;
+    outline: none;
+    border: none;
+    background-color: var(--purple);
+}
+
+@media screen and (max-width: 620px) {
+    #page_add h1 {
+        font-size: 1.5em;
+    }
+    .add_image {
+        width: 180px;
+        height: 260px;
+        border-radius: 30px;
+    }
+    .grid_container_category, .grid_container_sections {
+        grid-template-columns: auto auto auto;
+    }
+    .grid_container_measurement {
+        grid-template-columns: auto auto;
+    }
+    
+    /* Stitched 미리보기 모바일 최적화 */
+    .stitched_preview img {
+        max-height: 200px;
+    }
+    
+    .section_info {
+        top: 5px;
+        right: 5px;
+        padding: 3px 8px;
+        font-size: 0.7em;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    #page_add {
+        padding: 0 20px 20px 20px;
+    }
+    #page_add h1 {
+        font-size: 1.5em;
+    }
+    #page_add .subheader {
+        padding: 20px 0 0 0;
+    }
+    .add_image {
+        width: 120px;
+        height: 200px;
+        border-radius: 20px;
+    }
+    .grid_container_category, .grid_container_sections {
+        grid-template-columns: auto auto auto;
+        grid-gap: 1em;
+    }
+    .category_image {
+        height: 50px;        
+    }
+    .category_image span {
+        line-height: 50px;
+        font-size: 1em;
+    }
+    .grid_container_sub_category {
+        grid-template-columns: 1fr 1fr;
+    }
+    .label_with_input {
+        width: 150px;
+        grid-template-columns: 80px 1fr;
+    }
+    .label_with_input .part {
+        font-size: 1em;
+    }
+    
+    .grid_container_size{
+        grid-template-columns: 80px 1fr;
+    }   
+    .size_region {
+        width: 60px;
+        height: 40px;
+        border-radius: 1.5rem;
+        padding: 0 10px;
+        box-sizing: content-box;
+    }
+    .size_region_dropdown {
+        margin-top: 40px;
+        width: 60px;
+        height: 40px;
+        border-radius: 0 !important;
+    }
+    
+    .size_region_dropdown .size_region {
+        border-radius: 0 !important;
+    }
+    .size_key {
+        width: 60px;
+        height: 40px;
+        margin-right: 10px;
+    }
+    .size_key_container label {
+        padding: 0;
+        line-height: 40px;
+    }
+    .grid_container_composition {
+        grid-template-columns: auto auto;
+    }
+    .grid_container_season {
+        grid-template-columns: auto auto;
+    }
+    .measurement_input, .composition_input, .season_input {
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.4em;
+        padding: 0.3em 0;
+        letter-spacing: 0;
+    }
+}
