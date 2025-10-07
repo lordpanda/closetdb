@@ -14,8 +14,28 @@ from image_utils import ImageProcessor
 load_dotenv()
 
 app = Flask(__name__)
+
+# Security Configuration
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'your-secret-key-change-this')
-logging.basicConfig(level=logging.INFO)
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('FLASK_ENV') == 'production'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
+
+# Logging Configuration
+log_level = logging.DEBUG if os.getenv('FLASK_DEBUG') == 'True' else logging.INFO
+logging.basicConfig(level=log_level)
+
+# Security Headers
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    if os.getenv('FLASK_ENV') == 'production':
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
 
 # OAuth 설정
 oauth = OAuth(app)
