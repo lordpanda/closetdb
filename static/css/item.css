@@ -56,7 +56,7 @@
 .grid_container_view_details {
     padding-bottom: 30px;
     display: grid;
-    grid-template-columns: 1fr 200px;
+    grid-template-columns: 1fr 300px;
     grid-gap: 1.5em;
 }
 .view_measurement {

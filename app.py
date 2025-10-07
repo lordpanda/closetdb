@@ -111,16 +111,24 @@ def get_item(item_id):
         # Supabase 아이템인지 확인
         if item_id.startswith('supabase_'):
             actual_id = item_id.replace('supabase_', '')
+            logging.info(f"🔍 Getting item with actual_id: {actual_id}")
             item = db.get_item_by_id(actual_id)
+            
             if item:
+                logging.info(f"✅ Found item: {item.get('item_id', 'no-id')}")
+                logging.info(f"🖼️ Item images: {item.get('images', [])} (length: {len(item.get('images', []))})")
+                logging.info(f"🖼️ Item thumbnail: {item.get('thumbnail_url', 'None')}")
                 return jsonify({'item': item}), 200
             else:
+                logging.warning(f"❌ Item {actual_id} not found in database")
                 return jsonify({'error': 'Item not found'}), 404
         else:
             # 기존 더미 데이터는 빈 응답
             return jsonify({'item': None}), 200
     except Exception as e:
         logging.error(f"Error fetching item {item_id}: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500    
 
 @app.route('/api/filter', methods=['POST'])
@@ -141,19 +149,9 @@ def api_filter_items():
 
 @app.route('/login', methods=['POST'])
 def login():
-    password = request.form.get('password')
-    
-    # 환경변수 패스워드와 비교
-    admin_password = os.getenv('ADMIN_PASSWORD')
-    
-    if password == admin_password:
-        session['authenticated'] = True
-        # 간단한 토큰 생성 (실제 운영에서는 JWT 등을 사용)
-        token = f"authenticated_{int(time.time())}"
-        logging.info("Authentication successful")
-        return jsonify({'success': True, 'token': token}), 200
-    else:
-        return jsonify({'error': 'Invalid password'}), 401
+    # Admin password login disabled - use Google OAuth instead
+    logging.info("Admin password login disabled, redirecting to Google OAuth")
+    return jsonify({'error': 'Admin password login disabled. Please use Google OAuth.'}), 401
 
 @app.route('/auth/google')
 def google_login():
@@ -229,9 +227,37 @@ def google_callback():
 
 def require_auth(f):
     def decorated_function(*args, **kwargs):
-        if not session.get('authenticated'):
-            return redirect('/login.html')
-        return f(*args, **kwargs)
+        # Flask session 확인
+        session_auth = session.get('authenticated')
+        logging.info(f"🔍 Flask session authenticated: {session_auth}")
+        logging.info(f"🔍 Session data: {dict(session) if session else 'empty'}")
+        
+        if session_auth:
+            logging.info("✅ Flask session authentication valid")
+            return f(*args, **kwargs)
+        
+        # Authorization 헤더 확인
+        auth_header = request.headers.get('Authorization')
+        logging.info(f"🔍 Auth header: {auth_header}")
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header[7:]  # "Bearer " 제거
+            logging.info(f"🔐 Auth token received: {token[:20]}...")
+            
+            # 토큰이 유효한지 간단히 확인 (google_auth로 시작하는지)
+            if token and (token.startswith('google_auth_') or token.startswith('logged_in_')):
+                logging.info("✅ Valid auth token found")
+                return f(*args, **kwargs)
+            else:
+                logging.warning(f"❌ Invalid token format: {token[:20]}...")
+        
+        logging.warning("❌ No valid authentication found")
+        
+        # Ajax 요청인 경우 JSON 오류 응답
+        if request.headers.get('Content-Type', '').startswith('multipart/form-data') or request.method == 'POST':
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        # 일반 요청인 경우 로그인 페이지로 리다이렉트
+        return redirect('/login.html')
     decorated_function.__name__ = f.__name__
     return decorated_function
 
@@ -507,11 +533,18 @@ def update_item():
         thumbnail_url = existing_item.get('thumbnail_url')
         
         image_mode = request.form.get('image_mode')
+        logging.info(f"🖼️ Image mode received: '{image_mode}'")
+        
         if image_mode:  # 새 이미지가 업로드된 경우
+            logging.info(f"🖼️ Processing new images in {image_mode} mode")
             if image_mode == 'stitched':
                 stitched_file = request.files.get('stitched_image')
+                logging.info(f"🖼️ Stitched file received: {stitched_file is not None}")
+                logging.info(f"🖼️ Stitched filename: {stitched_file.filename if stitched_file else 'None'}")
+                
                 if stitched_file and stitched_file.filename:
                     section_count = int(request.form.get('section_count', 2))
+                    logging.info(f"🖼️ Section count: {section_count}")
                     
                     # 기존 이미지 삭제 (필요시)
                     
@@ -744,11 +777,36 @@ def update_item():
         logging.info(f"📝 Final updated_item data: {updated_item}")
         response = db.update_item(item_id, updated_item)
         logging.info(f"✅ Update response from database: {response}")
-        return jsonify({'message': 'Item updated successfully', 'response': response}), 200
+        logging.info(f"✅ Database response type: {type(response)}")
+        
+        # 업데이트 후 아이템 재조회로 확인
+        updated_item_check = db.get_item_by_id(item_id)
+        if updated_item_check:
+            logging.info(f"🔍 Updated item verification - Images: {updated_item_check.get('images', [])}")
+            logging.info(f"🔍 Updated item verification - Thumbnail: {updated_item_check.get('thumbnail_url', 'None')}")
+        else:
+            logging.warning("❌ Could not retrieve updated item for verification")
+        
+        # 응답 객체가 JSON 직렬화 가능한지 확인
+        try:
+            json_response = {'message': 'Item updated successfully', 'response': response}
+            json.dumps(json_response)  # 직렬화 테스트
+            logging.info(f"✅ Response is JSON serializable")
+        except Exception as json_error:
+            logging.error(f"❌ Response serialization error: {json_error}")
+            # 직렬화 불가능한 객체를 문자열로 변환
+            json_response = {'message': 'Item updated successfully', 'response': str(response)}
+        
+        return jsonify(json_response), 200
         
     except Exception as e:
         app.logger.error(f"Error updating item: {e}")
-        return jsonify({'error': str(e)}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'error': f'Update failed: {str(e)}',
+            'details': traceback.format_exc()
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

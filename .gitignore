@@ -60,6 +60,9 @@ test_*.py
 *_test.py
 simple_test.py
 
+# DynamoDB utilities with hardcoded credentials
+dynamodb_utils.py
+
 # SQL files (potentially containing sensitive data)
 *.sql
 

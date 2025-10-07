@@ -1117,13 +1117,53 @@ function submitEditForm(event) {
     }
     
     // 서버로 업데이트 요청
+    const token = sessionStorage.getItem('userToken');
+    console.log('🔐 Using auth token:', token ? token.substring(0, 20) + '...' : 'none');
+    
+    const headers = {};
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     fetch('/update_item', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: headers
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('🌐 Server response status:', response.status);
+        console.log('🌐 Server response headers:', response.headers);
+        
+        // 먼저 텍스트로 응답을 받아서 로깅
+        return response.text().then(text => {
+            console.log('📄 Raw server response:', text);
+            
+            // 응답이 비어있는지 확인
+            if (!text.trim()) {
+                throw new Error('Server returned empty response');
+            }
+            
+            // JSON 파싱 시도
+            try {
+                return JSON.parse(text);
+            } catch (parseError) {
+                console.error('❌ JSON parse error:', parseError);
+                console.error('❌ Raw text that failed to parse:', text);
+                throw new Error(`Invalid JSON response: ${parseError.message}`);
+            }
+        });
+    })
     .then(data => {
-        console.log('Update success:', data);
+        console.log('📨 Server response data:', data);
+        
+        if (data.error) {
+            console.error('❌ Server error:', data.error);
+            console.error('❌ Server error details:', data.details);
+            alert('서버 오류: ' + data.error + '\n\n자세한 정보는 콘솔을 확인하세요.');
+            return;
+        }
+        
+        console.log('✅ Update success:', data);
         alert('아이템이 성공적으로 업데이트되었습니다!');
         // 아이템 상세 페이지로 돌아가기 (supabase_ 접두사 추가)
         const redirectId = itemId.toString().startsWith('supabase_') ? itemId : `supabase_${itemId}`;
@@ -1131,8 +1171,8 @@ function submitEditForm(event) {
         window.location.href = `/item.html?id=${redirectId}`;
     })
     .catch(error => {
-        console.error('Update error:', error);
-        alert('업데이트 중 오류가 발생했습니다: ' + error.message);
+        console.error('❌ Network/Parse error:', error);
+        alert('네트워크 오류가 발생했습니다: ' + error.message);
     });
 }
 
@@ -2499,9 +2539,15 @@ function submitForm(event) {
     
     
     // Flask 서버로 전송
+    const token = sessionStorage.getItem('userToken');
+    console.log('🔐 Using auth token for add_item:', token ? token.substring(0, 20) + '...' : 'none');
+    
     fetch('/add_item', {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
     })
     .then(response => response.json())
     .then(data => {
@@ -2665,7 +2711,12 @@ function loadItemDetails() {
                             // updateItemDisplay은 이미 populateItemView에서 호출되었음
                         };
                         
-                        testImg.src = fixedImages[0].fixed;
+                        if (fixedImages && fixedImages.length > 0 && fixedImages[0].fixed) {
+                            testImg.src = fixedImages[0].fixed;
+                        } else {
+                            console.log('❌ No fixed images available for testing');
+                            urlTestComplete = true;
+                        }
                         
                         // 테스트 타임아웃 (1초 후 원본 URL 사용)
                         setTimeout(() => {
