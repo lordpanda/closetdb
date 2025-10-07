@@ -1,14 +1,19 @@
 import os
-from supabase import create_client, Client
+import requests
+import json
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class SupabaseDB:
     def __init__(self):
-        url = os.getenv('SUPABASE_URL')
-        key = os.getenv('SUPABASE_KEY')
-        self.supabase: Client = create_client(url, key)
+        self.url = os.getenv('SUPABASE_URL')
+        self.key = os.getenv('SUPABASE_KEY')
+        self.headers = {
+            'apikey': self.key,
+            'Authorization': f'Bearer {self.key}',
+            'Content-Type': 'application/json'
+        }
     
     def add_item(self, item):
         try:
@@ -35,8 +40,14 @@ class SupabaseDB:
             # None 값 제거 (Supabase에서 NULL로 처리됨)
             data = {k: v for k, v in data.items() if v is not None and v != ''}
             
-            result = self.supabase.table('closet_items').insert(data).execute()
-            return "Item added successfully!"
+            # REST API 호출
+            url = f"{self.url}/rest/v1/closet_items"
+            response = requests.post(url, headers=self.headers, json=data)
+            
+            if response.status_code == 201:
+                return "Item added successfully!"
+            else:
+                return f"Error adding item: {response.status_code} - {response.text}"
                 
         except Exception as e:
             print(f"Error adding item: {e}")
@@ -44,8 +55,14 @@ class SupabaseDB:
     
     def get_all_items(self):
         try:
-            result = self.supabase.table('closet_items').select("*").order('created_at', desc=True).execute()
-            return result.data
+            url = f"{self.url}/rest/v1/closet_items?select=*&order=created_at.desc"
+            response = requests.get(url, headers=self.headers)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"Error fetching items: {response.status_code} - {response.text}")
+                return []
                 
         except Exception as e:
             print(f"Error fetching items: {e}")
@@ -53,8 +70,15 @@ class SupabaseDB:
     
     def get_item_by_id(self, item_id):
         try:
-            result = self.supabase.table('closet_items').select("*").eq('item_id', item_id).execute()
-            return result.data[0] if result.data else None
+            url = f"{self.url}/rest/v1/closet_items?select=*&item_id=eq.{item_id}"
+            response = requests.get(url, headers=self.headers)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return data[0] if data else None
+            else:
+                print(f"Error fetching item by id: {response.status_code} - {response.text}")
+                return None
                 
         except Exception as e:
             print(f"Error fetching item: {e}")
@@ -62,53 +86,50 @@ class SupabaseDB:
     
     def filter_items(self, filters):
         try:
-            query = self.supabase.table('closet_items').select("*")
+            # 기본 URL - 최근 생성 순으로 정렬
+            url = f"{self.url}/rest/v1/closet_items?select=*&order=created_at.desc"
             
-            # 카테고리 필터
+            # 필터 조건들을 URL 파라미터로 추가
+            filter_params = []
+            
             if filters.get('category'):
-                query = query.eq('category', filters['category'])
+                filter_params.append(f"category=eq.{filters['category']}")
             
-            # 서브카테고리 필터
             if filters.get('subcategory'):
-                query = query.eq('subcategory', filters['subcategory'])
+                filter_params.append(f"subcategory=eq.{filters['subcategory']}")
             
-            # 서브카테고리2 필터
             if filters.get('subcategory2'):
-                query = query.eq('subcategory2', filters['subcategory2'])
+                filter_params.append(f"subcategory2=eq.{filters['subcategory2']}")
             
-            # 브랜드 필터 (부분 일치)
             if filters.get('brand'):
-                query = query.ilike('brand', f"%{filters['brand']}%")
+                filter_params.append(f"brand=ilike.*{filters['brand']}*")
             
-            # 사이즈 필터
             if filters.get('size'):
-                query = query.eq('size', filters['size'])
+                filter_params.append(f"size=eq.{filters['size']}")
             
-            # 사이즈 리전 필터
             if filters.get('size_region'):
-                query = query.eq('size_region', filters['size_region'])
+                filter_params.append(f"size_region=eq.{filters['size_region']}")
             
-            # 연도 필터
             if filters.get('year'):
-                query = query.eq('year', filters['year'])
+                filter_params.append(f"year=eq.{filters['year']}")
             
-            # 시즌 필터
             if filters.get('season'):
-                query = query.eq('season', filters['season'])
+                filter_params.append(f"season=eq.{filters['season']}")
             
-            # 구매 연도 필터
             if filters.get('purchase_year'):
-                query = query.eq('purchase_year', filters['purchase_year'])
+                filter_params.append(f"purchase_year=eq.{filters['purchase_year']}")
             
-            # 조성 필터 (JSON 내부 검색)
-            if filters.get('composition'):
-                for comp_name, min_percentage in filters['composition'].items():
-                    if min_percentage:
-                        # JSON 컬럼에서 특정 조성이 최소 퍼센트 이상인 아이템 검색
-                        query = query.filter('compositions', 'cs', f'{{"{comp_name}": {min_percentage}}}')
+            # 필터 파라미터를 URL에 추가
+            if filter_params:
+                url += "&" + "&".join(filter_params)
             
-            result = query.order('created_at', desc=True).execute()
-            return result.data
+            response = requests.get(url, headers=self.headers)
+            
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"Error filtering items: {response.status_code} - {response.text}")
+                return []
                 
         except Exception as e:
             print(f"Error filtering items: {e}")
@@ -152,14 +173,32 @@ class SupabaseDB:
                         
             print(f"🧹 Cleaned data for update: {cleaned_data}")
             
-            result = self.supabase.table('closet_items').update(cleaned_data).eq('item_id', item_id).execute()
+            # REST API 호출
+            url = f"{self.url}/rest/v1/closet_items?item_id=eq.{item_id}"
+            response = requests.patch(url, headers=self.headers, json=cleaned_data)
             
-            if result.data:
-                print(f"✅ Item {item_id} updated successfully")
-                print(f"📦 Updated result: {result.data[0]}")
-                return result.data[0]
+            if response.status_code in [200, 204]:  # Both 200 and 204 are success
+                print(f"✅ Item {item_id} updated successfully (status: {response.status_code})")
+                
+                # 204 No Content인 경우 업데이트된 데이터 다시 조회
+                if response.status_code == 204:
+                    updated_item = self.get_item_by_id(item_id)
+                    if updated_item:
+                        print(f"📦 Updated result: {updated_item.get('item_id', 'no-id')}")
+                        return updated_item
+                    else:
+                        print(f"✅ Update successful but could not retrieve updated item")
+                        return {'success': True}
+                else:
+                    # 200 OK인 경우
+                    data = response.json()
+                    if data:
+                        print(f"📦 Updated result: {data[0]}")
+                        return data[0]
+                    else:
+                        return {'success': True}
             else:
-                print(f"❌ No item found with ID {item_id}")
+                print(f"❌ Update failed: {response.status_code} - {response.text}")
                 return None
                 
         except Exception as e:

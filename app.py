@@ -7,11 +7,22 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, send_from_directory, url_for, jsonify, session, redirect
 from authlib.integrations.flask_client import OAuth
 
-from supabase_utils import db
+load_dotenv()
+
+try:
+    from supabase_utils import db
+    print(f"✅ Successfully imported db: {type(db)}")
+    # Quick test
+    test_items = db.get_all_items()
+    print(f"✅ DB connection test: {len(test_items)} items")
+except Exception as e:
+    print(f"❌ Error importing supabase_utils: {e}")
+    import traceback
+    traceback.print_exc()
+    db = None
+
 from r2_utils import r2
 from image_utils import ImageProcessor
-
-load_dotenv()
 
 app = Flask(__name__)
 
@@ -99,10 +110,28 @@ def view_all():
 @app.route('/api/items')
 def get_items():
     try:
+        logging.info("🔍 API request for all items")
+        print(f"🔍 DB object type: {type(db)}")
+        
+        if db is None:
+            logging.error("❌ DB object is None")
+            return jsonify({'items': [], 'error': 'Database not initialized'}), 500
+            
         items = db.get_all_items()
+        logging.info(f"📊 Retrieved {len(items)} items from database")
+        print(f"📊 Retrieved {len(items)} items from database")
+        
+        # 첫 번째 아이템 로깅 (있다면)
+        if items:
+            logging.info(f"📝 First item: {items[0].get('item_id', 'no-id')} - {items[0].get('brand', 'no-brand')}")
+            print(f"📝 First item: {items[0].get('item_id', 'no-id')} - {items[0].get('brand', 'no-brand')}")
+        
         return jsonify({'items': items}), 200
     except Exception as e:
         logging.error(f"Error fetching items: {e}")
+        print(f"❌ Error fetching items: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/items/<item_id>')

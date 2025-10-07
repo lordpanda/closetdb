@@ -293,9 +293,15 @@ function displayRecentlyAdded() {
     var grid = document.querySelector(".grid_container"); 
     
     // Supabase에서 새로 추가된 아이템들 먼저 가져오기 (위쪽에 배치)
+    console.log('🔄 Fetching recently added items from /api/items');
     fetch('/api/items')
-        .then(response => response.json())
+        .then(response => {
+            console.log('📡 Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('📊 Received data:', data);
+            console.log('📊 Items count:', data.items ? data.items.length : 'no items property');
             if (data.items && data.items.length > 0) {
                 // 최대 8개까지만 표시
                 const maxItems = Math.min(data.items.length, 8);
@@ -383,9 +389,15 @@ function displayAllItems() {
     var grid = document.querySelector(".grid_container"); 
     
     // Supabase에서 모든 아이템 가져오기
+    console.log('🔄 Fetching all items from /api/items');
     fetch('/api/items')
-        .then(response => response.json())
+        .then(response => {
+            console.log('📡 Response status:', response.status);
+            return response.json();
+        })
         .then(data => {
+            console.log('📊 Received data:', data);
+            console.log('📊 Items count:', data.items ? data.items.length : 'no items property');
             if (data.items && data.items.length > 0) {
                 // 모든 아이템 표시 (제한 없음)
                 data.items.forEach((item, index) => {
@@ -1715,7 +1727,7 @@ function displaySizesByRegion(region) {
     } else if (region == "IT") {
         accordingSizes.push(34, 36, 38);
     } else if (region == "WW") {
-        accordingSizes.push("one size", "XXS", "XXS", "XS", "S", "M", "L", "XL");
+        accordingSizes.push("one size", "XXXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
         accordingSizes.push(230, 235, 240);
     } else if (region == "Kids") {
@@ -2239,6 +2251,15 @@ function populateItemView(item) {
     
     if (brandElement) {
         brandElement.textContent = item.brand || 'Brand Name';
+        
+        // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
+        if (item.brand) {
+            const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
+            if (hasKorean) {
+                brandElement.style.fontFamily = 'GmarketSansBold, GmarketSans, -apple-system, BlinkMacSystemFont, sans-serif';
+                brandElement.style.fontWeight = '700'; // 두꺼운 폰트
+            }
+        }
     }
     
     if (categoryElement) {
@@ -2257,12 +2278,25 @@ function populateItemView(item) {
             console.log('🧩 Displaying stitched images as carousel');
             displayStitchedImagesAsCarousel(item.images, imageContainer);
         } else {
-            console.log('🖼️ Displaying individual images');
+            console.log('🖼️ Displaying individual images (non-stitched)');
             // 첫 번째 이미지만 표시 (또는 갤러리 형태로)
             const img = document.createElement('img');
             img.src = item.images[0];
             img.style.maxWidth = '100%';
             img.style.borderRadius = '30px';
+            img.onload = () => {
+                // 이미지가 윈도우보다 작으면 중앙 정렬
+                console.log('🖼️ Image width:', img.naturalWidth);
+                console.log('🖼️ Window width:', window.innerWidth);
+                console.log('🖼️ Should center?', img.naturalWidth < window.innerWidth);
+                
+                if (img.naturalWidth < window.innerWidth) {
+                    console.log('✅ Adding center-align class');
+                    img.classList.add('center-align');
+                } else {
+                    console.log('❌ Image is wider than window, no centering');
+                }
+            };
             img.onerror = () => {
                 imageContainer.innerHTML = '<div class="no-image">이미지를 로드할 수 없습니다</div>';
             };
@@ -2273,7 +2307,12 @@ function populateItemView(item) {
     // Size 정보 표시
     const sizeElement = document.querySelector('.view_size');
     if (sizeElement && item.size) {
-        const sizeText = item.size_region ? `${item.size_region} ${item.size}` : item.size;
+        let sizeText;
+        if (item.size_region && item.size_region.toUpperCase() === 'WW') {
+            sizeText = `Size ${item.size}`;
+        } else {
+            sizeText = item.size_region ? `${item.size_region} ${item.size}` : item.size;
+        }
         sizeElement.textContent = sizeText;
         sizeElement.style.display = 'block';
     }
@@ -2295,8 +2334,8 @@ function populateItemView(item) {
                     createTopMeasurement(measurementContainer, item.measurements);
                 }
             } else if (item.category === 'dress') {
-                // Dress 카테고리 - 서브카테고리 전달
-                createDressMeasurement(measurementContainer, item.measurements, item.subcategory);
+                // Dress 카테고리 - 서브카테고리와 서브카테고리2 전달
+                createDressMeasurement(measurementContainer, item.measurements, item.subcategory, item.subcategory2);
             }
             // 다른 카테고리들도 필요시 추가
         }
@@ -2927,7 +2966,7 @@ function updateMeasurementDisplay(item) {
                 createTopMeasurement(measurementContainer, measurements);
             }
         } else if (category === 'dress') {
-            createDressMeasurement(measurementContainer, measurements, item.subcategory);
+            createDressMeasurement(measurementContainer, measurements, item.subcategory, item.subcategory2);
         } else {
             // 기본값으로 top 사용
             createTopMeasurement(measurementContainer, measurements);
@@ -3013,12 +3052,19 @@ function createTopLongSleeveMeasurement(container, measurements) {
 }
 
 // Dress 카테고리 measurement 생성 - 서브카테고리별 분기
-function createDressMeasurement(container, measurements, subcategory) {
+function createDressMeasurement(container, measurements, subcategory, subcategory2) {
     const subcategoryLower = (subcategory || '').toLowerCase();
+    const subcategory2Lower = (subcategory2 || '').toLowerCase();
+    console.log('🔍 Dress measurement - subcategory:', subcategory);
+    console.log('🔍 Dress measurement - subcategory2:', subcategory2);
+    console.log('🔍 Includes short sleeve:', subcategoryLower.includes('short sleeve'));
+    console.log('🔍 Includes mini:', subcategory2Lower.includes('mini'));
     
-    if (subcategoryLower.includes('short sleeve') && subcategoryLower.includes('mini')) {
+    if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('mini')) {
+        console.log('✅ Using createDressShortSleeveMiniMeasurement');
         createDressShortSleeveMiniMeasurement(container, measurements);
     } else {
+        console.log('⚠️ Using fallback createTopMeasurement for dress');
         // 기본 dress 처리 (현재는 top과 동일)
         createTopMeasurement(container, measurements);
     }
@@ -3180,6 +3226,39 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         // 빈 공간에서는 기본 위아래 스크롤 허용 (preventDefault 하지 않음)
     });
     
+    let loadedCount = 0;
+    const totalImages = imageUrls.length;
+    
+    // 중앙 정렬 확인 함수
+    function checkCenterAlignment() {
+        if (loadedCount === totalImages) {
+            // 모든 이미지가 로드된 후에 계산
+            let totalWidth = 0;
+            const images = carouselContainer.querySelectorAll('img');
+            
+            images.forEach(img => {
+                // 실제 렌더링된 너비 사용
+                totalWidth += img.offsetWidth;
+            });
+            
+            // gap 추가 (이미지 개수 - 1) * 20px
+            const gapWidth = (totalImages - 1) * 20;
+            const totalCarouselWidth = totalWidth + gapWidth;
+            const containerWidth = carouselContainer.clientWidth;
+            
+            console.log(`📏 총 캐러셀 너비: ${totalCarouselWidth}px`);
+            console.log(`📏 컨테이너 너비: ${containerWidth}px`);
+            
+            if (totalCarouselWidth < containerWidth) {
+                console.log('🎯 캐러셀이 컨테이너보다 작음 - 중앙 정렬 적용');
+                carouselContainer.style.justifyContent = 'center';
+            } else {
+                console.log('📍 캐러셀이 컨테이너보다 큼 - 좌측 정렬 유지');
+                carouselContainer.style.justifyContent = 'flex-start';
+            }
+        }
+    }
+    
     // 이미지들 추가
     imageUrls.forEach((url, index) => {
         const img = document.createElement('img');
@@ -3222,6 +3301,9 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             console.log(`✅ Carousel image ${index + 1} loaded successfully`);
             console.log(`📐 Image dimensions: ${this.naturalWidth}x${this.naturalHeight}`);
             console.log(`🎨 Image styles: height=${this.style.height}, width=${this.style.width}`);
+            
+            loadedCount++;
+            checkCenterAlignment();
         };
         
         img.onerror = function() {
@@ -3231,6 +3313,9 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             img.src = '/static/src/img/plus.png';
             img.style.opacity = '0.3';
             img.title = 'Image not found in storage';
+            
+            loadedCount++;
+            checkCenterAlignment();
         };
         
         carouselContainer.appendChild(img);
