@@ -85,6 +85,7 @@
     justify-content: center;
     align-items: center;
     white-space: nowrap;
+    transform: translate(-50%, -50%); /* Center align on position coordinates */
 }
 .view_measurement .chest {
     top: 36%;
@@ -181,7 +182,7 @@
 
 /* Short Sleeve Long Dress 전용 위치 설정 */
 .view_measurement .chest.short-sleeve-long-dress {
-    top: 25%;
+    top: 20%;
     left: 46%;
 }
 
