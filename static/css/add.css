@@ -344,15 +344,29 @@ input:checked + .toggle_slider:before {
     display: none;
     position: absolute;
     background-color: white;
-    width: 80px;
+    width: auto;
+    min-width: 100px;
     margin-top: 0px;
     z-index: 1000;
     border-radius: 0 !important;
+    white-space: nowrap;
 }
 .season_dropdown .size_region {
     border-radius: 0 !important;
     width: 100%;
     margin: 0;
+    white-space: nowrap;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Season 선택 버튼도 adaptive width */
+.season_selected {
+    width: auto !important;
+    min-width: 100px !important;
+    padding: 0 20px !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
 }
 .season_dropdown .size_region:first-child {
     border-radius: 2rem 2rem 0 0 !important;
@@ -521,15 +535,31 @@ input:checked + .toggle_slider:before {
 }
 
 .add_composition_set_btn {
-    background: none;
+    background: none !important;
+    background-color: transparent !important;
     border: none;
     cursor: pointer;
     padding: 5px;
     transition: transform 0.2s;
+    outline: none;
+}
+
+.add_composition_set_btn:focus {
+    background: none !important;
+    background-color: transparent !important;
+    outline: none;
+}
+
+.add_composition_set_btn:active {
+    background: none !important;
+    background-color: transparent !important;
 }
 
 .add_composition_set_btn:hover {
     transform: scale(1.1);
+    background: none !important;
+    background-color: transparent !important;
+    color: inherit !important;
 }
 
 /* Composition 섹션의 subheader만 특별히 처리 */
