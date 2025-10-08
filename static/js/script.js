@@ -3595,7 +3595,7 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
 function createDressShortSleeveLongMeasurement(container, measurements) {
     // 베이스 이미지
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/dress_short sleeve, long.png';
+    baseImg.src = '/static/src/img/dress_short sleeve, long.svg';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
