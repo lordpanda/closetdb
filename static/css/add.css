@@ -350,6 +350,7 @@ input:checked + .toggle_slider:before {
     z-index: 1000;
     border-radius: 0 !important;
     white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .season_dropdown .size_region {
     border-radius: 0 !important;
@@ -358,6 +359,11 @@ input:checked + .toggle_slider:before {
     white-space: nowrap;
     padding: 0 20px;
     box-sizing: border-box;
+    text-align: center;
+    display: block;
+    font-size: 1.2em;
+    height: 60px;
+    line-height: 60px;
 }
 
 /* Season 선택 버튼도 adaptive width */
@@ -371,14 +377,16 @@ input:checked + .toggle_slider:before {
 
 /* Tags 섹션 스타일 */
 .grid_container_tags {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 1.5em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5em;
     margin-bottom: 20px;
+    justify-content: flex-start;
 }
 
 .tag_item {
-    display: block;
+    display: inline-block;
+    flex: 0 0 auto;
 }
 
 .tag_item input[type="checkbox"] {
@@ -398,17 +406,19 @@ input:checked + .toggle_slider:before {
 .tag_item label {
     display: inline-block;
     text-align: center;
-    width: 100%;
+    width: auto;
+    min-width: 120px;
     font-family: 'Poppins';
     font-size: 1.2em;
     line-height: 58px;
     border: solid 1px var(--gray);
     border-radius: 60px;
     margin: 0;
-    padding: 0;
+    padding: 0 20px;
     transition: all .2s ease-out;
     cursor: pointer;
     box-sizing: border-box;
+    white-space: nowrap;
 }
 
 .tag_item label:hover {
@@ -804,8 +814,14 @@ input:checked + .toggle_slider:before {
     }
     
     .grid_container_tags {
-        grid-template-columns: 1fr;
-        grid-gap: 1em;
+        gap: 1em;
+        justify-content: center;
+    }
+    
+    .tag_item label {
+        min-width: 100px;
+        font-size: 1.1em;
+        padding: 0 15px;
     }
     .measurement_input, .composition_input, .season_input {
         font-family: 'Poppins', sans-serif;
