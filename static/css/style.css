@@ -533,7 +533,9 @@ h1 {
         grid-template-rows: 1fr 1fr 1fr 1fr;
     }
     .grid_item {
-        display: flex;
+        border-radius: 20px;
+        aspect-ratio: 3/4;
+        width: 100%;
     }
 
     .header {
@@ -713,14 +715,9 @@ h1 {
     .grid_container {
         grid-gap: 1em;
     }
-    .grid_item {
-        border-radius: 20px;
-    }
-    .grid_item a {
-        justify-self: flex-start;
-    }
     .grid_item img {
-        justify-self: flex-start;
-        flex: 0 0 40%;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 }

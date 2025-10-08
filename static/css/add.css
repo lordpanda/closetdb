@@ -223,12 +223,51 @@ input:checked + .toggle_slider:before {
     height: 100%;
     vertical-align: middle;
 }
-.grid_container_category, .grid_container_sub_category, .grid_container_sections {
+.grid_container_category, .grid_container_sub_category {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: auto auto;
     justify-content: space-evenly;
     grid-gap: 1.5em;
+}
+
+.grid_container_sections {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    margin-top: 10px !important;
+}
+
+.grid_container_sections .section_item {
+    display: inline-block !important;
+}
+
+.grid_container_sections input[type="radio"] {
+    display: none !important;
+}
+
+.grid_container_sections .category_item {
+    width: 60px !important;
+    height: 60px !important;
+    line-height: 60px !important;
+    text-align: center !important;
+    font-family: 'Poppins' !important;
+    font-size: 1.2em !important;
+    background-color: transparent !important;
+    border: 1px solid var(--gray) !important;
+    border-radius: 2rem !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    color: var(--black) !important;
+}
+
+.grid_container_sections input[type="radio"]:checked + .category_item {
+    background-color: var(--black) !important;
+    color: white !important;
 }
 .grid_category, .grid_sub_category {
     width: 100%;
@@ -588,8 +627,11 @@ input:checked + .toggle_slider:before {
         height: 260px;
         border-radius: 30px;
     }
-    .grid_container_category, .grid_container_sections {
+    .grid_container_category {
         grid-template-columns: auto auto auto;
+    }
+    .grid_container_sections {
+        gap: 8px;
     }
     .grid_container_measurement {
         grid-template-columns: auto auto;
@@ -623,9 +665,12 @@ input:checked + .toggle_slider:before {
         height: 200px;
         border-radius: 20px;
     }
-    .grid_container_category, .grid_container_sections {
+    .grid_container_category {
         grid-template-columns: auto auto auto;
         grid-gap: 1em;
+    }
+    .grid_container_sections {
+        gap: 6px;
     }
     .category_image {
         height: 50px;        

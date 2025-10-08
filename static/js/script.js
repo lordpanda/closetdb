@@ -580,6 +580,13 @@ function readStitchedImage() {
         console.log('📌 Appended preview to container instead');
     }
     
+    // section 선택 UI 표시
+    const stitchedInfo = container.querySelector('.stitched_info');
+    if (stitchedInfo) {
+        stitchedInfo.style.display = 'block';
+        console.log('📋 Section selection UI shown');
+    }
+    
     // 클릭시 제거하고 + 버튼 다시 표시
     preview.addEventListener('click', () => {
         console.log('🖱️ Preview clicked - removing');
@@ -587,6 +594,12 @@ function readStitchedImage() {
         if (addButton) {
             addButton.style.display = 'block';
             console.log('👁️ Add button shown again');
+        }
+        // section 선택 UI 숨기기
+        const stitchedInfo = container.querySelector('.stitched_info');
+        if (stitchedInfo) {
+            stitchedInfo.style.display = 'none';
+            console.log('🙈 Section selection UI hidden');
         }
         const fileInput = document.querySelector('.file_uploader_stitched');
         if (fileInput) {
@@ -604,9 +617,56 @@ let mainImageIndex = 0;
 function initLandingCarousel() {
     console.log('🎠 Initializing landing page carousel...');
     
+    // fallback 데이터 (API 실패시에만 사용)
+    const fallbackData = {
+        items: [
+            {
+                item_id: 1,
+                brand: 'Item 1',
+                images: [],
+                thumbnail_url: null
+            },
+            {
+                item_id: 2,
+                brand: 'Item 2', 
+                images: [],
+                thumbnail_url: null
+            },
+            {
+                item_id: 3,
+                brand: 'Item 3',
+                images: [],
+                thumbnail_url: null
+            },
+            {
+                item_id: 4,
+                brand: 'Item 4',
+                images: [],
+                thumbnail_url: null
+            }
+        ]
+    };
+    
+    // 실제 API 호출 시도
     fetch('/api/items')
-        .then(response => response.json())
+        .then(response => {
+            console.log('API response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`API returned ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('✅ API data loaded:', data);
+            processCarouselData(data);
+        })
+        .catch(error => {
+            console.error('❌ API failed, using fallback data:', error);
+            processCarouselData(fallbackData);
+        });
+}
+
+function processCarouselData(data) {
             if (data.items && data.items.length > 0) {
                 // 랜덤하게 아이템들을 섞기
                 const shuffledItems = [...data.items].sort(() => 0.5 - Math.random());
@@ -622,6 +682,8 @@ function initLandingCarousel() {
                     return;
                 }
                 
+                console.log('📊 Found', data.items.length, 'items for carousel');
+                
                 // 기존 내용 제거
                 carouselTrack.innerHTML = '';
                 
@@ -635,25 +697,71 @@ function initLandingCarousel() {
                         img.loading = 'eager'; // 캐러셀은 즉시 로드
                         img.decoding = 'async'; // 비동기 디코딩
                         
-                        // 썸네일 우선 사용 (성능 최적화)
+                        // 이미지 URL 결정
+                        let imageUrl = null;
                         if (item.thumbnail_url) {
-                            img.src = item.thumbnail_url;
+                            imageUrl = item.thumbnail_url;
+                            console.log(`Using thumbnail for item ${item.item_id}:`, imageUrl);
                         } else if (item.images && item.images.length > 0) {
-                            img.src = item.images[0];
+                            imageUrl = item.images[0];
+                            console.log(`Using first image for item ${item.item_id}:`, imageUrl);
+                        }
+                        
+                        if (imageUrl && imageUrl !== '/static/src/img/plus.png') {
+                            // R2 이미지는 프록시를 통해 로드
+                            if (imageUrl.includes('pub-d30acb5ff7c3432aad2e05bfbfd34c6d.r2.dev')) {
+                                const filename = imageUrl.split('/').pop();
+                                img.src = `/api/image-proxy/${filename}`;
+                                console.log('✅ Setting proxied image src to:', img.src);
+                            } else {
+                                img.src = imageUrl;
+                                console.log('✅ Setting direct image src to:', imageUrl);
+                            }
                         } else {
-                            img.src = "/static/src/img/plus.png";
-                            img.style.opacity = "0.3";
+                            console.log(`No real image found for item ${item.item_id}, using color background`);
+                            // 이미지가 없거나 plus.png이면 색상 배경 사용
+                            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#8b4513'];
+                            const colorIndex = index % colors.length; // 인덱스 기반으로 일관된 색상
+                            carouselItem.style.backgroundColor = colors[colorIndex];
+                            img.style.display = 'none';
                         }
                         
                         // 이미지 로드 완료 시 부드러운 표시
                         img.onload = function() {
                             this.style.opacity = "1";
                             this.style.transition = "opacity 0.3s ease";
+                            console.log('✅ Landing carousel image loaded:', this.src);
                         };
                         
                         img.onerror = function() {
-                            this.src = "/static/src/img/plus.png";
-                            this.style.opacity = "0.3";
+                            console.error('❌ Landing carousel image failed to load:', this.src);
+                            console.error('Error event details:', event);
+                            
+                            // CORS 문제일 수 있으니 crossOrigin 설정 시도
+                            if (this.src.includes('pub-d30acb5ff7c3432aad2e05bfbfd34c6d.r2.dev') && !this.crossOrigin) {
+                                console.log('Trying with crossOrigin="anonymous"');
+                                this.crossOrigin = 'anonymous';
+                                this.src = this.src; // 다시 로드 시도
+                                return;
+                            }
+                            
+                            // 다른 이미지가 있으면 시도
+                            if (item.images && item.images.length > 1) {
+                                for (let i = 1; i < item.images.length; i++) {
+                                    if (this.src !== item.images[i]) {
+                                        console.log(`Trying image ${i + 1}:`, item.images[i]);
+                                        this.src = item.images[i];
+                                        return;
+                                    }
+                                }
+                            }
+                            
+                            // 모든 이미지 실패시 색상 배경
+                            console.log('All images failed, showing colored placeholder');
+                            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#8b4513'];
+                            const colorIndex = index % colors.length;
+                            this.parentElement.style.backgroundColor = colors[colorIndex];
+                            this.style.display = 'none';
                         };
                         
                         carouselItem.appendChild(img);
@@ -665,16 +773,15 @@ function initLandingCarousel() {
                 }
                 
                 console.log(`✅ Carousel initialized with ${selectedItems.length} items (duplicated for infinite scroll)`);
+                
+                console.log('✅ Carousel setup complete - using CSS animation for infinite loop');
             } else {
                 console.log('⚠️ No items found for carousel');
                 showFallbackCarousel();
             }
-        })
-        .catch(error => {
-            console.error('❌ Error loading carousel items:', error);
-            showFallbackCarousel();
-        });
 }
+
+// setupInfiniteScroll 함수 제거됨 - CSS animation 사용
 
 // 대체 캐러셀 (데이터 로딩 실패시)
 function showFallbackCarousel() {
@@ -683,22 +790,46 @@ function showFallbackCarousel() {
     
     carouselTrack.innerHTML = '';
     
-    // 플레이스홀더 아이템들 생성
+    console.log('🔧 Creating fallback carousel with external images...');
+    
+    // 플레이스홀더 아이템들 생성 (외부 이미지 사용)
+    const placeholderImages = [
+        'https://via.placeholder.com/300x400/ff6b6b/ffffff?text=Closet+1',
+        'https://via.placeholder.com/300x400/4ecdc4/ffffff?text=Closet+2', 
+        'https://via.placeholder.com/300x400/45b7d1/ffffff?text=Closet+3',
+        'https://via.placeholder.com/300x400/f9ca24/ffffff?text=Closet+4'
+    ];
+    
     for (let round = 0; round < 2; round++) {
-        for (let i = 0; i < 4; i++) {
+        placeholderImages.forEach((imgSrc, i) => {
             const carouselItem = document.createElement('div');
             carouselItem.className = 'carousel-item';
             
             const img = document.createElement('img');
-            img.src = "/static/src/img/plus.png";
-            img.style.opacity = "0.3";
+            img.src = imgSrc;
+            img.style.borderRadius = '15px';
+            
+            img.onload = function() {
+                console.log('✅ Fallback image loaded:', this.src);
+            };
+            
+            img.onerror = function() {
+                console.error('❌ Fallback image failed:', this.src);
+                // 최후의 수단: 색상 박스
+                this.style.background = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'][i];
+                this.style.width = '300px';
+                this.style.height = '400px';
+                this.alt = `Placeholder ${i + 1}`;
+            };
             
             carouselItem.appendChild(img);
             carouselTrack.appendChild(carouselItem);
-        }
+        });
     }
     
-    console.log('📦 Fallback carousel created');
+    console.log('📦 Fallback carousel created with', placeholderImages.length * 2, 'items');
+    
+    console.log('✅ Fallback carousel setup complete - using CSS animation for infinite loop');
 }
 
 // Edit 페이지로 이동하는 함수

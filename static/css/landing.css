@@ -25,11 +25,14 @@
 .carousel-track {
     display: flex;
     gap: 1.5em;
-    animation: carousel-scroll 20s linear infinite;
     width: calc(200% + 1.5em); /* 원활한 무한 스크롤을 위해 */
     padding: 0 1.5em;
     will-change: transform; /* GPU 가속 힌트 */
     backface-visibility: hidden; /* 성능 최적화 */
+}
+
+.carousel-track {
+    animation: carousel-scroll 20s linear infinite;
 }
 
 /* 캐러셀 아이템 */

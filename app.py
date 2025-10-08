@@ -11,12 +11,12 @@ load_dotenv()
 
 try:
     from supabase_utils import db
-    print(f"✅ Successfully imported db: {type(db)}")
+    print("Successfully imported db:", type(db))
     # Quick test
     test_items = db.get_all_items()
-    print(f"✅ DB connection test: {len(test_items)} items")
+    print("DB connection test:", len(test_items), "items")
 except Exception as e:
-    print(f"❌ Error importing supabase_utils: {e}")
+    print("Error importing supabase_utils:", e)
     import traceback
     traceback.print_exc()
     db = None
@@ -159,6 +159,32 @@ def get_item(item_id):
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500    
+
+@app.route('/api/image-proxy/<filename>')
+def image_proxy(filename):
+    """R2 이미지를 프록시하여 CORS 문제 해결"""
+    try:
+        import requests
+        r2_url = f"https://pub-d30acb5ff7c3432aad2e05bfbfd34c6d.r2.dev/{filename}"
+        
+        response = requests.get(r2_url, stream=True)
+        
+        if response.status_code == 200:
+            from flask import Response
+            return Response(
+                response.content,
+                content_type=response.headers.get('content-type', 'image/jpeg'),
+                headers={
+                    'Cache-Control': 'public, max-age=3600',
+                    'Access-Control-Allow-Origin': '*'
+                }
+            )
+        else:
+            return "Image not found", 404
+            
+    except Exception as e:
+        logging.error(f"Image proxy error: {e}")
+        return "Proxy error", 500
 
 @app.route('/api/filter', methods=['POST'])
 def api_filter_items():
@@ -838,4 +864,4 @@ def update_item():
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
