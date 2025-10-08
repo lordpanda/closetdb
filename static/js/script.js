@@ -324,7 +324,7 @@ function displayRecentlyAdded() {
                     } else {
                         // 기본 이미지
                         img.src = "/static/src/img/plus.png";
-                        img.style.opacity = "0.3";
+                        img.classList.add('image-placeholder');
                         console.log('No images found for item:', item); // 디버깅용
                     }
                     
@@ -332,7 +332,7 @@ function displayRecentlyAdded() {
                         // 이미지 로드 실패시 기본 이미지
                         console.log('Image load failed:', this.src); // 디버깅용
                         this.src = "/static/src/img/plus.png";
-                        this.style.opacity = "0.3";
+                        this.classList.add('image-placeholder');
                     };
                     
                     gridItem.appendChild(img);
@@ -417,7 +417,7 @@ function displayAllItems() {
                     } else {
                         // 기본 이미지
                         img.src = "/static/src/img/plus.png";
-                        img.style.opacity = "0.3";
+                        img.classList.add('image-placeholder');
                         console.log('No images found for item:', item); // 디버깅용
                     }
                     
@@ -425,7 +425,7 @@ function displayAllItems() {
                         // 이미지 로드 실패시 기본 이미지
                         console.log('Image load failed:', this.src); // 디버깅용
                         this.src = "/static/src/img/plus.png";
-                        this.style.opacity = "0.3";
+                        this.classList.add('image-placeholder');
                     };
                     
                     gridItem.appendChild(img);
@@ -479,28 +479,28 @@ function setupImageModeToggle() {
     modeToggle.addEventListener('change', function() {
         if (this.checked) {
             // Checked = Stitched Image mode
-            stitchedMode.style.display = 'block';
-            individualMode.style.display = 'none';
+            stitchedMode.classList.remove('hidden');
+            individualMode.classList.add('hidden');
             
             // 기존 stitched 이미지가 있으면 + 버튼 숨기기
             const existingStitchedImage = stitchedMode.querySelector('.stitched_preview.existing_image');
             const stitchedAddButton = stitchedMode.querySelector('.add_image');
             if (existingStitchedImage && stitchedAddButton) {
-                stitchedAddButton.style.display = 'none';
+                stitchedAddButton.classList.add('hidden');
                 console.log('🖼️ Hiding stitched add button - existing stitched image present');
             } else if (stitchedAddButton) {
-                stitchedAddButton.style.display = 'block';
+                stitchedAddButton.classList.remove('hidden');
                 console.log('➕ Showing stitched add button - no existing stitched image');
             }
         } else {
             // Unchecked = Individual Images mode
-            stitchedMode.style.display = 'none';
-            individualMode.style.display = 'block';
+            stitchedMode.classList.add('hidden');
+            individualMode.classList.remove('hidden');
             
             // Individual 모드에서는 + 버튼을 항상 표시 (추가 이미지 업로드 가능)
             const individualAddButton = individualMode.querySelector('.add_image');
             if (individualAddButton) {
-                individualAddButton.style.display = 'block';
+                individualAddButton.classList.remove('hidden');
                 console.log('➕ Individual add button always visible - additional images can be uploaded');
             }
         }
@@ -544,7 +544,7 @@ function readStitchedImage() {
     const addButton = container.querySelector('.add_image');
     console.log('➕ Add button found:', !!addButton);
     if (addButton) {
-        addButton.style.display = 'none';
+        addButton.classList.add('hidden');
         console.log('🙈 Add button hidden');
     }
     
@@ -583,7 +583,7 @@ function readStitchedImage() {
     // section 선택 UI 표시
     const stitchedInfo = container.querySelector('.stitched_info');
     if (stitchedInfo) {
-        stitchedInfo.style.display = 'block';
+        stitchedInfo.classList.remove('hidden');
         console.log('📋 Section selection UI shown');
     }
     
@@ -592,13 +592,13 @@ function readStitchedImage() {
         console.log('🖱️ Preview clicked - removing');
         preview.remove();
         if (addButton) {
-            addButton.style.display = 'block';
+            addButton.classList.remove('hidden');
             console.log('👁️ Add button shown again');
         }
         // section 선택 UI 숨기기
         const stitchedInfo = container.querySelector('.stitched_info');
         if (stitchedInfo) {
-            stitchedInfo.style.display = 'none';
+            stitchedInfo.classList.add('hidden');
             console.log('🙈 Section selection UI hidden');
         }
         const fileInput = document.querySelector('.file_uploader_stitched');
@@ -722,14 +722,13 @@ function processCarouselData(data) {
                             // 이미지가 없거나 plus.png이면 색상 배경 사용
                             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#8b4513'];
                             const colorIndex = index % colors.length; // 인덱스 기반으로 일관된 색상
-                            carouselItem.style.backgroundColor = colors[colorIndex];
-                            img.style.display = 'none';
+                            carouselItem.classList.add(`color-bg-${['red', 'teal', 'blue', 'brown'][colorIndex]}`);
+                            img.classList.add('hidden');
                         }
                         
                         // 이미지 로드 완료 시 부드러운 표시
                         img.onload = function() {
-                            this.style.opacity = "1";
-                            this.style.transition = "opacity 0.3s ease";
+                            this.classList.add('image-loaded');
                             console.log('✅ Landing carousel image loaded:', this.src);
                         };
                         
@@ -760,8 +759,8 @@ function processCarouselData(data) {
                             console.log('All images failed, showing colored placeholder');
                             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#8b4513'];
                             const colorIndex = index % colors.length;
-                            this.parentElement.style.backgroundColor = colors[colorIndex];
-                            this.style.display = 'none';
+                            this.parentElement.classList.add(`color-bg-${['red', 'teal', 'blue', 'brown'][colorIndex]}`);
+                            this.classList.add('hidden');
                         };
                         
                         carouselItem.appendChild(img);
@@ -807,7 +806,7 @@ function showFallbackCarousel() {
             
             const img = document.createElement('img');
             img.src = imgSrc;
-            img.style.borderRadius = '15px';
+            img.classList.add('small-radius');
             
             img.onload = function() {
                 console.log('✅ Fallback image loaded:', this.src);
@@ -816,9 +815,7 @@ function showFallbackCarousel() {
             img.onerror = function() {
                 console.error('❌ Fallback image failed:', this.src);
                 // 최후의 수단: 색상 박스
-                this.style.background = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'][i];
-                this.style.width = '300px';
-                this.style.height = '400px';
+                this.classList.add('fallback-carousel-item', `color-bg-${['red', 'teal', 'blue', 'brown'][i % 4]}`);
                 this.alt = `Placeholder ${i + 1}`;
             };
             
@@ -830,6 +827,252 @@ function showFallbackCarousel() {
     console.log('📦 Fallback carousel created with', placeholderImages.length * 2, 'items');
     
     console.log('✅ Fallback carousel setup complete - using CSS animation for infinite loop');
+}
+
+// 검색 기능 초기화
+function initializeSearch() {
+    const searchInput = document.getElementById('form1');
+    if (!searchInput) return;
+    
+    console.log('🔍 Initializing search functionality');
+    
+    // 검색 입력 이벤트 리스너
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+        if (query.length > 0) {
+            performSearch(query);
+        } else {
+            // 검색어가 없으면 원래 아이템들 표시
+            displayRecentlyAdded();
+        }
+    });
+    
+    // Enter 키 이벤트
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                performSearch(query);
+            }
+        }
+    });
+}
+
+// All.html 페이지용 검색 초기화
+function initializeSearchForAll() {
+    const searchInput = document.getElementById('form1');
+    if (!searchInput) return;
+    
+    console.log('🔍 Initializing search functionality for all.html');
+    
+    // 검색 입력 이벤트 리스너
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+        if (query.length > 0) {
+            performSearchForAll(query);
+        } else {
+            // 검색어가 없으면 모든 아이템 표시
+            displayAllItems();
+        }
+    });
+    
+    // Enter 키 이벤트
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = e.target.value.trim();
+            if (query.length > 0) {
+                performSearchForAll(query);
+            }
+        }
+    });
+}
+
+// All.html용 검색 수행 (다중 키워드 및 region+size 조합 포함)
+function performSearchForAll(query) {
+    console.log('🔍 Performing search for all.html:', query);
+    
+    fetch('/api/items')
+        .then(response => response.json())
+        .then(data => {
+            if (data.items) {
+                // 향상된 검색 필터링 (다중 키워드 및 region+size 조합 포함)
+                const filteredItems = data.items.filter(item => {
+                    const searchText = query.toLowerCase();
+                    const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
+                    
+                    // 모든 검색어가 매치되어야 함 (AND 조건)
+                    return searchTerms.every(term => {
+                        // 각 검색어가 어떤 필드든 하나라도 매치하면 됨
+                        const fieldMatch = (
+                            (item.brand && item.brand.toLowerCase().includes(term)) ||
+                            (item.category && item.category.toLowerCase().includes(term)) ||
+                            (item.subcategory && item.subcategory.toLowerCase().includes(term)) ||
+                            (item.subcategory2 && item.subcategory2.toLowerCase().includes(term)) ||
+                            (item.size && item.size.toLowerCase().includes(term)) ||
+                            (item.size_region && item.size_region.toLowerCase().includes(term)) ||
+                            (item.season && item.season.toLowerCase().includes(term))
+                        );
+                        
+                        // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
+                        const regionSizeMatch = item.size_region && item.size && 
+                            (item.size_region + item.size).toLowerCase().includes(term);
+                        
+                        return fieldMatch || regionSizeMatch;
+                    });
+                });
+                
+                console.log(`📊 Found ${filteredItems.length} items matching "${query}"`);
+                displaySearchResultsForAll(filteredItems, query);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Search error:', error);
+        });
+}
+
+// All.html용 검색 결과 표시
+function displaySearchResultsForAll(items, query) {
+    const container = document.querySelector('.grid_container');
+    const subheader = document.querySelector('.subheader h1');
+    
+    if (!container) return;
+    
+    // 헤더 업데이트
+    if (subheader) {
+        subheader.textContent = `search results for "${query}"`;
+    }
+    
+    // 기존 내용 제거
+    container.innerHTML = '';
+    
+    if (items.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No items found</div>';
+        return;
+    }
+    
+    // 검색 결과 아이템들 표시
+    items.forEach(item => {
+        const gridItem = document.createElement('div');
+        gridItem.className = 'grid_item';
+        
+        const link = document.createElement('a');
+        link.href = `/item.html?id=${item.item_id}`;
+        
+        const img = document.createElement('img');
+        
+        // 이미지 URL 결정
+        if (item.thumbnail_url) {
+            img.src = item.thumbnail_url;
+        } else if (item.images && item.images.length > 0) {
+            img.src = item.images[0];
+        } else {
+            img.src = '/static/src/img/plus.png';
+            img.classList.add('image-placeholder');
+        }
+        
+        img.alt = item.brand || 'Item';
+        img.loading = 'lazy';
+        
+        link.appendChild(img);
+        gridItem.appendChild(link);
+        container.appendChild(gridItem);
+    });
+}
+
+// 검색 수행 (다중 키워드 및 region+size 조합 포함)
+function performSearch(query) {
+    console.log('🔍 Performing search for:', query);
+    
+    fetch('/api/items')
+        .then(response => response.json())
+        .then(data => {
+            if (data.items) {
+                // 향상된 검색 필터링 (다중 키워드 및 region+size 조합 포함)
+                const filteredItems = data.items.filter(item => {
+                    const searchText = query.toLowerCase();
+                    const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
+                    
+                    // 모든 검색어가 매치되어야 함 (AND 조건)
+                    return searchTerms.every(term => {
+                        // 각 검색어가 어떤 필드든 하나라도 매치하면 됨
+                        const fieldMatch = (
+                            (item.brand && item.brand.toLowerCase().includes(term)) ||
+                            (item.category && item.category.toLowerCase().includes(term)) ||
+                            (item.subcategory && item.subcategory.toLowerCase().includes(term)) ||
+                            (item.subcategory2 && item.subcategory2.toLowerCase().includes(term)) ||
+                            (item.size && item.size.toLowerCase().includes(term)) ||
+                            (item.size_region && item.size_region.toLowerCase().includes(term)) ||
+                            (item.season && item.season.toLowerCase().includes(term))
+                        );
+                        
+                        // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
+                        const regionSizeMatch = item.size_region && item.size && 
+                            (item.size_region + item.size).toLowerCase().includes(term);
+                        
+                        return fieldMatch || regionSizeMatch;
+                    });
+                });
+                
+                console.log(`📊 Found ${filteredItems.length} items matching "${query}"`);
+                
+                // 검색 결과 표시
+                displaySearchResults(filteredItems, query);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Search error:', error);
+        });
+}
+
+// 검색 결과 표시
+function displaySearchResults(items, query) {
+    const container = document.querySelector('.grid_container');
+    const subheader = document.querySelector('.subheader h1');
+    
+    if (!container) return;
+    
+    // 헤더 업데이트
+    if (subheader) {
+        subheader.textContent = `search results for "${query}"`;
+    }
+    
+    // 기존 내용 제거
+    container.innerHTML = '';
+    
+    if (items.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No items found</div>';
+        return;
+    }
+    
+    // 검색 결과 아이템들 표시
+    items.forEach(item => {
+        const gridItem = document.createElement('div');
+        gridItem.className = 'grid_item';
+        
+        const link = document.createElement('a');
+        link.href = `/item.html?id=${item.item_id}`;
+        
+        const img = document.createElement('img');
+        
+        // 이미지 URL 결정
+        if (item.thumbnail_url) {
+            img.src = item.thumbnail_url;
+        } else if (item.images && item.images.length > 0) {
+            img.src = item.images[0];
+        } else {
+            img.src = '/static/src/img/plus.png';
+            img.classList.add('image-placeholder');
+        }
+        
+        img.alt = item.brand || 'Item';
+        img.loading = 'lazy';
+        
+        link.appendChild(img);
+        gridItem.appendChild(link);
+        container.appendChild(gridItem);
+    });
 }
 
 // Edit 페이지로 이동하는 함수
@@ -979,7 +1222,7 @@ function populateEditForm(item) {
                         const etcInput = document.getElementById('size_etc_input');
                         if (etcInput) {
                             etcInput.value = item.size;
-                            etcInput.style.display = 'inline-block';
+                            etcInput.classList.add('size-etc-input-visible');
                         }
                     } else {
                         const sizeRadio = document.querySelector(`input[name="size_key"][value="${item.size}"]`);
@@ -1099,8 +1342,8 @@ function displayExistingImages(images) {
         // Stitched 모드로 표시 (toggle switch를 stitched로 설정)
         const imageModeToggle = document.getElementById('image_mode_switch');
         if (imageModeToggle) imageModeToggle.checked = true;
-        stitchedMode.style.display = 'block';
-        individualMode.style.display = 'none';
+        stitchedMode.classList.remove('hidden');
+        individualMode.classList.add('hidden');
         
         const addImage = stitchedMode.querySelector('.add_image');
         const preview = document.createElement('div');
@@ -1112,7 +1355,7 @@ function displayExistingImages(images) {
         `;
         
         // + 업로드 버튼 숨기기 (기존 이미지가 있으므로)
-        addImage.style.display = 'none';
+        addImage.classList.add('hidden');
         console.log('🖼️ Hiding add image button - existing stitched image displayed');
         
         // 클릭 이벤트 추가: stitched 이미지 삭제 기능
@@ -1133,7 +1376,7 @@ function displayExistingImages(images) {
             });
             
             // + 업로드 버튼 다시 표시 (이미지 삭제 후)
-            addImage.style.display = 'block';
+            addImage.classList.remove('hidden');
             console.log('➕ Showing add image button - stitched image removed');
             
             preview.remove();
@@ -1145,8 +1388,8 @@ function displayExistingImages(images) {
         // Individual 모드로 표시 (toggle switch unchecked)
         const imageModeToggle = document.getElementById('image_mode_switch');
         if (imageModeToggle) imageModeToggle.checked = false;
-        stitchedMode.style.display = 'none';
-        individualMode.style.display = 'block';
+        stitchedMode.classList.add('hidden');
+        individualMode.classList.remove('hidden');
         
         const addImage = individualMode.querySelector('.add_image');
         
@@ -1165,7 +1408,11 @@ function displayExistingImages(images) {
             const badge = document.createElement('div');
             badge.className = 'main_image_badge';
             badge.textContent = 'MAIN';
-            badge.style.display = index === 0 ? 'block' : 'none';
+            if (index === 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
             
             preview.appendChild(img);
             preview.appendChild(badge);
@@ -1189,7 +1436,7 @@ function displayExistingImages(images) {
                     if (nextMain) {
                         nextMain.classList.add('main_image');
                         const nextBadge = nextMain.querySelector('.main_image_badge');
-                        if (nextBadge) nextBadge.style.display = 'block';
+                        if (nextBadge) nextBadge.classList.remove('hidden');
                     }
                 }
                 
@@ -1211,8 +1458,8 @@ function displayExistingImages(images) {
                 if (images.length === 0 && !window.individualFiles?.length) {
                     const imageModeToggle = document.getElementById('image_mode_switch');
                     if (imageModeToggle) imageModeToggle.checked = true;
-                    stitchedMode.style.display = 'block';
-                    individualMode.style.display = 'none';
+                    stitchedMode.classList.remove('hidden');
+                    individualMode.classList.add('hidden');
                 }
             });
             
@@ -1562,7 +1809,7 @@ function readImages() {
     var container = document.querySelector("#individual_mode");
     
     // Individual 모드인지 확인
-    const isIndividualMode = container && container.style.display !== 'none';
+    const isIndividualMode = container && !container.classList.contains('hidden');
     
     if (isIndividualMode) {
         // Individual 모드: 대표 이미지 선택 기능 포함
@@ -1586,7 +1833,11 @@ function readImages() {
             const badge = document.createElement('div');
             badge.className = 'main_image_badge';
             badge.textContent = 'MAIN';
-            badge.style.display = i === 0 ? 'block' : 'none';
+            if (i === 0) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
             
             preview.appendChild(img);
             preview.appendChild(badge);
@@ -1641,10 +1892,10 @@ function setMainImageFromPreview(clickedPreview, index) {
         const badge = preview.querySelector('.main_image_badge');
         if (preview === clickedPreview) {
             preview.classList.add('main_image');
-            badge.style.display = 'block';
+            badge.classList.remove('hidden');
         } else {
             preview.classList.remove('main_image');
-            badge.style.display = 'none';
+            badge.classList.add('hidden');
         }
     });
 }
@@ -1741,41 +1992,38 @@ function displayFilterSize() {
     var grid = document.querySelector(".filter_size");
     if (!grid) return;
     
-    // Size Region 필터 생성
-    const regionContainer = document.createElement('div');
-    regionContainer.innerHTML = '<h3 style="margin: 10px 0; font-size: 1.1em;">Region</h3>';
-    regionContainer.style.marginBottom = '20px';
-    
-    const regionGrid = document.createElement('div');
-    regionGrid.style.display = 'grid';
-    regionGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(60px, 1fr))';
-    regionGrid.style.gap = '10px';
-    regionGrid.style.marginBottom = '20px';
-    
-    for (let i = 0; i < sizeRegionList.length; i++) {
-        const item = document.createElement('div');
-        item.innerHTML = `<input type="radio" name="size_region_input" class="category_image" id="size_region_${i}" value="${sizeRegionList[i]}"/><label for="size_region_${i}">${sizeRegionList[i]}</label>`;
-        regionGrid.appendChild(item);
-    }
-    
-    regionContainer.appendChild(regionGrid);
-    grid.appendChild(regionContainer);
-    
-    // Size 값 필터 생성 (일반적인 사이즈들)
+    // 전체 사이즈 필터 생성 (지역별로 그룹화)
     const sizeContainer = document.createElement('div');
-    sizeContainer.innerHTML = '<h3 style="margin: 10px 0; font-size: 1.1em;">Size</h3>';
     
     const sizeGrid = document.createElement('div');
-    sizeGrid.style.display = 'grid';
-    sizeGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(50px, 1fr))';
-    sizeGrid.style.gap = '10px';
+    sizeGrid.className = 'size-grid';
     
-    // 일반적인 사이즈 목록
-    const commonSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '34', '36', '38', '40', '42', '44', '46', '48', '50'];
+    // 실제 시스템에서 사용되는 사이즈 목록 (displaySizesByRegion 기준)
+    const allSizes = [
+        // US sizes
+        "00", "0", "2",
+        // UK sizes  
+        "4", "6", "8", "10",
+        // EU sizes
+        "35", "35.5", "36", "36.5", "37",
+        // FR sizes
+        "32", "34", "36",
+        // DE sizes (same as FR)
+        // IT sizes
+        "38",
+        // WW sizes
+        "one size", "XXXS", "XXS", "XS", "S", "M", "L", "XL",
+        // KR sizes
+        "230", "235", "240",
+        // Kids sizes
+        "10Y", "11Y", "12Y", "13Y", "14Y", "15Y", "16Y", "130cm", "140cm", "150cm",
+        // Ring sizes
+        "48", "50", "52", "5", "6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J"
+    ];
     
-    for (let i = 0; i < commonSizes.length; i++) {
+    for (let i = 0; i < allSizes.length; i++) {
         const item = document.createElement('div');
-        item.innerHTML = `<input type="radio" name="size_input" class="category_image" id="size_${i}" value="${commonSizes[i]}"/><label for="size_${i}">${commonSizes[i]}</label>`;
+        item.innerHTML = `<input type="checkbox" name="size_input" class="category_image" id="size_${i}" value="${allSizes[i]}"/><label for="size_${i}">${allSizes[i]}</label>`;
         sizeGrid.appendChild(item);
     }
     
@@ -1837,7 +2085,7 @@ function displaySizesByRegion(region) {
             console.log('🔧 Created new etc input element');
         }
         
-        etcInput.style.display = 'inline-block';
+        etcInput.classList.add('size-etc-input-visible');
         grid.appendChild(etcInput);
         etcInput.focus();
         console.log('✅ etc input displayed and focused');
@@ -1876,11 +2124,11 @@ function displaySizesByRegion(region) {
     }
     var cont = document.querySelector(".grid_container_size");
     if (accordingSizes.length > 5){
-        cont.style.height = "120px";
+        cont.classList.add('container-height-120');
     } else if (accordingSizes.length > 10){
-        cont.style.height = "180px";
+        cont.classList.add('container-height-180');
     } else {
-        cont.style.height = "80px";
+        cont.classList.add('container-height-80');
     }
 }
 function selectedSizeRegion(region){
@@ -2387,8 +2635,7 @@ function populateItemView(item) {
         if (item.brand) {
             const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
             if (hasKorean) {
-                brandElement.style.fontFamily = 'GmarketSansBold, GmarketSans, -apple-system, BlinkMacSystemFont, sans-serif';
-                brandElement.style.fontWeight = '700'; // 두꺼운 폰트
+                brandElement.classList.add('item-brand');
             }
         }
     }
@@ -2413,8 +2660,7 @@ function populateItemView(item) {
             // 첫 번째 이미지만 표시 (또는 갤러리 형태로)
             const img = document.createElement('img');
             img.src = item.images[0];
-            img.style.maxWidth = '100%';
-            img.style.borderRadius = '30px';
+            img.classList.add('fallback-image');
             img.onload = () => {
                 // 이미지가 윈도우보다 작으면 중앙 정렬
                 console.log('🖼️ Image width:', img.naturalWidth);
@@ -2445,7 +2691,7 @@ function populateItemView(item) {
             sizeText = item.size_region ? `${item.size_region} ${item.size}` : item.size;
         }
         sizeElement.textContent = sizeText;
-        sizeElement.style.display = 'block';
+        sizeElement.classList.remove('hidden');
     }
     
     // Measurement 표시
@@ -2933,8 +3179,7 @@ function updateItemDisplay(item) {
         // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
         const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
         if (hasKorean) {
-            brandElement.style.fontFamily = 'GmarketSansBold, GmarketSans, -apple-system, BlinkMacSystemFont, sans-serif';
-            brandElement.style.fontWeight = '700'; // 두꺼운 폰트
+            brandElement.classList.add('item-brand');
         }
     }
     
@@ -2987,12 +3232,11 @@ function updateSizeDisplay(item) {
                 final_sizeText: sizeText
             });
             sizeElement.textContent = sizeText;
-            sizeElement.style.fontFamily = 'Sequel85, sans-serif';
-            sizeElement.style.display = 'block';
+            sizeElement.classList.add('item-size');
             console.log('Updated size display:', sizeText);
         } else {
             // 사이즈 정보가 없으면 숨김
-            sizeElement.style.display = 'none';
+            sizeElement.classList.add('item-size-hidden');
             console.log('No size information, hiding size element');
         }
     }
@@ -3027,14 +3271,12 @@ function updateCompositionDisplay(item) {
                     if (material) {
                         const compDiv = document.createElement('div');
                         compDiv.className = 'label_with_value';
-                        compDiv.style.display = 'block'; // 세로로 나열
-                        compDiv.style.marginBottom = '8px';
+                        compDiv.classList.add('composition-block');
                         
                         const labelDiv = document.createElement('div');
                         labelDiv.className = 'comp_label';
                         labelDiv.textContent = material;
-                        labelDiv.style.fontSize = '1.1em';
-                        labelDiv.style.color = '#333';
+                        labelDiv.classList.add('composition-label');
                         
                         compDiv.appendChild(labelDiv);
                         compositionContainer.appendChild(compDiv);
@@ -3066,6 +3308,56 @@ function updateCompositionDisplay(item) {
         } catch (error) {
             console.error('Error updating composition:', error);
         }
+    }
+    
+    // Season과 Purchase year 정보 추가 (composition 아래)
+    updateSeasonAndPurchaseDisplay(item);
+}
+
+// Season과 Purchase year 표시 함수
+function updateSeasonAndPurchaseDisplay(item) {
+    const compositionContainer = document.querySelector('.view_composition');
+    if (!compositionContainer) return;
+    
+    // 기존 season과 purchase year 정보 제거
+    const existingDetails = compositionContainer.querySelectorAll('.detail_section');
+    existingDetails.forEach(detail => detail.remove());
+    
+    // Season 표시 (composition 아래 40px)
+    if (item.season && item.season.toString().trim() !== '') {
+        const seasonContainer = document.createElement('div');
+        seasonContainer.className = 'detail_section';
+        
+        const seasonLabel = document.createElement('div');
+        seasonLabel.className = 'detail_label';
+        seasonLabel.textContent = 'season';
+        
+        const seasonValue = document.createElement('div');
+        seasonValue.className = 'detail_value';
+        seasonValue.textContent = item.season;
+        
+        seasonContainer.appendChild(seasonLabel);
+        seasonContainer.appendChild(seasonValue);
+        compositionContainer.appendChild(seasonContainer);
+    }
+    
+    // Purchase year 표시 (season 아래 10px 또는 composition 아래 40px)
+    if (item.purchase_year && item.purchase_year.toString().trim() !== '') {
+        const purchaseContainer = document.createElement('div');
+        const hasSeasonAbove = item.season && item.season.toString().trim() !== '';
+        purchaseContainer.className = hasSeasonAbove ? 'detail_section close_spacing' : 'detail_section';
+        
+        const purchaseLabel = document.createElement('div');
+        purchaseLabel.className = 'detail_label';
+        purchaseLabel.textContent = 'purchase year';
+        
+        const purchaseYear = document.createElement('div');
+        purchaseYear.className = 'detail_value';
+        purchaseYear.textContent = item.purchase_year;
+        
+        purchaseContainer.appendChild(purchaseLabel);
+        purchaseContainer.appendChild(purchaseYear);
+        compositionContainer.appendChild(purchaseContainer);
     }
 }
 
@@ -3284,9 +3576,7 @@ function stitchImagesBack(imageUrls, container) {
                 console.log('Using fallback original image display for first image');
                 const fallbackImg = document.createElement('img');
                 fallbackImg.src = url; // 원본 URL 사용
-                fallbackImg.style.maxWidth = '100%';
-                fallbackImg.style.height = 'auto';
-                fallbackImg.style.borderRadius = '30px';
+                fallbackImg.className = 'fallback-image';
                 container.appendChild(fallbackImg);
             }
             
@@ -3314,37 +3604,11 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     
     // 외부 패딩 컨테이너 (40px padding)
     const paddingContainer = document.createElement('div');
-    paddingContainer.style.padding = '40px';
-    paddingContainer.style.height = '800px';
-    paddingContainer.style.maxHeight = '800px';
-    paddingContainer.style.width = '100%';
-    paddingContainer.style.boxSizing = 'border-box';
-    paddingContainer.style.overflowY = 'visible'; // 위아래 스크롤 허용
+    paddingContainer.className = 'carousel-padding-container';
+    paddingContainer.classList.add('max-height-override');
     
     // 내부 carousel 컨테이너 (좌우 스크롤)
     const carouselContainer = document.createElement('div');
-    carouselContainer.style.display = 'flex';
-    carouselContainer.style.flexDirection = 'row';
-    carouselContainer.style.gap = '20px';
-    carouselContainer.style.height = '100%';
-    carouselContainer.style.overflowX = 'auto';
-    carouselContainer.style.overflowY = 'hidden';
-    carouselContainer.style.alignItems = 'flex-start';
-    carouselContainer.style.justifyContent = 'flex-start';
-    carouselContainer.style.width = '100%';
-    
-    // 스크롤바 숨기기
-    carouselContainer.style.scrollbarWidth = 'none'; // Firefox
-    carouselContainer.style.msOverflowStyle = 'none'; // IE
-    
-    // Webkit 브라우저용 스크롤바 숨기기
-    const style = document.createElement('style');
-    style.textContent = `
-        .horizontal-carousel::-webkit-scrollbar {
-            display: none;
-        }
-    `;
-    document.head.appendChild(style);
     carouselContainer.className = 'horizontal-carousel';
     
     // 이미지에서만 좌우 스크롤, 빈 공간에서는 위아래 스크롤 허용
@@ -3382,10 +3646,10 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             
             if (totalCarouselWidth < containerWidth) {
                 console.log('🎯 캐러셀이 컨테이너보다 작음 - 중앙 정렬 적용');
-                carouselContainer.style.justifyContent = 'center';
+                carouselContainer.classList.add('center-align');
             } else {
                 console.log('📍 캐러셀이 컨테이너보다 큼 - 좌측 정렬 유지');
-                carouselContainer.style.justifyContent = 'flex-start';
+                carouselContainer.classList.remove('center-align');
             }
         }
     }
@@ -3395,34 +3659,17 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         const img = document.createElement('img');
         // 직접 URL 사용
         img.src = url;
-        img.style.height = '100%';
-        img.style.maxHeight = '800px';
-        img.style.width = 'auto';
-        img.style.objectFit = 'contain';
-        img.style.borderRadius = '30px';
-        img.style.flexShrink = '0';
-        img.style.cursor = 'pointer';
+        img.className = 'carousel-image';
         
         // 클릭 시 확대
         img.onclick = () => {
             const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-            modal.style.display = 'flex';
-            modal.style.justifyContent = 'center';
-            modal.style.alignItems = 'center';
-            modal.style.zIndex = '1000';
+            modal.className = 'fullscreen-modal';
             modal.onclick = () => document.body.removeChild(modal);
             
             const modalImg = document.createElement('img');
             modalImg.src = url;
-            modalImg.style.maxWidth = '90%';
-            modalImg.style.maxHeight = '90%';
-            modalImg.style.borderRadius = '30px';
+            modalImg.className = 'modal-image';
             
             modal.appendChild(modalImg);
             document.body.appendChild(modal);
@@ -3442,7 +3689,7 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             console.log(`⚠️ This image may not exist in R2 bucket`);
             // 플레이스홀더로 대체하되 더 명확한 메시지
             img.src = '/static/src/img/plus.png';
-            img.style.opacity = '0.3';
+            img.classList.add('image-placeholder');
             img.title = 'Image not found in storage';
             
             loadedCount++;
@@ -3492,9 +3739,7 @@ function combineImages(images, canvas, ctx, container) {
     try {
         const combinedImg = document.createElement('img');
         combinedImg.src = canvas.toDataURL('image/jpeg', 0.9);
-        combinedImg.style.maxWidth = '100%';
-        combinedImg.style.height = 'auto';
-        combinedImg.style.borderRadius = '30px';
+        combinedImg.className = 'combined-image';
         
         console.log('Appending combined image to container');
         container.appendChild(combinedImg);
@@ -3508,25 +3753,11 @@ function combineImages(images, canvas, ctx, container) {
         
         // 외부 패딩 컨테이너
         const paddingContainer = document.createElement('div');
-        paddingContainer.style.padding = '40px';
-        paddingContainer.style.height = '800px';
-        paddingContainer.style.width = '100%';
-        paddingContainer.style.boxSizing = 'border-box';
+        paddingContainer.className = 'carousel-padding-container';
         
         // 내부 carousel 컨테이너 
         const carouselContainer = document.createElement('div');
-        carouselContainer.style.display = 'flex';
-        carouselContainer.style.flexDirection = 'row';
-        carouselContainer.style.gap = '20px';
-        carouselContainer.style.height = '100%';
-        carouselContainer.style.overflowX = 'auto';
-        carouselContainer.style.overflowY = 'hidden';
-        carouselContainer.style.alignItems = 'center';
-        carouselContainer.style.width = '100%';
-        
-        // 스크롤바 숨기기
-        carouselContainer.style.scrollbarWidth = 'none'; // Firefox
-        carouselContainer.style.msOverflowStyle = 'none'; // IE
+        carouselContainer.className = 'carousel-container-flex';
         
         // Webkit 브라우저용 스크롤바 숨기기
         const style = document.createElement('style');
@@ -3547,11 +3778,7 @@ function combineImages(images, canvas, ctx, container) {
         images.forEach((img, index) => {
             const displayImg = document.createElement('img');
             displayImg.src = img.src;
-            displayImg.style.height = '100%';
-            displayImg.style.width = 'auto';
-            displayImg.style.objectFit = 'contain';
-            displayImg.style.borderRadius = '15px';
-            displayImg.style.flexShrink = '0';
+            displayImg.className = 'carousel-item-image';
             
             carouselContainer.appendChild(displayImg);
         });
@@ -3578,9 +3805,9 @@ function submitFilterForm(event) {
     const brandInput = document.getElementById('brand_search');
     const brand = brandInput ? brandInput.value.trim() : '';
     
-    // 사이즈 필터
-    const selectedSizeRegion = document.querySelector('input[name="size_region_input"]:checked');
-    const selectedSize = document.querySelector('input[name="size_input"]:checked');
+    // 사이즈 필터 (여러 개 선택 가능)
+    const selectedSizes = document.querySelectorAll('input[name="size_input"]:checked');
+    const sizesArray = Array.from(selectedSizes).map(checkbox => checkbox.value);
     
     // 조성 필터 수집
     const compositionFilters = {};
@@ -3612,12 +3839,8 @@ function submitFilterForm(event) {
         filters.brand = brand;
     }
     
-    if (selectedSizeRegion) {
-        filters.size_region = selectedSizeRegion.value;
-    }
-    
-    if (selectedSize) {
-        filters.size = selectedSize.value;
+    if (sizesArray.length > 0) {
+        filters.sizes = sizesArray;
     }
     
     if (Object.keys(compositionFilters).length > 0) {
@@ -3650,94 +3873,73 @@ function submitFilterForm(event) {
     });
 }
 
-// 필터 결과 표시 함수
+// 필터 결과 표시 함수 - Apply filters 버튼 아래에 표시
 function displayFilterResults(items, count) {
     console.log(`📊 Displaying ${count} filtered items`);
     
-    // 기존 내용 정리
-    const contentSection = document.querySelector('.content.narrow');
-    if (contentSection) {
-        // 결과 컨테이너가 이미 있으면 제거
-        const existingResults = contentSection.querySelector('.filter-results');
-        if (existingResults) {
-            existingResults.remove();
-        }
-        
-        // 새 결과 컨테이너 생성
-        const resultsContainer = document.createElement('div');
-        resultsContainer.className = 'filter-results';
-        resultsContainer.innerHTML = `
-            <div class="subheader">
-                <h1>Results (${count})</h1>
-            </div>
-            <div class="results-grid"></div>
-        `;
-        
-        const resultsGrid = resultsContainer.querySelector('.results-grid');
-        resultsGrid.style.display = 'grid';
-        resultsGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
-        resultsGrid.style.gap = '20px';
-        resultsGrid.style.marginTop = '20px';
-        
-        // 각 아이템 표시
-        items.forEach(item => {
-            const itemElement = document.createElement('div');
-            itemElement.className = 'filter-result-item';
-            itemElement.style.cursor = 'pointer';
-            itemElement.style.borderRadius = '15px';
-            itemElement.style.overflow = 'hidden';
-            itemElement.style.backgroundColor = '#f8f9fa';
-            itemElement.style.transition = 'transform 0.3s ease';
-            
-            // 이미지 표시
-            const imageUrl = item.thumbnail_url || (item.images && item.images[0]) || '/static/src/img/placeholder.jpg';
-            
-            itemElement.innerHTML = `
-                <img src="${imageUrl}" 
-                     style="width: 100%; height: 200px; object-fit: cover;" 
-                     onerror="this.src='/static/src/img/placeholder.jpg'">
-                <div style="padding: 15px;">
-                    <h3 style="margin: 0; font-size: 1.1em; color: #333;">${item.brand || 'Unknown Brand'}</h3>
-                    <p style="margin: 5px 0; color: #666; font-size: 0.9em;">${item.name || 'No Name'}</p>
-                    <p style="margin: 5px 0; color: #888; font-size: 0.8em;">${item.category || ''} ${item.subcategory || ''}</p>
-                    ${item.size && item.size.trim() !== '' && item.size !== 'null' && item.size !== null ? 
-                        `<p style="margin: 5px 0; color: #888; font-size: 0.8em;">Size: ${item.size}</p>` : 
-                        ''}
-                </div>
-            `;
-            
-            // 클릭 시 상세 페이지로 이동
-            itemElement.addEventListener('click', () => {
-                window.location.href = `/item.html?id=supabase_${item.item_id}`;
-            });
-            
-            // 호버 효과
-            itemElement.addEventListener('mouseenter', () => {
-                itemElement.style.transform = 'scale(1.02)';
-            });
-            
-            itemElement.addEventListener('mouseleave', () => {
-                itemElement.style.transform = 'scale(1)';
-            });
-            
-            resultsGrid.appendChild(itemElement);
-        });
-        
-        // 결과 없음 메시지
-        if (items.length === 0) {
-            resultsGrid.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #666; grid-column: 1 / -1;">
-                    <h3>검색 결과가 없습니다</h3>
-                    <p>다른 조건으로 다시 검색해보세요.</p>
-                </div>
-            `;
-        }
-        
-        contentSection.appendChild(resultsContainer);
-        
-        // 결과 영역으로 스크롤
-        resultsContainer.scrollIntoView({ behavior: 'smooth' });
+    // Apply filters 버튼 찾기
+    const submitButton = document.querySelector('.submit_button');
+    if (!submitButton) return;
+    
+    // 기존 결과 제거
+    const existingResults = document.querySelector('.filter-results');
+    if (existingResults) {
+        existingResults.remove();
     }
+    
+    // 새 결과 컨테이너 생성 - 적절한 마진과 패딩 추가
+    const resultsContainer = document.createElement('div');
+    resultsContainer.className = 'filter-results';
+    resultsContainer.className = 'filter-results';
+    resultsContainer.innerHTML = `
+        <div class="subheader">
+            <div class="text">
+                <h1>filter results</h1>
+            </div>
+        </div>
+        <div class="grid_container"></div>
+    `;
+    
+    const resultsGrid = resultsContainer.querySelector('.grid_container');
+    
+    // 필터 결과 아이템들 표시 - 원본 grid_item 형식 사용
+    items.forEach(item => {
+        const gridItem = document.createElement('div');
+        gridItem.className = 'grid_item';
+        
+        const link = document.createElement('a');
+        link.href = `/item.html?id=${item.item_id}`;
+        
+        const img = document.createElement('img');
+        
+        // 이미지 URL 결정
+        if (item.thumbnail_url) {
+            img.src = item.thumbnail_url;
+        } else if (item.images && item.images.length > 0) {
+            img.src = item.images[0];
+        } else {
+            img.src = '/static/src/img/plus.png';
+            img.classList.add('image-placeholder');
+        }
+        
+        img.alt = item.brand || 'Item';
+        img.loading = 'lazy';
+        
+        link.appendChild(img);
+        gridItem.appendChild(link);
+        resultsGrid.appendChild(gridItem);
+    });
+    
+    // 결과 없음 메시지
+    if (items.length === 0) {
+        resultsGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No items found</div>';
+    }
+    
+    // Apply filters 버튼 다음에 결과 추가
+    submitButton.insertAdjacentElement('afterend', resultsContainer);
+    
+    // 결과 영역으로 스크롤
+    resultsContainer.scrollIntoView({ behavior: 'smooth' });
 }
 
 // Add event listener to form submission button
@@ -3811,7 +4013,7 @@ function setupImagePasteAndDrop() {
     document.addEventListener('paste', function(e) {
         // individual 모드가 아니면 무시
         const individualMode = document.getElementById('individual_mode');
-        if (!individualMode || individualMode.style.display === 'none') {
+        if (!individualMode || individualMode.classList.contains('hidden')) {
             return;
         }
         
@@ -3882,7 +4084,7 @@ function addImageFiles(files) {
     }
     
     // Individual 모드가 활성화되어 있는지 확인
-    if (container.style.display === 'none') {
+    if (container.classList.contains('hidden')) {
         console.error('❌ Individual mode is not active!');
         alert('Individual 이미지 모드를 먼저 선택해주세요.');
         return;
@@ -3908,13 +4110,11 @@ function addImageFiles(files) {
             // 미리보기 요소 생성
             const preview = document.createElement('div');
             preview.className = 'preview_image';
-            preview.style.position = 'relative';
+            preview.classList.add('preview-relative');
             
             const img = document.createElement('img');
             img.src = e.target.result;
-            img.style.width = '100%';
-            img.style.height = '100%';
-            img.style.objectFit = 'cover';
+            img.classList.add('preview-image-cover');
             
             preview.appendChild(img);
             

@@ -277,3 +277,79 @@
 .edit-button:hover {
     background: linear-gradient(45deg, #764ba2 0%, #667eea 100%);
 }
+
+/* Season/Purchase 공통 스타일 */
+.detail_section {
+    margin-top: 40px;
+}
+
+.detail_section.close_spacing {
+    margin-top: 10px;
+}
+
+.detail_label {
+    font-family: 'LeferiPointOblique';
+    font-size: 1.2em;
+    margin-bottom: -5px;
+    color: var(--black);
+}
+
+.detail_value {
+    font-family: 'Sequel75';
+    font-size: 1.2em;
+    color: var(--black);
+    margin-bottom: 20px;
+}
+
+/* Brand and Size styling */
+.item-brand {
+    font-family: 'GmarketSansBold', 'GmarketSans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 700;
+}
+
+.item-size {
+    font-family: 'Sequel85', sans-serif;
+    display: block;
+}
+
+.item-size-hidden {
+    display: none;
+}
+
+/* Composition display styles */
+.composition-block {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.composition-label {
+    font-size: 1.1em;
+    color: #333;
+}
+
+/* Carousel container overrides for mobile */
+@media screen and (max-width: 400px) {
+    .carousel-height-override {
+        height: auto !important;
+        max-height: none !important;
+        padding: 0 20px !important;
+    }
+    
+    .carousel-inner-override {
+        height: auto !important;
+        max-height: none !important;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .carousel-image-mobile {
+        max-width: 100%;
+        height: auto !important;
+        object-fit: contain;
+        border-radius: 30px;
+        margin: 0;
+        display: block;
+        scroll-snap-align: center;
+        scroll-snap-stop: always;
+    }
+}

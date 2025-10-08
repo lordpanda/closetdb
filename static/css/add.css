@@ -732,3 +732,12 @@ input:checked + .toggle_slider:before {
         letter-spacing: 0;
     }
 }
+
+/* Add/Edit page specific styles */
+.mode-toggle {
+    display: block !important;
+}
+
+.mode-toggle.hidden {
+    display: none !important;
+}

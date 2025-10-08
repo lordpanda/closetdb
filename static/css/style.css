@@ -66,6 +66,10 @@
     src: url('./fonts/Sequel100Black-85.ttf');
 }
 @font-face {
+    font-family: 'Sequel75';
+    src: url('./fonts/Sequel100Black-75.ttf');
+}
+@font-face {
     font-family: 'Sequel45';
     src: url('./fonts/Sequel100Black-45.ttf');
 }
@@ -76,6 +80,175 @@
 @font-face {
     font-family: 'OstrichBlack';
     src: url('./fonts/ostrich-sans-black.woff');
+}
+
+/* Carousel styles - used across multiple pages */
+.horizontal-carousel {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE */
+}
+
+.horizontal-carousel::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.horizontal-carousel.center-align {
+    justify-content: center;
+}
+
+.carousel-image {
+    height: 100%;
+    max-height: 800px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 30px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.carousel-image.small-radius {
+    border-radius: 15px;
+}
+
+.carousel-padding-container {
+    padding: 40px;
+    height: 800px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.carousel-padding-container.max-height-override {
+    max-height: 800px;
+    overflow-y: visible;
+}
+
+/* Carousel container variations */
+.carousel-container-flex {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    align-items: center;
+    width: 100%;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.carousel-container-flex::-webkit-scrollbar {
+    display: none;
+}
+
+/* Individual carousel image styles */
+.carousel-item-image {
+    height: 100%;
+    width: auto;
+    object-fit: contain;
+    border-radius: 15px;
+    flex-shrink: 0;
+}
+
+/* Fallback carousel styles */
+.fallback-carousel-item {
+    width: 300px;
+    height: 400px;
+}
+
+/* Combined image display */
+.combined-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 30px;
+}
+
+/* Landing page carousel specific */
+.landing-carousel-item {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.landing-carousel-item.loaded {
+    opacity: 1;
+}
+
+/* Common utility classes */
+.hidden {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+.image-placeholder {
+    opacity: 0.3;
+}
+
+.image-loaded {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Modal styles */
+.fullscreen-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.modal-image {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 30px;
+}
+
+/* Fallback image styles */
+.fallback-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 30px;
+}
+
+/* Flex layouts */
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Color backgrounds for missing images */
+.color-bg-red { background-color: #ff6b6b; }
+.color-bg-teal { background-color: #4ecdc4; }
+.color-bg-blue { background-color: #45b7d1; }
+.color-bg-brown { background-color: #8b4513; }
+
+/* Preview styles */
+.preview-relative {
+    position: relative;
+}
+
+.preview-image-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 body {
@@ -403,7 +576,7 @@ h1 {
 /* responsive image grid */
 .grid_container {
     display: grid;
-    grid-template-columns: auto auto auto auto;
+    grid-template-columns: repeat(4, 1fr);
     grid-template-rows: auto auto;
     justify-content: space-evenly;
     grid-gap: 1.5em;
@@ -503,7 +676,7 @@ h1 {
 /* Responsive layout - makes a two column-layout instead of four columns */
 @media screen and (max-width: 1200px) {
     .grid_container {
-        grid-template-columns: auto auto auto;
+        grid-template-columns: repeat(3, 1fr);
     }
 
 }
@@ -529,7 +702,7 @@ h1 {
         padding: 20px;
     }
     .grid_container {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(2, 1fr);
         grid-template-rows: 1fr 1fr 1fr 1fr;
     }
     .grid_item {
