@@ -104,7 +104,12 @@ class SupabaseDB:
             if filters.get('brand'):
                 filter_params.append(f"brand=ilike.*{filters['brand']}*")
             
-            if filters.get('size'):
+            if filters.get('sizes') and len(filters['sizes']) > 0:
+                # Multiple sizes - use 'in' operator
+                sizes_list = ','.join(filters['sizes'])
+                filter_params.append(f"size=in.({sizes_list})")
+            elif filters.get('size'):
+                # Single size (backward compatibility)
                 filter_params.append(f"size=eq.{filters['size']}")
             
             if filters.get('size_region'):
@@ -118,6 +123,13 @@ class SupabaseDB:
             
             if filters.get('purchase_year'):
                 filter_params.append(f"purchase_year=eq.{filters['purchase_year']}")
+            
+            # Composition 필터 처리 (JSON 필드에서 키 검색)
+            if filters.get('composition'):
+                composition_filters = filters['composition']
+                for comp_name in composition_filters.keys():
+                    # JSON 필드에서 특정 키가 존재하는지 확인
+                    filter_params.append(f"compositions->>{comp_name}=not.is.null")
             
             # 필터 파라미터를 URL에 추가
             if filter_params:

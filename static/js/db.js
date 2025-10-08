@@ -4,7 +4,7 @@ const categoryList = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewer
 const subCategoryList = ["mini", "midi", "long", "short sleeve", "long sleeve", "short", "long", "bag", "socks", "belt", "hat", "etc"];
 const sizeRegionList = ["WW", "US", "EU", "FR", "IT", "DE", "UK", "KR", "JP", "Kids", "Ring", "etc"];
 const compositionList = ["cotton", "silk", "wool", "cashmere", "leather", "viscose", "polyesther", "polyamide", 
-"elastane", "acryl", "acetate", "spandex", "metallic", "brass", "rubber", "sterling silver", "gold 14K", "gold 18K"];
+"elastane", "lyocell", "acryl", "acetate", "spandex", "metallic", "brass", "rubber", "sterling silver", "gold 14K", "gold 18K"];
 var brandList = ["APIECE APART", "Burberry", "Derek Lam 10 Crosby", "HAUS OF PBK", "Juun.J", "KIMHEKIM", "Maison Margiela", "MM6", "MSGM", 
 "Opening Ceremony", "Palm Angels", "Sandro", "Stella McCartney", "Tibi", "Tory Burch", "Versace", "ZARA"];
 

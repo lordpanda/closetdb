@@ -350,7 +350,6 @@ input:checked + .toggle_slider:before {
     z-index: 1000;
     border-radius: 0 !important;
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .season_dropdown .size_region {
     border-radius: 0 !important;
@@ -591,32 +590,23 @@ input:checked + .toggle_slider:before {
     grid-gap: 1.5em;
 }
 
-.add_composition_set_btn {
+.add_composition_set_btn,
+.add_composition_set_btn:hover,
+.add_composition_set_btn:focus,
+.add_composition_set_btn:active,
+.add_composition_set_btn:visited {
     background: none !important;
     background-color: transparent !important;
-    border: none;
+    border: none !important;
     cursor: pointer;
     padding: 5px;
     transition: transform 0.2s;
-    outline: none;
-}
-
-.add_composition_set_btn:focus {
-    background: none !important;
-    background-color: transparent !important;
-    outline: none;
-}
-
-.add_composition_set_btn:active {
-    background: none !important;
-    background-color: transparent !important;
+    outline: none !important;
+    color: inherit !important;
 }
 
 .add_composition_set_btn:hover {
     transform: scale(1.1);
-    background: none !important;
-    background-color: transparent !important;
-    color: inherit !important;
 }
 
 /* Composition 섹션의 subheader만 특별히 처리 */

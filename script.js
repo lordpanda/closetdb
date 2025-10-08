@@ -375,12 +375,14 @@ function displayMeasurementInput(selectedCategory) {
     var accordingSizes = [];
 
     
-    if (selected == "top" || selected == "dress" || selected == "outer") {
+    if (selected == "top" || selected == "outer") {
         accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length");
+    } else if (selected == "dress") {
+        accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width");
     } else if (selected == "pants") {
         accordingSizes = ["waist", "hip", "rise", "legOpening", "length"];
     } else if (selected == "skirt") {
-        accordingSizes = ["waist", "hip", "length"];
+        accordingSizes = ["waist", "hip", "length", "hem width"];
     } else if (selected == "shoes") {
         accordingSizes = ["heel"];
     } else if (selected == "jewerly" || selected == ".etc") {

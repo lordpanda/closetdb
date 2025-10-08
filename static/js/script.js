@@ -544,7 +544,7 @@ function readStitchedImage() {
     const addButton = container.querySelector('.add_image');
     console.log('➕ Add button found:', !!addButton);
     if (addButton) {
-        addButton.classList.add('hidden');
+        addButton.style.display = 'none';
         console.log('🙈 Add button hidden');
     }
     
@@ -583,7 +583,7 @@ function readStitchedImage() {
     // section 선택 UI 표시
     const stitchedInfo = container.querySelector('.stitched_info');
     if (stitchedInfo) {
-        stitchedInfo.classList.remove('hidden');
+        stitchedInfo.style.display = 'block';
         console.log('📋 Section selection UI shown');
     }
     
@@ -592,13 +592,13 @@ function readStitchedImage() {
         console.log('🖱️ Preview clicked - removing');
         preview.remove();
         if (addButton) {
-            addButton.classList.remove('hidden');
+            addButton.style.display = 'inline-block';
             console.log('👁️ Add button shown again');
         }
         // section 선택 UI 숨기기
         const stitchedInfo = container.querySelector('.stitched_info');
         if (stitchedInfo) {
-            stitchedInfo.classList.add('hidden');
+            stitchedInfo.style.display = 'none';
             console.log('🙈 Section selection UI hidden');
         }
         const fileInput = document.querySelector('.file_uploader_stitched');
@@ -2238,12 +2238,14 @@ function displayMeasurementInput(selectedCategory) {
     var accordingSizes = [];
 
     
-    if (selected == "top" || selected == "dress" || selected == "outer") {
+    if (selected == "top" || selected == "outer") {
         accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length");
+    } else if (selected == "dress") {
+        accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width");
     } else if (selected == "pants") {
         accordingSizes = ["허리둘레", "엉덩이둘레", "밑위", "밑단", "총장"];
     } else if (selected == "skirt") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "총장"];
+        accordingSizes = ["허리둘레", "엉덩이둘레", "총장", "hem width"];
     } else if (selected == "shoes") {
         accordingSizes = ["굽높이"];
     } else if (selected == "jewerly" || selected == "etc." || selected == "etc") {
@@ -2424,6 +2426,27 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
     }
     
     console.log(`✅ Created composition set ${setIndex}: ${setName}`);
+    
+    // 세트가 하나만 있는 경우 원래 스타일로 복원
+    setTimeout(() => {
+        if (window.compositionSets && window.compositionSets.length === 1) {
+            const container = document.getElementById('composition_sets_container');
+            if (container) {
+                const compositionSet = container.querySelector('.composition_set');
+                if (compositionSet) {
+                    compositionSet.style.backgroundColor = 'transparent';
+                    compositionSet.style.borderRadius = '0';
+                    compositionSet.style.padding = '0';
+                    compositionSet.style.marginBottom = '0';
+                }
+                
+                const setHeader = container.querySelector('.composition_set_header');
+                if (setHeader) {
+                    setHeader.classList.add('hidden');
+                }
+            }
+        }
+    }, 10);
 }
 
 // composition 세트 제거
@@ -2471,6 +2494,27 @@ function refreshCompositionSets() {
             }
         });
     });
+    
+    // 세트가 하나만 남은 경우 원래 스타일로 복원
+    if (sets.length === 1) {
+        const container = document.getElementById('composition_sets_container');
+        if (container) {
+            // composition_set 스타일 제거
+            const compositionSet = container.querySelector('.composition_set');
+            if (compositionSet) {
+                compositionSet.style.backgroundColor = 'transparent';
+                compositionSet.style.borderRadius = '0';
+                compositionSet.style.padding = '0';
+                compositionSet.style.marginBottom = '0';
+            }
+            
+            // 세트 헤더 숨김
+            const setHeader = container.querySelector('.composition_set_header');
+            if (setHeader) {
+                setHeader.classList.add('hidden');
+            }
+        }
+    }
 }
 
 // composition 세트 이름 업데이트
@@ -2691,7 +2735,9 @@ function populateItemView(item) {
             sizeText = item.size_region ? `${item.size_region} ${item.size}` : item.size;
         }
         sizeElement.textContent = sizeText;
-        sizeElement.classList.remove('hidden');
+        sizeElement.style.display = ''; // 인라인 스타일 제거
+        sizeElement.classList.remove('hidden', 'item-size-hidden');
+        sizeElement.classList.add('item-size');
     }
     
     // Measurement 표시
@@ -3232,10 +3278,13 @@ function updateSizeDisplay(item) {
                 final_sizeText: sizeText
             });
             sizeElement.textContent = sizeText;
+            sizeElement.style.display = ''; // 인라인 스타일 제거
+            sizeElement.classList.remove('hidden', 'item-size-hidden');
             sizeElement.classList.add('item-size');
             console.log('Updated size display:', sizeText);
         } else {
             // 사이즈 정보가 없으면 숨김
+            sizeElement.classList.remove('item-size');
             sizeElement.classList.add('item-size-hidden');
             console.log('No size information, hiding size element');
         }
@@ -3322,6 +3371,11 @@ function updateSeasonAndPurchaseDisplay(item) {
     // 기존 season과 purchase year 정보 제거
     const existingDetails = compositionContainer.querySelectorAll('.detail_section');
     existingDetails.forEach(detail => detail.remove());
+    
+    // Composition과 Season 사이 구분선 추가
+    const dividerLine = document.createElement('div');
+    dividerLine.className = 'composition-season-divider';
+    compositionContainer.appendChild(dividerLine);
     
     // Season 표시 (composition 아래 40px)
     if (item.season && item.season.toString().trim() !== '') {
@@ -3486,6 +3540,9 @@ function createDressMeasurement(container, measurements, subcategory, subcategor
     if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('mini')) {
         console.log('✅ Using createDressShortSleeveMiniMeasurement');
         createDressShortSleeveMiniMeasurement(container, measurements);
+    } else if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('long')) {
+        console.log('✅ Using createDressShortSleeveLongMeasurement');
+        createDressShortSleeveLongMeasurement(container, measurements);
     } else {
         console.log('⚠️ Using fallback createTopMeasurement for dress');
         // 기본 dress 처리 (현재는 top과 동일)
@@ -3508,16 +3565,61 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
         { key: 'sleeve', label: '소매', guideline: 'measurement_dress_short sleeve, mini_sleeve.svg' },
         { key: 'sleeveOpening', label: '소매단', guideline: 'measurement_dress_short sleeve, mini_sleeveOpening.svg' },
         { key: 'armhole', label: '암홀', guideline: 'measurement_dress_short sleeve, mini_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_dress_short sleeve, mini_waist.svg' },
         { key: 'length', label: '총장', guideline: 'measurement_dress_short sleeve, mini_length.svg' },
-        { key: 'waist', label: '허리', guideline: 'measurement_dress_short sleeve, mini_waist.svg' }
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_dress_short sleeve, mini_hemWidth.svg' }
     ];
     
     measurementMap.forEach(item => {
-        if (measurements && measurements[item.key]) {
+        // Check for both camelCase (sleeveOpening) and display text (sleeve opening) formats
+        const measurementValue = measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()];
+        
+        if (measurements && measurementValue) {
             // 수치 박스 생성
             const box = document.createElement('div');
             box.className = `box ${item.key} short-sleeve-mini-dress`;
-            box.textContent = measurements[item.key];
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Short Sleeve Long Dress 카테고리 measurement 생성
+function createDressShortSleeveLongMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/dress_short sleeve, long.png';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // short sleeve long dress measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_dress_short sleeve, long_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_dress_short sleeve, long_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_dress_short sleeve, long_sleeve.svg' },
+        { key: 'sleeveOpening', label: '소매단', guideline: 'measurement_dress_short sleeve, long_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_dress_short sleeve, long_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_dress_short sleeve, long_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_dress_short sleeve, long_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_dress_short sleeve, long_hemWidth.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        // Check for both camelCase (hemWidth) and display text (hem width) formats
+        const measurementValue = measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()];
+        
+        if (measurements && measurementValue) {
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} short-sleeve-long-dress`;
+            box.textContent = measurementValue;
             container.appendChild(box);
             
             // 가이드라인 이미지 생성
