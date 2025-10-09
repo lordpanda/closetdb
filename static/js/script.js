@@ -463,8 +463,12 @@ function displayAllItems() {
 /* add */
 
 window.onload = function() {
-    // 새로운 이미지 모드 토글 설정
-    setupImageModeToggle();
+    // 이미지 모드 토글 설정 (중복 호출 방지를 위해 조건부)
+    const modeToggle = document.getElementById('image_mode_switch');
+    if (modeToggle && !modeToggle.hasAttribute('data-initialized')) {
+        setupImageModeToggle();
+        modeToggle.setAttribute('data-initialized', 'true');
+    }
 }
 
 // 이미지 모드 토글 설정
@@ -474,6 +478,20 @@ function setupImageModeToggle() {
     const individualMode = document.getElementById('individual_mode');
     
     if (!modeToggle || !stitchedMode || !individualMode) return;
+    
+    // 초기 상태 설정 (default: individual mode)
+    console.log('🎛️ Setting up image mode toggle - default to individual mode');
+    stitchedMode.classList.add('hidden');
+    individualMode.classList.remove('hidden');
+    modeToggle.checked = false; // unchecked = individual mode
+    modeToggle.setAttribute('data-initialized', 'true');
+    
+    // Individual 모드의 + 버튼이 보이도록 확실히 설정
+    const individualAddButton = individualMode.querySelector('.add_image');
+    if (individualAddButton) {
+        individualAddButton.classList.remove('hidden');
+        console.log('➕ Individual add button made visible on init');
+    }
     
     // 토글 스위치 변경 이벤트
     modeToggle.addEventListener('change', function() {
@@ -1091,6 +1109,9 @@ function editItem() {
 function initEditPage() {
     console.log('🔧 Initializing edit page...');
     
+    // 이미지 모드 토글 설정 - 페이지 로드 시 바로 설정
+    setupImageModeToggle();
+    
     const urlParams = new URLSearchParams(window.location.search);
     const itemId = urlParams.get('id');
     
@@ -1655,6 +1676,14 @@ function collectEditFormData() {
     
     // Composition 데이터 수집 (다중 세트 모드 지원)
     console.log('🧪 Collecting composition data for edit mode');
+    
+    // 디버깅: composition DOM 요소들 확인
+    const allCompositionInputs = document.querySelectorAll('.composition_input');
+    console.log('🔍 Total composition inputs found:', allCompositionInputs.length);
+    allCompositionInputs.forEach((input, i) => {
+        console.log(`Input ${i}:`, { value: input.value, id: input.id, className: input.className });
+    });
+    
     let compositions;
     
     if (window.usingMultiSets && window.compositionSets && window.compositionSets.length > 0) {
@@ -1808,10 +1837,24 @@ function readImages() {
     var files = document.querySelector('input[class="file_uploader"]').files;
     var container = document.querySelector("#individual_mode");
     
+    console.log('📁 readImages called with files:', files.length);
+    console.log('📦 Individual container found:', !!container);
+    console.log('👁️ Container hidden:', container?.classList.contains('hidden'));
+    console.log('🔍 Container classes:', container?.className);
+    console.log('🔍 Container visibility:', container?.style.display);
+    
     // Individual 모드인지 확인
     const isIndividualMode = container && !container.classList.contains('hidden');
+    console.log('🔍 Is individual mode:', isIndividualMode);
+    
+    // 디버깅을 위해 + 버튼 상태도 확인
+    const addButton = container?.querySelector('.add_image');
+    console.log('➕ Add button found:', !!addButton);
+    console.log('➕ Add button classes:', addButton?.className);
+    console.log('➕ Add button hidden:', addButton?.classList.contains('hidden'));
     
     if (isIndividualMode) {
+        console.log('✅ Using individual mode logic');
         // Individual 모드: 대표 이미지 선택 기능 포함
         if (!window.individualFiles) {
             window.individualFiles = [];
@@ -1821,6 +1864,8 @@ function readImages() {
         mainImageIndex = 0; // 첫 번째가 기본 메인
         
         for (let i = 0; i < files.length; i++) {
+            console.log(`🖼️ Creating preview ${i + 1}/${files.length} for file:`, files[i].name);
+            
             const preview = document.createElement('div');
             preview.className = "preview_image";
             if (i === 0) preview.classList.add('main_image');
@@ -1828,6 +1873,8 @@ function readImages() {
             const currentImageUrl = URL.createObjectURL(files[i]);
             const img = document.createElement("img");
             img.src = currentImageUrl;
+            
+            console.log(`📷 Created image element with URL:`, currentImageUrl);
             
             // 메인 이미지 배지 추가
             const badge = document.createElement('div');
@@ -1844,7 +1891,11 @@ function readImages() {
             
             // Individual mode에서는 해당 컨테이너 내의 add_image 앞에 추가
             const addImage = container.querySelector(".add_image");
+            console.log(`📦 Add image element found:`, !!addImage);
+            console.log(`➕ Inserting preview before add button`);
             addImage.before(preview);
+            
+            console.log(`✅ Preview ${i + 1} added to DOM`);
             
             // 클릭 이벤트: 대표 이미지 설정 또는 제거
             preview.addEventListener('click', () => {
@@ -1858,6 +1909,7 @@ function readImages() {
             });
         }
     } else {
+        console.log('⚠️ Using fallback mode (not individual mode)');
         // 기존 일반 모드
         for (let i = 0; i < files.length; i++) {
             const preview = document.createElement('div');
@@ -3540,6 +3592,9 @@ function createDressMeasurement(container, measurements, subcategory, subcategor
     if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('mini')) {
         console.log('✅ Using createDressShortSleeveMiniMeasurement');
         createDressShortSleeveMiniMeasurement(container, measurements);
+    } else if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('midi')) {
+        console.log('✅ Using createDressShortSleeveMidiMeasurement');
+        createDressShortSleeveMidiMeasurement(container, measurements);
     } else if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('long')) {
         console.log('✅ Using createDressShortSleeveLongMeasurement');
         createDressShortSleeveLongMeasurement(container, measurements);
@@ -3578,6 +3633,47 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
             // 수치 박스 생성
             const box = document.createElement('div');
             box.className = `box ${item.key} short-sleeve-mini-dress`;
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Short Sleeve Midi Dress 카테고리 measurement 생성
+function createDressShortSleeveMidiMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/dress_short sleeve, midi.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // short sleeve midi dress measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_dress_short sleeve, midi_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_dress_short sleeve, midi_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_dress_short sleeve, midi_sleeve.svg' },
+        { key: 'sleeveOpening', label: '소매단', guideline: 'measurement_dress_short sleeve, midi_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_dress_short sleeve, midi_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_dress_short sleeve, midi_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_dress_short sleeve, midi_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_dress_short sleeve, midi_hemWidth.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        // Check for both camelCase (hemWidth) and display text (hem width) formats
+        const measurementValue = measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()];
+        
+        if (measurements && measurementValue) {
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} short-sleeve-midi-dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -4068,6 +4164,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Add page에서 copy & paste, drag & drop 기능 초기화
     if (window.location.pathname.includes('add.html')) {
+        setupImageModeToggle(); // 이미지 모드 토글 설정 추가
         setupImagePasteAndDrop();
         loadExistingBrandsForAutocomplete();
     }
