@@ -509,15 +509,39 @@ def proxy_image():
     
     try:
         import requests
-        logging.info(f"🔄 Fetching image from: {image_url}")
+        import urllib.parse
+        
+        # URL의 파일명 부분만 인코딩 시도
+        parsed_url = urllib.parse.urlparse(image_url)
+        encoded_path = urllib.parse.quote(parsed_url.path, safe='/-._~')
+        encoded_url = urllib.parse.urlunparse((
+            parsed_url.scheme,
+            parsed_url.netloc,
+            encoded_path,
+            parsed_url.params,
+            parsed_url.query,
+            parsed_url.fragment
+        ))
+        
+        logging.info(f"🔄 Original URL: {image_url}")
+        logging.info(f"🔄 Encoded URL: {encoded_url}")
         
         # User-Agent 헤더 추가
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        response = requests.get(image_url, timeout=10, headers=headers)
-        response.raise_for_status()
-        logging.info(f"✅ Image fetched successfully, status: {response.status_code}, size: {len(response.content)} bytes")
+        
+        # 먼저 인코딩된 URL로 시도
+        try:
+            response = requests.get(encoded_url, timeout=10, headers=headers)
+            response.raise_for_status()
+            logging.info(f"✅ Image fetched successfully with encoded URL, status: {response.status_code}, size: {len(response.content)} bytes")
+        except Exception as e:
+            logging.warning(f"⚠️ Encoded URL failed, trying original URL: {e}")
+            # 인코딩된 URL이 실패하면 원본 URL로 재시도
+            response = requests.get(image_url, timeout=10, headers=headers)
+            response.raise_for_status()
+            logging.info(f"✅ Image fetched successfully with original URL, status: {response.status_code}, size: {len(response.content)} bytes")
         
         # 적절한 Content-Type 헤더 설정
         content_type = response.headers.get('Content-Type', 'image/jpeg')
