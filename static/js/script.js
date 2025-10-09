@@ -3191,13 +3191,13 @@ function loadItemDetails() {
                             return { fixed: url, original: url };
                         });
                         
-                        // 첫 번째 이미지로 URL 접근성 테스트
-                        console.log('🔍 Testing URL accessibility...');
+                        // 첫 번째 이미지로 URL 접근성 테스트 (프록시를 통해 테스트)
+                        console.log('🔍 Testing URL accessibility via proxy...');
                         const testImg = new Image();
                         let urlTestComplete = false;
                         
                         testImg.onload = () => {
-                            console.log('✅ Fixed URLs are accessible');
+                            console.log('✅ URLs are accessible via proxy');
                             // 수정된 URL 사용
                             item.images = fixedImages.map(img => img.fixed);
                             urlTestComplete = true;
@@ -3216,7 +3216,7 @@ function loadItemDetails() {
                         };
                         
                         testImg.onerror = () => {
-                            console.log('❌ Fixed URLs not accessible, using original URLs');
+                            console.log('❌ URLs not accessible even via proxy, using original URLs');
                             // 원본 URL 사용
                             item.images = originalImages;
                             fixedImages = originalImages.map(url => ({ fixed: url, original: url }));
@@ -3226,7 +3226,10 @@ function loadItemDetails() {
                         };
                         
                         if (fixedImages && fixedImages.length > 0 && fixedImages[0].fixed) {
-                            testImg.src = fixedImages[0].fixed;
+                            // 프록시를 통해 URL 테스트
+                            const proxyTestUrl = `/proxy_image?url=${encodeURIComponent(fixedImages[0].fixed)}`;
+                            console.log('🔗 Testing via proxy URL:', proxyTestUrl);
+                            testImg.src = proxyTestUrl;
                         } else {
                             console.log('❌ No fixed images available for testing');
                             urlTestComplete = true;
