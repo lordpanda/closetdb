@@ -6,7 +6,7 @@ Werkzeug==3.0.3
 supabase==2.3.4
 
 # Environment & Configuration
-python-dotenv==1.0.1
+python-dotenv==1.1.1
 
 # Cloud Storage & AWS
 boto3==1.34.34
