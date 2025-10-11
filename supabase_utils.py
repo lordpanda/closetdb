@@ -150,8 +150,8 @@ class SupabaseDB:
     def update_item(self, item_id, updated_data):
         """아이템 업데이트"""
         try:
-            print(f"🔄 Starting update for item {item_id}")
-            print(f"📊 Raw updated_data: {updated_data}")
+            print(f"Starting update for item {item_id}")
+            print(f"Raw updated_data: {updated_data}")
             
             # ID는 업데이트 데이터에서 제거
             if 'id' in updated_data:
@@ -160,13 +160,13 @@ class SupabaseDB:
             # composition 데이터 특별 처리
             if 'compositions' in updated_data:
                 compositions = updated_data['compositions']
-                print(f"🧪 Compositions in update data: {compositions} (type: {type(compositions)})")
+                print(f"Compositions in update data: {compositions} (type: {type(compositions)})")
                 
                 # composition은 빈 객체라도 유효한 업데이트로 처리 (기존 데이터 삭제/초기화 목적)
                 if isinstance(compositions, (dict, list)):
-                    print(f"✅ Compositions data (including empty): {compositions}")
+                    print(f"Compositions data (including empty): {compositions}")
                 else:
-                    print(f"❌ Invalid compositions type: {type(compositions)}")
+                    print(f"Invalid compositions type: {type(compositions)}")
                         
             # 빈 값들 제거 (None, 빈 문자열 제외)
             cleaned_data = {}
@@ -175,7 +175,7 @@ class SupabaseDB:
                     # compositions는 빈 객체라도 포함
                     if k == 'compositions':
                         cleaned_data[k] = v
-                        print(f"🧪 Including compositions in cleaned data: {v}")
+                        print(f"Including compositions in cleaned data: {v}")
                     # 리스트나 딕셔너리는 별도 처리
                     elif isinstance(v, (list, dict)):
                         if v:  # 빈 리스트나 딕셔너리가 아닌 경우만
@@ -183,38 +183,38 @@ class SupabaseDB:
                     else:
                         cleaned_data[k] = v
                         
-            print(f"🧹 Cleaned data for update: {cleaned_data}")
+            print(f"Cleaned data for update: {cleaned_data}")
             
             # REST API 호출
             url = f"{self.url}/rest/v1/closet_items?item_id=eq.{item_id}"
             response = requests.patch(url, headers=self.headers, json=cleaned_data)
             
             if response.status_code in [200, 204]:  # Both 200 and 204 are success
-                print(f"✅ Item {item_id} updated successfully (status: {response.status_code})")
+                print(f"Item {item_id} updated successfully (status: {response.status_code})")
                 
                 # 204 No Content인 경우 업데이트된 데이터 다시 조회
                 if response.status_code == 204:
                     updated_item = self.get_item_by_id(item_id)
                     if updated_item:
-                        print(f"📦 Updated result: {updated_item.get('item_id', 'no-id')}")
+                        print(f"Updated result: {updated_item.get('item_id', 'no-id')}")
                         return updated_item
                     else:
-                        print(f"✅ Update successful but could not retrieve updated item")
+                        print(f"Update successful but could not retrieve updated item")
                         return {'success': True}
                 else:
                     # 200 OK인 경우
                     data = response.json()
                     if data:
-                        print(f"📦 Updated result: {data[0]}")
+                        print(f"Updated result: {data[0]}")
                         return data[0]
                     else:
                         return {'success': True}
             else:
-                print(f"❌ Update failed: {response.status_code} - {response.text}")
+                print(f"Update failed: {response.status_code} - {response.text}")
                 return None
                 
         except Exception as e:
-            print(f"❌ Error updating item {item_id}: {e}")
+            print(f"Error updating item {item_id}: {e}")
             raise e
 
 # 전역 인스턴스

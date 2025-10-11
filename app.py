@@ -110,26 +110,26 @@ def view_all():
 @app.route('/api/items')
 def get_items():
     try:
-        logging.info("🔍 API request for all items")
-        print(f"🔍 DB object type: {type(db)}")
+        logging.info("API request for all items")
+        print(f"DB object type: {type(db)}")
         
         if db is None:
-            logging.error("❌ DB object is None")
+            logging.error("DB object is None")
             return jsonify({'items': [], 'error': 'Database not initialized'}), 500
             
         items = db.get_all_items()
-        logging.info(f"📊 Retrieved {len(items)} items from database")
-        print(f"📊 Retrieved {len(items)} items from database")
+        logging.info(f"Retrieved {len(items)} items from database")
+        print(f"Retrieved {len(items)} items from database")
         
         # 첫 번째 아이템 로깅 (있다면)
         if items:
-            logging.info(f"📝 First item: {items[0].get('item_id', 'no-id')} - {items[0].get('brand', 'no-brand')}")
-            print(f"📝 First item: {items[0].get('item_id', 'no-id')} - {items[0].get('brand', 'no-brand')}")
+            logging.info(f"First item: {items[0].get('item_id', 'no-id')} - {items[0].get('brand', 'no-brand')}")
+            print(f"First item: {items[0].get('item_id', 'no-id')} - {items[0].get('brand', 'no-brand')}")
         
         return jsonify({'items': items}), 200
     except Exception as e:
         logging.error(f"Error fetching items: {e}")
-        print(f"❌ Error fetching items: {e}")
+        print(f"Error fetching items: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
@@ -140,16 +140,16 @@ def get_item(item_id):
         # Supabase 아이템인지 확인
         if item_id.startswith('supabase_'):
             actual_id = item_id.replace('supabase_', '')
-            logging.info(f"🔍 Getting item with actual_id: {actual_id}")
+            logging.info(f"Getting item with actual_id: {actual_id}")
             item = db.get_item_by_id(actual_id)
             
             if item:
-                logging.info(f"✅ Found item: {item.get('item_id', 'no-id')}")
-                logging.info(f"🖼️ Item images: {item.get('images', [])} (length: {len(item.get('images', []))})")
-                logging.info(f"🖼️ Item thumbnail: {item.get('thumbnail_url', 'None')}")
+                logging.info(f"Found item: {item.get('item_id', 'no-id')}")
+                logging.info(f"Item images: {item.get('images', [])} (length: {len(item.get('images', []))})")
+                logging.info(f"Item thumbnail: {item.get('thumbnail_url', 'None')}")
                 return jsonify({'item': item}), 200
             else:
-                logging.warning(f"❌ Item {actual_id} not found in database")
+                logging.warning(f"Item {actual_id} not found in database")
                 return jsonify({'error': 'Item not found'}), 404
         else:
             # 기존 더미 데이터는 빈 응답

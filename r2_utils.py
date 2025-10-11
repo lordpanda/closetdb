@@ -72,7 +72,7 @@ class CloudflareR2:
         이미지 파일을 R2에 업로드하고 공개 URL 반환
         """
         try:
-            print(f"🔄 Starting upload: {filename}")
+            print(f"Starting upload: {filename}")
             
             # 파일명 안전화
             safe_filename = self.sanitize_filename(filename)
@@ -81,11 +81,11 @@ class CloudflareR2:
             if hasattr(file, 'stream'):
                 # ImageProcessor에서 생성된 파일 객체
                 file_obj = file.stream
-                print(f"📁 Using stream from ImageProcessor file object")
+                print(f"Using stream from ImageProcessor file object")
             elif hasattr(file, 'read'):
                 # Flask 파일 객체 또는 일반 파일 객체
                 file_obj = file
-                print(f"📁 Using direct file object")
+                print(f"Using direct file object")
             else:
                 raise ValueError("Invalid file object")
             
@@ -95,9 +95,9 @@ class CloudflareR2:
                 file_obj.seek(0, 2)  # 끝으로 이동
                 file_size = file_obj.tell()
                 file_obj.seek(current_pos)  # 원래 위치로 복원
-                print(f"📏 File size: {file_size:,} bytes")
+                print(f"File size: {file_size:,} bytes")
             
-            print(f"📤 Uploading to R2 bucket: {self.bucket_name}")
+            print(f"Uploading to R2 bucket: {self.bucket_name}")
             
             # 파일을 R2에 업로드 (안전화된 파일명 사용)
             self.s3_client.upload_fileobj(
@@ -107,16 +107,16 @@ class CloudflareR2:
                 ExtraArgs={'ContentType': 'image/jpeg'}  # 기본값, 실제로는 파일 타입에 따라 변경 가능
             )
             
-            print(f"✅ Upload successful to R2")
+            print(f"Upload successful to R2")
             
             # 공개 URL 생성 (R2 Public Development URL - 안전화된 파일명 사용)
             public_url = f"{self.public_url}/{safe_filename}"
-            print(f"🔗 Generated public URL: {public_url}")
+            print(f"Generated public URL: {public_url}")
             
             return public_url
             
         except Exception as e:
-            print(f"❌ Error uploading to R2: {e}")
+            print(f"Error uploading to R2: {e}")
             import traceback
             traceback.print_exc()
             return None
