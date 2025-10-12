@@ -437,7 +437,7 @@
 }
 
 /* Composition과 Season 사이 구분선 */
-.composition-season-divider {
+.composition_season_divider {
     width: 40px;
     height: 1px;
     background-color: var(--darkgray);

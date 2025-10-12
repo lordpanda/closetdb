@@ -144,8 +144,8 @@ function displayGlobalMenu(parm1) {
     <div class="hamburger"><div></div></div>
     <ul class="menu">
         <li><a class="`+activeItem[0]+`" href="#" id="view-all-link">View all</a></li>
-        <li><a class="`+activeItem[1]+`" href="#" id="filter-link">Filter items</a></li>
-        <li><a class="`+activeItem[2]+`" href="#" id="add-new-link">Add new</a></li>
+        <li><a class="`+activeItem[1]+`" href="#" id="filter-link">Filter</a></li>
+        <li><a class="`+activeItem[2]+`" href="#" id="add-new-link">Add</a></li>
     </ul>
     `);
 }
@@ -3349,7 +3349,7 @@ function updateSeasonAndPurchaseDisplay(item) {
     
     // Composition과 Season 사이 구분선 추가
     const dividerLine = document.createElement('div');
-    dividerLine.className = 'composition-season-divider';
+    dividerLine.className = 'composition_season_divider';
     compositionContainer.appendChild(dividerLine);
     
     // Season 표시 (composition 아래 40px)
