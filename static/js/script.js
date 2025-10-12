@@ -13,27 +13,27 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log('🔐 Login successful!', data);
+                    console.log('Login successful!', data);
                     
                     // 토큰이 있으면 저장
                     if (data.token) {
-                        console.log('💾 Saving token:', data.token);
+                        console.log('Saving token:', data.token);
                         sessionStorage.setItem('userToken', data.token);
                     } else {
-                        console.log('⚠️ No token in response, creating dummy token');
+                        console.log('No token in response, creating dummy token');
                         sessionStorage.setItem('userToken', 'logged_in_' + Date.now());
                     }
                     
                     // 로그인 전에 저장된 목표 URL이 있으면 그곳으로, 없으면 메인으로
                     const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-                    console.log('🔍 Checking for saved redirect URL:', redirectUrl);
+                    console.log('Checking for saved redirect URL:', redirectUrl);
                     
                     if (redirectUrl) {
-                        console.log("🎯 Redirecting to saved URL:", redirectUrl);
+                        console.log("Redirecting to saved URL:", redirectUrl);
                         sessionStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
                         window.location.href = redirectUrl;
                     } else {
-                        console.log("🏠 No saved URL, redirecting to main page");
+                        console.log("No saved URL, redirecting to main page");
                         window.location.href = '/';
                     }
                 } else {
@@ -95,20 +95,20 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (data.token) {
-                    console.log("🔐 Login successful! Received token: ", data.token);
+                    console.log("Login successful! Received token: ", data.token);
 
                     sessionStorage.setItem('userToken', data.token);  // Store token
 
                     // 로그인 전에 저장된 목표 URL이 있으면 그곳으로, 없으면 메인으로
                     const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-                    console.log('🔍 Checking for saved redirect URL:', redirectUrl);
+                    console.log('Checking for saved redirect URL:', redirectUrl);
                     
                     if (redirectUrl) {
-                        console.log("🎯 Redirecting to saved URL:", redirectUrl);
+                        console.log("Redirecting to saved URL:", redirectUrl);
                         sessionStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
                         window.location.href = redirectUrl;
                     } else {
-                        console.log("🏠 No saved URL, redirecting to main page");
+                        console.log("No saved URL, redirecting to main page");
                         window.location.href = '/'; // Redirect to the dashboard page
                     }
                 } else {
@@ -152,27 +152,27 @@ function displayGlobalMenu(parm1) {
 
 // 모든 메뉴 링크에 이벤트 리스너 추가
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔧 Setting up menu link event listeners');
+    console.log('Setting up menu link event listeners');
     
     // 현재 페이지가 로그인이 필요한 페이지인지 확인
     const currentPath = window.location.pathname;
     const protectedPages = ['/index.html', '/add.html', '/edit.html', '/filter.html', '/all.html', '/item.html'];
     const isProtectedPage = protectedPages.includes(currentPath);
     
-    console.log('🔍 Current path:', currentPath);
-    console.log('🔒 Is protected page:', isProtectedPage);
+    console.log('Current path:', currentPath);
+    console.log('Is protected page:', isProtectedPage);
     
     if (isProtectedPage) {
-        console.log('🔒 Protected page detected, checking login status...');
+        console.log('Protected page detected, checking login status...');
         const token = sessionStorage.getItem('userToken');
-        console.log('🔑 Token check:', token ? 'EXISTS' : 'NOT_EXISTS');
+        console.log('Token check:', token ? 'EXISTS' : 'NOT_EXISTS');
         
         if (!token || (!token.startsWith('authenticated_') && !token.startsWith('google_auth_') && !token.startsWith('logged_in_'))) {
             console.log('❌ Not logged in on protected page, redirecting to landing');
             window.location.href = '/';
             return;
         } else {
-            console.log('✅ User is logged in, allowing access to protected page');
+            console.log('User is logged in, allowing access to protected page');
         }
     }
     
@@ -181,10 +181,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // closetDB 로고 링크
         const logoLink = document.getElementById('logo-link');
         if (logoLink) {
-            console.log('✅ Found logo link, attaching event');
+            console.log('Found logo link, attaching event');
             logoLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('🏠 Logo clicked!');
+                console.log('Logo clicked!');
                 checkLoginAndRedirect('/index.html');
             });
         }
@@ -192,10 +192,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // View all 링크
         const viewAllLink = document.getElementById('view-all-link');
         if (viewAllLink) {
-            console.log('✅ Found view all link, attaching event');
+            console.log('Found view all link, attaching event');
             viewAllLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('👀 View all clicked!');
+                console.log('View all clicked!');
                 checkLoginAndRedirect('./all.html');
             });
         }
@@ -203,10 +203,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Filter 링크
         const filterLink = document.getElementById('filter-link');
         if (filterLink) {
-            console.log('✅ Found filter link, attaching event');
+            console.log('Found filter link, attaching event');
             filterLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('🔍 Filter clicked!');
+                console.log('Filter clicked!');
                 checkLoginAndRedirect('./filter.html');
             });
         }
@@ -214,34 +214,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add new 링크
         const addNewLink = document.getElementById('add-new-link');
         if (addNewLink) {
-            console.log('✅ Found Add new link, attaching event');
+            console.log('Found Add new link, attaching event');
             addNewLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('➕ Add new clicked!');
+                console.log('Add new clicked!');
                 checkLoginAndRedirect('/add.html');
             });
         }
         
-        console.log('🔧 All menu link event listeners set up');
+        console.log('All menu link event listeners set up');
     }, 100);
 });
 
 // 구글 로그인 시작 함수
 function initiateGoogleLogin() {
-    console.log('🔐 Starting Google OAuth login');
+    console.log('Starting Google OAuth login');
     
     // 현재 저장된 리다이렉트 URL 확인
     const savedRedirectUrl = sessionStorage.getItem('redirectAfterLogin');
-    console.log('📋 Current saved redirect URL:', savedRedirectUrl);
+    console.log('Current saved redirect URL:', savedRedirectUrl);
     
     // 목표 URL이 없으면 기본값 설정
     if (!savedRedirectUrl) {
-        console.log('📝 Setting default redirect URL to /add.html');
+        console.log('Setting default redirect URL to /add.html');
         sessionStorage.setItem('redirectAfterLogin', '/add.html');
     }
     
     // 구글 OAuth로 리다이렉트 (절대 경로 사용)
-    console.log('🚀 Redirecting to Google OAuth');
+    console.log('Redirecting to Google OAuth');
     window.location.href = '/auth/google';
 }
 
@@ -264,26 +264,26 @@ function checkLoginAndRedirect(targetUrl) {
     // 세션에서 토큰 확인
     const token = sessionStorage.getItem('userToken');
     
-    console.log('🔍 Checking login status for URL:', targetUrl);
-    console.log('🔑 Token found:', token ? 'YES' : 'NO');
-    console.log('🔑 Token value:', token);
+    console.log('Checking login status for URL:', targetUrl);
+    console.log('Token found:', token ? 'YES' : 'NO');
+    console.log('Token value:', token);
     
     if (token && token.trim() !== '') {
         console.log('✅ Token exists, checking validity...');
         
         // 토큰이 유효한지 간단히 확인 (더미 토큰 형식 체크)
         if (token.startsWith('authenticated_') || token.startsWith('google_auth_') || token.startsWith('logged_in_')) {
-            console.log('✅ Token format valid, redirecting to:', targetUrl);
+            console.log('Token format valid, redirecting to:', targetUrl);
             window.location.href = targetUrl;
         } else {
-            console.log('❌ Invalid token format, clearing and redirecting to login');
+            console.log('Invalid token format, clearing and redirecting to login');
             sessionStorage.removeItem('userToken');
             sessionStorage.setItem('redirectAfterLogin', targetUrl);
             window.location.href = '/login.html';
         }
     } else {
         // 토큰이 없으면 목표 URL을 저장하고 로그인 페이지로 이동
-        console.log('❌ No token found, saving target URL and redirecting to login');
+        console.log('No token found, saving target URL and redirecting to login');
         sessionStorage.setItem('redirectAfterLogin', targetUrl);
         window.location.href = '/login.html';
     }
@@ -293,10 +293,10 @@ function displayRecentlyAdded() {
     var grid = document.querySelector(".grid_container"); 
     
     // Supabase에서 새로 추가된 아이템들 먼저 가져오기 (위쪽에 배치)
-    console.log('🔄 Fetching recently added items from /api/items');
+    console.log('Fetching recently added items from /api/items');
     fetch('/api/items')
         .then(response => {
-            console.log('📡 Response status:', response.status);
+            console.log('Response status:', response.status);
             return response.json();
         })
         .then(data => {
@@ -392,7 +392,7 @@ function displayAllItems() {
     console.log('🔄 Fetching all items from /api/items');
     fetch('/api/items')
         .then(response => {
-            console.log('📡 Response status:', response.status);
+            console.log('Response status:', response.status);
             return response.json();
         })
         .then(data => {
@@ -479,18 +479,17 @@ function setupImageModeToggle() {
     
     if (!modeToggle || !stitchedMode || !individualMode) return;
     
-    // 초기 상태 설정 (default: individual mode)
-    console.log('🎛️ Setting up image mode toggle - default to individual mode');
-    stitchedMode.classList.add('hidden');
-    individualMode.classList.remove('hidden');
-    modeToggle.checked = false; // unchecked = individual mode
+    // 초기 상태 설정 (default: stitched mode)
+    console.log('Setting up image mode toggle - default to stitched mode');
+    stitchedMode.classList.remove('hidden');
+    individualMode.classList.add('hidden');
+    modeToggle.checked = true; // checked = stitched mode
     modeToggle.setAttribute('data-initialized', 'true');
     
-    // Individual 모드의 + 버튼이 보이도록 확실히 설정
-    const individualAddButton = individualMode.querySelector('.add_image');
-    if (individualAddButton) {
-        individualAddButton.classList.remove('hidden');
-        console.log('➕ Individual add button made visible on init');
+    // Stitched 모드의 + 버튼이 보이도록 확실히 설정
+    const stitchedAddButton = stitchedMode.querySelector('.add_image');
+    if (stitchedAddButton) {
+        stitchedAddButton.classList.remove('hidden');
     }
     
     // 토글 스위치 변경 이벤트
@@ -505,10 +504,8 @@ function setupImageModeToggle() {
             const stitchedAddButton = stitchedMode.querySelector('.add_image');
             if (existingStitchedImage && stitchedAddButton) {
                 stitchedAddButton.classList.add('hidden');
-                console.log('🖼️ Hiding stitched add button - existing stitched image present');
-            } else if (stitchedAddButton) {
+                } else if (stitchedAddButton) {
                 stitchedAddButton.classList.remove('hidden');
-                console.log('➕ Showing stitched add button - no existing stitched image');
             }
         } else {
             // Unchecked = Individual Images mode
@@ -519,7 +516,6 @@ function setupImageModeToggle() {
             const individualAddButton = individualMode.querySelector('.add_image');
             if (individualAddButton) {
                 individualAddButton.classList.remove('hidden');
-                console.log('➕ Individual add button always visible - additional images can be uploaded');
             }
         }
     });
@@ -607,17 +603,14 @@ function readStitchedImage() {
     
     // 클릭시 제거하고 + 버튼 다시 표시
     preview.addEventListener('click', () => {
-        console.log('🖱️ Preview clicked - removing');
         preview.remove();
         if (addButton) {
             addButton.style.display = 'inline-block';
-            console.log('👁️ Add button shown again');
         }
         // section 선택 UI 숨기기
         const stitchedInfo = container.querySelector('.stitched_info');
         if (stitchedInfo) {
             stitchedInfo.style.display = 'none';
-            console.log('🙈 Section selection UI hidden');
         }
         const fileInput = document.querySelector('.file_uploader_stitched');
         if (fileInput) {
@@ -1493,8 +1486,6 @@ function displayExistingImages(images) {
 function submitEditForm(event) {
     event.preventDefault();
     
-    console.log('🔄 Edit form submission started');
-    
     const urlParams = new URLSearchParams(window.location.search);
     let itemId = urlParams.get('id');
     
@@ -1506,10 +1497,7 @@ function submitEditForm(event) {
     // supabase_ 접두사 제거 (실제 DB에는 숫자만 저장됨)
     if (itemId.startsWith('supabase_')) {
         itemId = itemId.replace('supabase_', '');
-        console.log('🔄 Removed supabase_ prefix, actual item_id:', itemId);
     }
-    
-    console.log('📝 Collecting edit form data...');
     
     // 기존 submitForm 로직을 재사용하되, 업데이트용으로 수정
     const formData = collectEditFormData();
@@ -1521,15 +1509,8 @@ function submitEditForm(event) {
     // 아이템 ID 추가
     formData.append('item_id', itemId);
     
-    // FormData 내용 디버깅
-    console.log('🔍 Final FormData contents:');
-    for (let [key, value] of formData.entries()) {
-        console.log(`   ${key}: ${value}`);
-    }
-    
     // 서버로 업데이트 요청
     const token = sessionStorage.getItem('userToken');
-    console.log('🔐 Using auth token:', token ? token.substring(0, 20) + '...' : 'none');
     
     const headers = {};
     if (token) {
@@ -1542,13 +1523,8 @@ function submitEditForm(event) {
         headers: headers
     })
     .then(response => {
-        console.log('🌐 Server response status:', response.status);
-        console.log('🌐 Server response headers:', response.headers);
-        
         // 먼저 텍스트로 응답을 받아서 로깅
         return response.text().then(text => {
-            console.log('📄 Raw server response:', text);
-            
             // 응답이 비어있는지 확인
             if (!text.trim()) {
                 throw new Error('Server returned empty response');
@@ -1558,31 +1534,25 @@ function submitEditForm(event) {
             try {
                 return JSON.parse(text);
             } catch (parseError) {
-                console.error('❌ JSON parse error:', parseError);
-                console.error('❌ Raw text that failed to parse:', text);
+                console.error('JSON parse error:', parseError);
                 throw new Error(`Invalid JSON response: ${parseError.message}`);
             }
         });
     })
     .then(data => {
-        console.log('📨 Server response data:', data);
-        
         if (data.error) {
-            console.error('❌ Server error:', data.error);
-            console.error('❌ Server error details:', data.details);
-            alert('서버 오류: ' + data.error + '\n\n자세한 정보는 콘솔을 확인하세요.');
+            console.error('Server error:', data.error);
+            alert('서버 오류: ' + data.error);
             return;
         }
         
-        console.log('✅ Update success:', data);
         alert('아이템이 성공적으로 업데이트되었습니다!');
         // 아이템 상세 페이지로 돌아가기 (supabase_ 접두사 추가)
         const redirectId = itemId.toString().startsWith('supabase_') ? itemId : `supabase_${itemId}`;
-        console.log('🔄 Redirecting to item page with ID:', redirectId);
         window.location.href = `/item.html?id=${redirectId}`;
     })
     .catch(error => {
-        console.error('❌ Network/Parse error:', error);
+        console.error('Network/Parse error:', error);
         alert('네트워크 오류가 발생했습니다: ' + error.message);
     });
 }
@@ -1592,14 +1562,11 @@ window.deletedImageUrls = window.deletedImageUrls || [];
 
 // 편집 폼 데이터 수집 (submitForm과 유사하지만 이미지는 선택사항)
 function collectEditFormData() {
-    console.log('🔍 Starting collectEditFormData for edit mode');
     const formData = new FormData();
     
     // 이미지 모드 확인 (새 이미지가 있는 경우에만 추가)
     const imageModeToggle = document.getElementById('image_mode_switch');
     const mode = imageModeToggle && imageModeToggle.checked ? 'stitched' : 'individual';
-    
-    console.log('📸 Image mode:', mode);
     
     let hasNewImages = false;
     
@@ -1675,19 +1642,9 @@ function collectEditFormData() {
     });
     
     // Composition 데이터 수집 (다중 세트 모드 지원)
-    console.log('🧪 Collecting composition data for edit mode');
-    
-    // 디버깅: composition DOM 요소들 확인
-    const allCompositionInputs = document.querySelectorAll('.composition_input');
-    console.log('🔍 Total composition inputs found:', allCompositionInputs.length);
-    allCompositionInputs.forEach((input, i) => {
-        console.log(`Input ${i}:`, { value: input.value, id: input.id, className: input.className });
-    });
-    
     let compositions;
     
     if (window.usingMultiSets && window.compositionSets && window.compositionSets.length > 0) {
-        console.log('🧪 Using multi-set mode for data collection');
         // 다중 세트 구조로 수집
         const validSets = window.compositionSets.filter(set => 
             set.compositions && Object.keys(set.compositions).length > 0
@@ -1747,8 +1704,6 @@ function collectEditFormData() {
     const purchaseYear = seasonInputs[1] ? seasonInputs[1].value : '';
     
     // 필수 데이터 유효성 검사 (이미지는 선택사항)
-    console.log('✅ Validating form data for edit mode (images optional)');
-    console.log('📊 Form data:', { category, brand, sizeRegion, size, compositions, hasNewImages });
     
     const missingFields = [];
     
@@ -1760,21 +1715,17 @@ function collectEditFormData() {
     const hasComposition = window.usingMultiSets 
         ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
         : ((Array.isArray(compositions) && compositions.length > 0) || (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0));
-    console.log('🧪 Composition validation:', { hasComposition, compositions, usingMultiSets: window.usingMultiSets });
     
     if (!hasBrand && !hasSize && !hasComposition) {
         missingFields.push('브랜드, 사이즈, 소재 중 최소 하나');
     }
     
-    console.log('🔍 Missing fields check:', missingFields);
     
     if (missingFields.length > 0) {
-        console.log('❌ Validation failed, missing fields:', missingFields);
-        alert(`❌ 다음 필수 항목을 입력해주세요:\n${missingFields.join(', ')}`);
+        alert(`다음 필수 항목을 입력해주세요:\n${missingFields.join(', ')}`);
         return null;
     }
     
-    console.log('✅ Edit form validation passed (no image requirement)');
     
     // FormData에 추가
     if (category) formData.append('category', category);
@@ -1786,13 +1737,6 @@ function collectEditFormData() {
     if (sizeEtc && sizeEtc.trim() !== '') formData.append('sizeEtc', sizeEtc);
     if (Object.keys(measurements).length > 0) formData.append('measurements', JSON.stringify(measurements));
     // Composition 데이터 추가 (배열이거나 객체일 수 있음)
-    console.log('🧪 Final composition data check:', { 
-        compositions, 
-        type: typeof compositions, 
-        isArray: Array.isArray(compositions),
-        length: Array.isArray(compositions) ? compositions.length : Object.keys(compositions || {}).length,
-        stringified: JSON.stringify(compositions)
-    });
     
     const hasCompositionData = window.usingMultiSets 
         ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
@@ -2872,31 +2816,34 @@ function submitForm(event) {
         }
     } else {
         // Individual 이미지 모드
-        // copy & paste와 파일 선택 둘 다 지원
-        if (window.individualFiles && window.individualFiles.length > 0) {
+        console.log('Checking individual files...');
+        
+        // 기존 파일 선택 방식을 우선으로 체크
+        const individualFiles = document.querySelector('.file_uploader').files;
+        console.log('File input files:', individualFiles.length);
+        
+        if (individualFiles.length > 0) {
+            for (let i = 0; i < individualFiles.length; i++) {
+                formData.append('individual_images', individualFiles[i]);
+                console.log('Added file:', individualFiles[i].name);
+            }
+            console.log('Sending', individualFiles.length, 'individual files (file input)');
+            hasImages = true;
+        } else if (window.individualFiles && window.individualFiles.length > 0) {
             // copy & paste로 추가된 이미지들 사용
             for (let i = 0; i < window.individualFiles.length; i++) {
                 formData.append('individual_images', window.individualFiles[i]);
+                console.log('Added window file:', window.individualFiles[i].name);
             }
-            console.log('📤 Sending', window.individualFiles.length, 'individual files (copy&paste + file select)');
+            console.log('Sending', window.individualFiles.length, 'individual files (window.individualFiles)');
             hasImages = true;
-        } else {
-            // 기존 파일 선택 방식
-            const individualFiles = document.querySelector('.file_uploader').files;
-            if (individualFiles.length > 0) {
-                for (let i = 0; i < individualFiles.length; i++) {
-                    formData.append('individual_images', individualFiles[i]);
-                }
-                console.log('📤 Sending', individualFiles.length, 'individual files (file select only)');
-                hasImages = true;
-            }
         }
         formData.append('main_image_index', mainImageIndex || 0);
     }
     
     // 이미지 유효성 검사
     if (!hasImages) {
-        alert('❌ 이미지를 추가해주세요!');
+        alert('이미지를 추가해주세요!');
         return;
     }
     
@@ -3029,7 +2976,7 @@ function submitForm(event) {
     }
     
     if (missingFields.length > 0) {
-        alert(`❌ 다음 필수 항목을 입력해주세요:\n${missingFields.join(', ')}`);
+        alert(`다음 필수 항목을 입력해주세요:\n${missingFields.join(', ')}`);
         return;
     }
     
@@ -3052,9 +2999,19 @@ function submitForm(event) {
     if (purchaseYear) formData.append('purchaseYear', purchaseYear);
     
     
+    // FormData 내용 디버깅
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+            console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+        } else {
+            console.log(`  ${key}: ${value}`);
+        }
+    }
+    
     // Flask 서버로 전송
     const token = sessionStorage.getItem('userToken');
-    console.log('🔐 Using auth token for add_item:', token ? token.substring(0, 20) + '...' : 'none');
+    console.log('Using auth token for add_item:', token ? token.substring(0, 20) + '...' : 'none');
     
     fetch('/add_item', {
         method: 'POST',
@@ -3514,7 +3471,7 @@ function updateMeasurementDisplay(item) {
 function createTopMeasurement(container, measurements) {
     // 베이스 이미지
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/measurement_top.svg';
+    baseImg.src = '/static/src/img/measurement/measurement_top.svg';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
@@ -3538,7 +3495,7 @@ function createTopMeasurement(container, measurements) {
             
             // 가이드라인 이미지 생성
             const guidelineImg = document.createElement('img');
-            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
             guidelineImg.setAttribute('data-measurement', item.key);
             container.appendChild(guidelineImg);
@@ -3550,7 +3507,7 @@ function createTopMeasurement(container, measurements) {
 function createTopLongSleeveMeasurement(container, measurements) {
     // 베이스 이미지 (long sleeve용)
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/top_long.png';
+    baseImg.src = '/static/src/img/measurement/top_long.svg';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
@@ -3575,7 +3532,7 @@ function createTopLongSleeveMeasurement(container, measurements) {
             
             // 가이드라인 이미지 생성
             const guidelineImg = document.createElement('img');
-            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
             guidelineImg.setAttribute('data-measurement', item.key);
             container.appendChild(guidelineImg);
@@ -3612,7 +3569,7 @@ function createDressMeasurement(container, measurements, subcategory, subcategor
 function createDressShortSleeveMiniMeasurement(container, measurements) {
     // 베이스 이미지
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/dress_short sleeve, mini.png';
+    baseImg.src = '/static/src/img/measurement/dress_short sleeve, mini.png';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
@@ -3641,7 +3598,7 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
             
             // 가이드라인 이미지 생성
             const guidelineImg = document.createElement('img');
-            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
             guidelineImg.setAttribute('data-measurement', item.key);
             container.appendChild(guidelineImg);
@@ -3653,7 +3610,7 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
 function createDressShortSleeveMidiMeasurement(container, measurements) {
     // 베이스 이미지
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/dress_short sleeve, midi.svg';
+    baseImg.src = '/static/src/img/measurement/dress_short sleeve, midi.svg';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
@@ -3682,7 +3639,7 @@ function createDressShortSleeveMidiMeasurement(container, measurements) {
             
             // 가이드라인 이미지 생성
             const guidelineImg = document.createElement('img');
-            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
             guidelineImg.setAttribute('data-measurement', item.key);
             container.appendChild(guidelineImg);
@@ -3694,7 +3651,7 @@ function createDressShortSleeveMidiMeasurement(container, measurements) {
 function createDressShortSleeveLongMeasurement(container, measurements) {
     // 베이스 이미지
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/dress_short sleeve, long.svg';
+    baseImg.src = '/static/src/img/measurement/dress_short sleeve, long.svg';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
@@ -3723,7 +3680,7 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
             
             // 가이드라인 이미지 생성
             const guidelineImg = document.createElement('img');
-            guidelineImg.src = `/static/src/img/${item.guideline}`;
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
             guidelineImg.setAttribute('data-measurement', item.key);
             container.appendChild(guidelineImg);

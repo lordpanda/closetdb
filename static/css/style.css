@@ -2,6 +2,10 @@
     box-sizing: border-box;
 }
 
+.hidden {
+    display: none !important;
+}
+
 :root {
     --black: #555555;
     --darkgray: #717171;
@@ -561,7 +565,7 @@ h1 {
 }
 
 .subheader {
-    padding: 30px 10px 10px 10px;
+    padding: 30px 15px 10px 15px;
     width: 100%;
     display: block;
 }
@@ -570,7 +574,7 @@ h1 {
     font-family: var(--header-normal), sans-serif;
     text-transform: lowercase;
     color: var(--black);
-    margin: 0.5em 0;
+    margin: 0.5em 0 0;
 }
 
 /* responsive image grid */

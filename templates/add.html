@@ -4,13 +4,13 @@
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.784.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@latest/dist/amazon-cognito-identity.min.js"></script>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.0"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.6"></script>
     <script src="{{ url_for('static', filename='js/db.js') }}?v=2.0"></script>
 
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/add.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
-    <title>Panda's' DressRoom</title>
+    <title>Panda's DressRoom</title>
 </head>
 
 <body>
@@ -20,7 +20,7 @@
             <script>displayGlobalMenu(2);</script>
         <div class="intro">
             <span class="main">Add items</span>
-            <span class="sub">to your closet</span>
+            <span class="sub">you bought</span>
         </div>
     </section>
     <div id="bg"></div>
@@ -35,12 +35,12 @@
                 <!-- 이미지 업로드 모드 토글 스위치 -->
                 <div class="image_mode_toggle">
                     <div class="toggle_switch_container">
-                        <span class="toggle_label_text">Individual Images</span>
+                        <!--<span class="toggle_label_text">Individual Images</span>-->
                         <label class="toggle_switch">
                             <input type="checkbox" name="image_mode" id="image_mode_switch" checked>
                             <span class="toggle_slider"></span>
                         </label>
-                        <span class="toggle_label_text">Stitched Image</span>
+                        <span class="toggle_label_text">Stitched</span>
                     </div>
                 </div>
                 
@@ -67,7 +67,7 @@
             </div>
 
             <!-- Individual Images Mode -->
-            <div class="container_images" id="individual_mode" style="display: none;">
+            <div class="container_images" id="individual_mode">
                 <div class="add_image clickable" onclick="document.querySelector('.file_uploader').click()">
                     <img src="/static/src/img/plus.png">
                     <input type="file" class="file_uploader" accept="image/*" multiple onchange="readImages()" style="display: none;">
@@ -174,7 +174,7 @@
             <div class="grid_container_tags">
                 <div class="tag_item">
                     <input type="checkbox" id="tag_occasion" name="tags" value="occasion wear">
-                    <label for="tag_occasion">Occasion Wear</label>
+                    <label for="tag_occasion">Occasion wear</label>
                 </div>
                 <div class="tag_item">
                     <input type="checkbox" id="tag_active" name="tags" value="activewear">
@@ -186,7 +186,7 @@
                 </div>
                 <div class="tag_item">
                     <input type="checkbox" id="tag_evening" name="tags" value="evening wear">
-                    <label for="tag_evening">Evening Wear</label>
+                    <label for="tag_evening">Evening wear</label>
                 </div>
             </div>
 

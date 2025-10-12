@@ -36,7 +36,28 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
 
 # Logging Configuration
 log_level = logging.DEBUG if os.getenv('FLASK_DEBUG') == 'True' else logging.INFO
-logging.basicConfig(level=log_level)
+logging.basicConfig(
+    level=log_level,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()  # 콘솔 출력 강제
+    ]
+)
+
+# Request logging (disabled for production)
+# @app.before_request
+# def log_request_info():
+#     import sys
+#     print(f"=== INCOMING REQUEST ===")
+#     print(f"Method: {request.method}")
+#     print(f"Path: {request.path}")
+#     print(f"URL: {request.url}")
+#     print(f"Headers: {dict(request.headers)}")
+#     if request.method == 'POST':
+#         print(f"Form keys: {list(request.form.keys())}")
+#         print(f"Files keys: {list(request.files.keys())}")
+#     print(f"========================")
+#     sys.stdout.flush()
 
 # Security Headers
 @app.after_request
@@ -64,6 +85,11 @@ google = oauth.register(
         'token_endpoint_auth_method': 'client_secret_post',
     },
 )
+
+# Test endpoint (can be removed in production)
+@app.route('/claude_test')
+def claude_test():
+    return "CLAUDE CLOSETDB SERVER - CORRECT SERVER"
 
 @app.route('/static/<path:filename>')
 def send_static(filename):
@@ -333,6 +359,14 @@ def add_item():
         
         logging.info(f"Image mode: {image_mode}")
         logging.info(f"Form files: {list(request.files.keys())}")
+        logging.info(f"Form data keys: {list(request.form.keys())}")
+        
+        # 각 파일의 상세 정보 로깅
+        for key, file in request.files.items():
+            if file.filename:
+                logging.info(f"File {key}: {file.filename} ({file.content_length or 'unknown size'} bytes)")
+            else:
+                logging.info(f"File {key}: No filename (empty file)")
         
         if image_mode == 'stitched':
             # Stitched 이미지 처리
@@ -370,6 +404,8 @@ def add_item():
                     thumbnail_url = None
             else:
                 logging.warning("No stitched image found")
+                logging.warning(f"stitched_file exists: {stitched_file is not None}")
+                logging.warning(f"stitched_file.filename: {stitched_file.filename if stitched_file else 'N/A'}")
                 image_urls = []
                 thumbnail_url = None
         else:
@@ -377,6 +413,13 @@ def add_item():
             individual_files = request.files.getlist('individual_images')
             logging.info(f"Individual files found: {len(individual_files)}")
             logging.info(f"Individual files with filenames: {[f.filename for f in individual_files if f.filename]}")
+            
+            # 각 individual 파일 상세 정보
+            for i, file in enumerate(individual_files):
+                if file.filename:
+                    logging.info(f"Individual file {i}: {file.filename} ({file.content_length or 'unknown size'} bytes)")
+                else:
+                    logging.info(f"Individual file {i}: No filename (empty file)")
             
             if individual_files and any(file.filename for file in individual_files):
                 try:
@@ -593,18 +636,18 @@ def update_item():
         # 기존 아이템 정보 가져오기 (문자열과 정수 둘 다 시도)
         existing_item = db.get_item_by_id(item_id)
         if not existing_item and item_id_int is not None:
-            logging.info(f"🔍 Trying with integer item_id: {item_id_int}")
+            logging.info(f"Trying with integer item_id: {item_id_int}")
             existing_item = db.get_item_by_id(item_id_int)
             if existing_item:
                 item_id = item_id_int  # 성공한 ID로 업데이트
         
-        logging.info(f"🔍 Found existing item: {existing_item is not None}")
+        logging.info(f"Found existing item: {existing_item is not None}")
         
         if not existing_item:
             # 디버깅을 위해 모든 아이템 ID 조회
             all_items = db.get_all_items()
             item_ids = [item.get('item_id') for item in all_items[:5]]  # 처음 5개만
-            logging.error(f"❌ Item not found. Searched for: '{item_id}'. Available item_ids (sample): {item_ids}")
+            logging.error(f"Item not found. Searched for: '{item_id}'. Available item_ids (sample): {item_ids}")
             return jsonify({'error': 'Item not found'}), 404
         
         # 이미지 처리 (새 이미지가 있는 경우에만)
@@ -612,29 +655,29 @@ def update_item():
         thumbnail_url = existing_item.get('thumbnail_url')
         
         image_mode = request.form.get('image_mode')
-        logging.info(f"🖼️ Image mode received: '{image_mode}'")
+        logging.info(f"Image mode received: '{image_mode}'")
         
         if image_mode:  # 새 이미지가 업로드된 경우
-            logging.info(f"🖼️ Processing new images in {image_mode} mode")
+            logging.info(f"Processing new images in {image_mode} mode")
             if image_mode == 'stitched':
                 stitched_file = request.files.get('stitched_image')
-                logging.info(f"🖼️ Stitched file received: {stitched_file is not None}")
-                logging.info(f"🖼️ Stitched filename: {stitched_file.filename if stitched_file else 'None'}")
+                logging.info(f"Stitched file received: {stitched_file is not None}")
+                logging.info(f"Stitched filename: {stitched_file.filename if stitched_file else 'None'}")
                 
                 if stitched_file and stitched_file.filename:
                     section_count = int(request.form.get('section_count', 2))
-                    logging.info(f"🖼️ Section count: {section_count}")
+                    logging.info(f"Section count: {section_count}")
                     
                     # 기존 이미지 삭제 (필요시)
                     
                     # Stitched 이미지 처리
                     try:
-                        logging.info(f"🔄 Starting stitched image processing with {section_count} sections")
+                        logging.info(f"Starting stitched image processing with {section_count} sections")
                         sections = ImageProcessor.split_stitched_image(stitched_file, section_count)
-                        logging.info(f"📐 Image split into {len(sections)} sections")
+                        logging.info(f"Image split into {len(sections)} sections")
                         
                         file_objects = ImageProcessor.create_file_objects(sections, item_id)
-                        logging.info(f"📁 Created {len(file_objects)} file objects")
+                        logging.info(f"Created {len(file_objects)} file objects")
                         
                         # 첫 번째 섹션으로 썸네일 생성 및 업로드
                         new_image_urls = []
@@ -888,4 +931,7 @@ def update_item():
         }), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    print("=== CLAUDE CLOSETDB SERVER STARTING ===")
+    print("=== THIS IS THE CORRECT SERVER ===")
+    print("=== RUNNING ON PORT 5000 ===")
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

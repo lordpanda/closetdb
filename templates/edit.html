@@ -4,7 +4,7 @@
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.784.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/amazon-cognito-identity-js@latest/dist/amazon-cognito-identity.min.js"></script>
 
-    <script src="{{ url_for('static', filename='js/script.js') }}?v=3.0"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.6"></script>
     <script src="{{ url_for('static', filename='js/db.js') }}?v=2.0"></script>
 
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
@@ -66,7 +66,7 @@
             </div>
 
             <!-- Individual Images Mode -->
-            <div class="container_images" id="individual_mode" style="display: none;">
+            <div class="container_images" id="individual_mode">
                 <div class="add_image clickable" onclick="document.querySelector('.file_uploader').click()">
                     <img src="/static/src/img/plus.png">
                     <input type="file" class="file_uploader" accept="image/*" multiple onchange="readImages()" style="display: none;">
