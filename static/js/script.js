@@ -154,6 +154,10 @@ function displayGlobalMenu(parm1) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Setting up menu link event listeners');
     
+    // 이미지 파일 배열 초기화
+    window.individualFiles = [];
+    selectedFiles = [];
+    
     // 현재 페이지가 로그인이 필요한 페이지인지 확인
     const currentPath = window.location.pathname;
     const protectedPages = ['/index.html', '/add.html', '/edit.html', '/filter.html', '/all.html', '/item.html'];
@@ -1743,9 +1747,15 @@ function collectEditFormData() {
     return formData;
 }
 
+// Global array to track selected files for deletion
+let selectedFiles = [];
+
 function readImages() {
     var files = document.querySelector('input[class="file_uploader"]').files;
     var container = document.querySelector("#individual_mode");
+    
+    // Convert FileList to array and store globally
+    selectedFiles = Array.from(files);
     
     console.log('📁 readImages called with files:', files.length);
     console.log('📦 Individual container found:', !!container);
@@ -1770,15 +1780,24 @@ function readImages() {
             window.individualFiles = [];
         }
         // 기존 파일들에 새로운 파일들 추가
+        const startIndex = window.individualFiles.length;
         window.individualFiles.push(...Array.from(files));
-        mainImageIndex = 0; // 첫 번째가 기본 메인
+        
+        // 메인 이미지 인덱스는 첫 번째 파일이 추가될 때만 설정
+        if (startIndex === 0) {
+            mainImageIndex = 0;
+        }
         
         for (let i = 0; i < files.length; i++) {
-            console.log(`🖼️ Creating preview ${i + 1}/${files.length} for file:`, files[i].name);
+            const currentFileIndex = startIndex + i;
+            console.log(`🖼️ Creating preview ${currentFileIndex + 1}/${window.individualFiles.length} for file:`, files[i].name);
             
             const preview = document.createElement('div');
             preview.className = "preview_image";
-            if (i === 0) preview.classList.add('main_image');
+            
+            // 메인 이미지는 전체 파일 목록에서 첫 번째일 때만
+            const isMainImage = currentFileIndex === 0;
+            if (isMainImage) preview.classList.add('main_image');
 
             const currentImageUrl = URL.createObjectURL(files[i]);
             const img = document.createElement("img");
@@ -1790,7 +1809,7 @@ function readImages() {
             const badge = document.createElement('div');
             badge.className = 'main_image_badge';
             badge.textContent = 'MAIN';
-            if (i === 0) {
+            if (isMainImage) {
                 badge.classList.remove('hidden');
             } else {
                 badge.classList.add('hidden');
@@ -1807,15 +1826,39 @@ function readImages() {
             
             console.log(`✅ Preview ${i + 1} added to DOM`);
             
-            // 클릭 이벤트: 대표 이미지 설정 또는 제거
+            // 클릭 이벤트: 이미지 제거
             preview.addEventListener('click', () => {
-                if (preview.classList.contains('main_image') && files.length > 1) {
-                    // 메인 이미지가 아닌 다른 이미지를 메인으로 설정하기 위한 토글
-                    return;
-                } else {
-                    // 대표 이미지로 설정
-                    setMainImageFromPreview(preview, i);
+                const wasMainImage = preview.classList.contains('main_image');
+                
+                preview.remove();
+                // window.individualFiles와 selectedFiles 배열에서 해당 파일 제거
+                const fileToRemove = files[i];
+                const globalIndex = window.individualFiles.indexOf(fileToRemove);
+                if (globalIndex > -1) {
+                    window.individualFiles.splice(globalIndex, 1);
                 }
+                const selectedIndex = selectedFiles.indexOf(fileToRemove);
+                if (selectedIndex > -1) {
+                    selectedFiles.splice(selectedIndex, 1);
+                }
+                
+                // 메인 이미지가 삭제되었고 다른 이미지가 남아있다면, 첫 번째 이미지를 메인으로 설정
+                if (wasMainImage && window.individualFiles.length > 0) {
+                    const container = document.querySelector("#individual_mode");
+                    const remainingPreviews = container.querySelectorAll('.preview_image');
+                    if (remainingPreviews.length > 0) {
+                        const newMainPreview = remainingPreviews[0];
+                        newMainPreview.classList.add('main_image');
+                        const newMainBadge = newMainPreview.querySelector('.main_image_badge');
+                        if (newMainBadge) {
+                            newMainBadge.classList.remove('hidden');
+                        }
+                        mainImageIndex = 0; // 새로운 첫 번째가 메인
+                    }
+                }
+                
+                // FileList는 수정할 수 없으므로 새로운 배열로 갱신
+                updateFileInput(selectedFiles);
             });
         }
     } else {
@@ -1838,6 +1881,12 @@ function readImages() {
             
             preview.addEventListener('click', () => {
                 preview.remove();
+                // selectedFiles 배열에서 해당 파일 제거 (파일 객체로 찾기)
+                const fileIndex = selectedFiles.indexOf(files[i]);
+                if (fileIndex > -1) {
+                    selectedFiles.splice(fileIndex, 1);
+                }
+                updateFileInput(selectedFiles);
             });
         }
     }
@@ -1869,6 +1918,21 @@ function showSub() {
 function hideSub() {
     document.querySelector(".sub_category").classList.remove("show_sub");
 }
+// Helper function to update file input when files are removed
+function updateFileInput(files) {
+    const fileInput = document.querySelector('.file_uploader');
+    if (fileInput) {
+        if (files.length === 0) {
+            fileInput.value = '';
+        } else {
+            // Create a new DataTransfer object to simulate file selection
+            const dt = new DataTransfer();
+            files.forEach(file => dt.items.add(file));
+            fileInput.files = dt.files;
+        }
+    }
+}
+
 function displayFilterCategory() {
     var grid = document.querySelector(".grid_container_category"); 
     for (var i = 0; i < categoryList.length; i++) {
@@ -2205,13 +2269,13 @@ function displayMeasurementInput(selectedCategory) {
     } else if (selected == "dress") {
         accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width");
     } else if (selected == "pants") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "밑위", "밑단", "총장"];
+        accordingSizes = ["waist", "hip", "inseam", "leg opening", "length"];
     } else if (selected == "skirt") {
-        accordingSizes = ["허리둘레", "엉덩이둘레", "총장", "hem width"];
+        accordingSizes = ["waist", "hip", "length", "hem width"];
     } else if (selected == "shoes") {
-        accordingSizes = ["굽높이"];
+        accordingSizes = ["heel"];
     } else if (selected == "jewerly" || selected == "etc." || selected == "etc") {
-        accordingSizes = ["가로", "세로", "길이", "높이", "둘레"];
+        accordingSizes = ["width", "height", "length", "circumference"];
     }
     
     // Edit 페이지에서는 기존 measurement 데이터 보존
@@ -2697,15 +2761,28 @@ function populateItemView(item) {
         }
         sizeElement.textContent = sizeText;
         sizeElement.style.display = ''; // 인라인 스타일 제거
-        sizeElement.classList.remove('hidden', 'item_size-hidden');
+        sizeElement.classList.remove('hidden', 'item_size_hidden');
         sizeElement.classList.add('item_size');
     }
     
     // Measurement 표시
-    if (item.measurements && item.category) {
+    if (item.category) {
         const measurementContainer = document.getElementById('measurement_container');
         if (measurementContainer) {
             measurementContainer.innerHTML = ''; // 기존 내용 제거
+            
+            // measurement 값이 있는지 확인
+            const hasMeasurements = item.measurements && Object.keys(item.measurements).some(key => 
+                item.measurements[key] && item.measurements[key].toString().trim() !== ''
+            );
+            
+            // 모바일에서 measurement 값이 없으면 영역 숨김
+            if (window.innerWidth <= 400 && !hasMeasurements) {
+                measurementContainer.style.display = 'none';
+                return;
+            } else {
+                measurementContainer.style.display = 'block';
+            }
             
             // 카테고리별 measurement 생성
             if (item.category === 'top') {
@@ -2719,13 +2796,47 @@ function populateItemView(item) {
             } else if (item.category === 'dress') {
                 // Dress 카테고리 - 서브카테고리와 서브카테고리2 전달
                 createDressMeasurement(measurementContainer, item.measurements, item.subcategory, item.subcategory2);
+            } else if (item.category === 'skirt') {
+                // Skirt 카테고리 - 서브카테고리 전달 (subcategory에 long/mini 정보)
+                console.log('📏 Creating skirt measurement in populateItemView for subcategory:', item.subcategory);
+                createSkirtMeasurement(measurementContainer, item.measurements, item.subcategory);
             }
+            
+            // measurement 값이 없으면 "No measurement" 텍스트 추가
+            if (!hasMeasurements) {
+                const noMeasurementText = document.createElement('div');
+                noMeasurementText.className = 'no_measurement_text';
+                noMeasurementText.innerHTML = 'No<br>measurement';
+                measurementContainer.appendChild(noMeasurementText);
+            }
+            
             // 다른 카테고리들도 필요시 추가
         }
     }
     
     // Composition 표시
     updateCompositionDisplay(item);
+    
+    // Window resize 이벤트로 measurement 표시/숨김 처리
+    const handleResize = () => {
+        const measurementContainer = document.getElementById('measurement_container');
+        if (measurementContainer) {
+            // measurement 값이 있는지 확인
+            const hasMeasurements = item.measurements && Object.keys(item.measurements).some(key => 
+                item.measurements[key] && item.measurements[key].toString().trim() !== ''
+            );
+            
+            if (window.innerWidth <= 400 && !hasMeasurements) {
+                measurementContainer.style.display = 'none';
+            } else {
+                measurementContainer.style.display = 'block';
+            }
+        }
+    };
+    
+    // 기존 이벤트 리스너 제거 후 새로 추가
+    window.removeEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize);
     
     console.log('✅ Item view populated successfully');
 }
@@ -3254,13 +3365,13 @@ function updateSizeDisplay(item) {
             });
             sizeElement.textContent = sizeText;
             sizeElement.style.display = ''; // 인라인 스타일 제거
-            sizeElement.classList.remove('hidden', 'item_size-hidden');
+            sizeElement.classList.remove('hidden', 'item_size_hidden');
             sizeElement.classList.add('item_size');
             console.log('Updated size display:', sizeText);
         } else {
             // 사이즈 정보가 없으면 숨김
             sizeElement.classList.remove('item_size');
-            sizeElement.classList.add('item_size-hidden');
+            sizeElement.classList.add('item_size_hidden');
             console.log('No size information, hiding size element');
         }
     }
@@ -3400,7 +3511,6 @@ function updateMeasurementDisplay(item) {
     
     // 카테고리 확인 (기본값: top)
     const category = item.category || 'top';
-    
     try {
         // measurements가 문자열이면 JSON 파싱
         let measurements = item.measurements;
@@ -3420,7 +3530,7 @@ function updateMeasurementDisplay(item) {
         } else if (category === 'dress') {
             createDressMeasurement(measurementContainer, measurements, item.subcategory, item.subcategory2);
         } else if (category === 'skirt') {
-            createSkirtMeasurement(measurementContainer, measurements, item.subcategory2);
+            createSkirtMeasurement(measurementContainer, measurements, item.subcategory);
         } else {
             // 기본값으로 top 사용
             createTopMeasurement(measurementContainer, measurements);
@@ -3645,22 +3755,25 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
 }
 
 // Skirt 카테고리 measurement 생성
-function createSkirtMeasurement(container, measurements, subcategory2) {
-    const subcategory2Lower = (subcategory2 || '').toLowerCase();
+function createSkirtMeasurement(container, measurements, subcategory) {
+    const subcategoryLower = (subcategory || '').toLowerCase();
+    console.log('🩳 Skirt measurement - subcategory:', subcategory, 'lowercase:', subcategoryLower);
     
-    if (subcategory2Lower.includes('mini')) {
+    if (subcategoryLower.includes('mini')) {
+        console.log('✅ Using mini skirt measurement');
         createSkirtMiniMeasurement(container, measurements);
-    } else if (subcategory2Lower.includes('long')) {
+    } else if (subcategoryLower.includes('long')) {
+        console.log('✅ Using long skirt measurement');
         createSkirtLongMeasurement(container, measurements);
     } else {
-        // 기본값으로 mini 사용
+        console.log('⚠️ No specific match, using mini as default');
         createSkirtMiniMeasurement(container, measurements);
     }
 }
 
 // Skirt Mini measurement 생성
 function createSkirtMiniMeasurement(container, measurements) {
-    // 베이스 이미지
+    // 베이스 이미지 (항상 표시)
     const baseImg = document.createElement('img');
     baseImg.src = '/static/src/img/measurement/skirt_mini.svg';
     baseImg.className = 'measurement_base';
@@ -3687,8 +3800,8 @@ function createSkirtMiniMeasurement(container, measurements) {
             container.appendChild(box);
         }
         
-        // 가이드라인 이미지 생성
-        if (item.guideline) {
+        // 가이드라인 이미지 생성 (값이 있을 때만)
+        if (measurementValue) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
@@ -3700,7 +3813,7 @@ function createSkirtMiniMeasurement(container, measurements) {
 
 // Skirt Long measurement 생성
 function createSkirtLongMeasurement(container, measurements) {
-    // 베이스 이미지
+    // 베이스 이미지 (항상 표시)
     const baseImg = document.createElement('img');
     baseImg.src = '/static/src/img/measurement/skirt_long.svg';
     baseImg.className = 'measurement_base';
@@ -3727,8 +3840,8 @@ function createSkirtLongMeasurement(container, measurements) {
             container.appendChild(box);
         }
         
-        // 가이드라인 이미지 생성
-        if (item.guideline) {
+        // 가이드라인 이미지 생성 (값이 있을 때만)
+        if (measurementValue) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
@@ -3813,18 +3926,47 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     paddingContainer.className = 'carousel_padding_container';
     paddingContainer.classList.add('max_height_override');
     
-    // 내부 carousel 컨테이너 (좌우 스크롤)
+    // 내부 carousel 컨테이너 (상하 스크롤 + 드래그 좌우 스크롤)
     const carouselContainer = document.createElement('div');
     carouselContainer.className = 'horizontal_carousel';
     
-    // 이미지에서만 좌우 스크롤, 빈 공간에서는 위아래 스크롤 허용
-    carouselContainer.addEventListener('wheel', (e) => {
-        // 이벤트 타겟이 이미지인 경우에만 좌우 스크롤
-        if (e.target.tagName === 'IMG') {
-            e.preventDefault();
-            carouselContainer.scrollLeft += e.deltaY;
+    // 드래그로 좌우 스크롤 기능 추가
+    let isDragging = false;
+    let hasDragged = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    
+    carouselContainer.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        hasDragged = false; // 드래그 시작 시 리셋
+        carouselContainer.style.cursor = 'grabbing';
+        startX = e.pageX - carouselContainer.offsetLeft;
+        scrollLeft = carouselContainer.scrollLeft;
+        e.preventDefault();
+    });
+    
+    carouselContainer.addEventListener('mouseleave', () => {
+        isDragging = false;
+        carouselContainer.style.cursor = 'grab';
+    });
+    
+    carouselContainer.addEventListener('mouseup', () => {
+        isDragging = false;
+        carouselContainer.style.cursor = 'grab';
+    });
+    
+    carouselContainer.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - carouselContainer.offsetLeft;
+        const walk = (x - startX) * 2; // 스크롤 속도 조절
+        
+        // 실제로 스크롤이 발생했는지 확인 (최소 5px 이상 움직임)
+        if (Math.abs(walk) > 5) {
+            hasDragged = true;
         }
-        // 빈 공간에서는 기본 위아래 스크롤 허용 (preventDefault 하지 않음)
+        
+        carouselContainer.scrollLeft = scrollLeft - walk;
     });
     
     let loadedCount = 0;
@@ -3866,8 +4008,14 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         img.src = url;
         img.className = 'carousel_image';
         
-        // 클릭 시 확대
-        img.onclick = () => {
+        // 클릭 시 확대 (드래그한 경우 제외)
+        img.onclick = (e) => {
+            // 드래그가 발생한 경우 클릭 이벤트 방지
+            if (hasDragged) {
+                e.preventDefault();
+                return;
+            }
+            
             const modal = document.createElement('div');
             modal.className = 'fullscreen_modal';
             modal.onclick = () => document.body.removeChild(modal);

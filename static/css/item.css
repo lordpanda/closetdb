@@ -301,6 +301,20 @@
     left: 0;
     border-radius: 30px;
 }
+
+/* No measurement 텍스트 스타일 */
+.no_measurement_text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Sequel45', sans-serif;
+    font-size: 1em;
+    color: var(--darkgray);
+    text-align: center;
+    line-height: 1.2;
+    z-index: 20;
+}
 .measurement_guideline {
     z-index: 10;
     width: 100%;
@@ -433,21 +447,26 @@
 }
 
 .edit_button {
-    padding: 15px 40px;
-    font-size: 1.3em;
-    font-family: 'Sequel85', sans-serif;
+    width: 200px;
+    text-align: center;
+    border: none;
+    font-size: 1.2em;
+    line-height: 58px;
+    border-radius: 30px;
+    transition: 0.5s;
+    font-family: 'Sequel85';
+    margin-top: 30px;
+    padding-bottom: 4px;
     color: white;
     background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 30px;
+    background-size: 200% auto;
     cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .edit_button:hover {
-    background: linear-gradient(45deg, #764ba2 0%, #667eea 100%);
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
 }
 
 /* Season/Purchase 공통 스타일 */
@@ -492,7 +511,7 @@
     display: block;
 }
 
-.item_size-hidden {
+.item_size_hidden {
     display: none;
 }
 
