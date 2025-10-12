@@ -8,11 +8,9 @@
 /* 이미지 모드 토글 스위치 */
 .image_mode_toggle {
     display: flex;
-    justify-content: center;
+    justify-content: right;
     margin: 10px 0;
     padding: 15px;
-    background-color: var(--gray);
-    border-radius: 15px;
 }
 
 .toggle_switch_container {
@@ -23,7 +21,6 @@
 
 .toggle_label_text {
     font-family: 'Poppins', sans-serif;
-    font-weight: 400;
     font-size: 1.1em;
     color: #333;
 }
@@ -534,9 +531,7 @@ input:checked + .toggle_slider:before {
 }
 
 .composition_set {
-    background-color: var(--gray);
     border-radius: 15px;
-    padding: 15px;
     margin-bottom: 15px;
     position: relative;
 }
@@ -545,30 +540,31 @@ input:checked + .toggle_slider:before {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 10px;
+    padding: 0 10px;
+    margin-bottom: 20px;
 }
 
 .composition_set_name {
     flex: 1;
-    padding: 8px 12px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.1em;
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    background-color: white;
+    padding: 14px 14px 10px;
+    font-family: 'GmarketSans', 'Poppins', sans-serif;
+    font-size: 1.3em;
+    border-radius: 26px;
+    background-color: var(--gray);
+    border-color: transparent;
+    color: var(--black);
     outline: none;
-    margin-right: 10px;
 }
 
 .composition_set_name:focus {
-    border-color: #667eea;
+    border-color: transparent;
 }
 
 .remove_composition_set_btn {
     width: 30px;
     height: 30px;
     border: none;
-    background-color: #dc3545;
+    background-color: var(--darkgray);
     color: white;
     border-radius: 50%;
     cursor: pointer;
@@ -577,6 +573,7 @@ input:checked + .toggle_slider:before {
     justify-content: center;
     font-size: 18px;
     transition: background-color 0.3s;
+    margin-left: 10px;
 }
 
 .remove_composition_set_btn:hover {
@@ -620,7 +617,6 @@ input:checked + .toggle_slider:before {
     flex: 1;
 }
 
-
 .label_with_input {
     display: grid;
     grid-template-columns: 100px 1fr;
@@ -663,7 +659,7 @@ input:checked + .toggle_slider:before {
 
 .submit_button .button {
     width: 200px;
-    height: 58px;
+    /*height: 58px;*/
     text-align: center;
     border: none;
     font-size: 1.2em;
@@ -672,6 +668,7 @@ input:checked + .toggle_slider:before {
     transition: 0.5s;
     font-family: 'Sequel85';
     margin-top: 30px;
+    padding-bottom: 4px;
     color: white;
     background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
     background-size: 200% auto;

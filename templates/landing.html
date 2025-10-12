@@ -1,7 +1,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}?v=2.8"></script>
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/landing.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
@@ -26,10 +26,6 @@
             </div>
         </div>
         
-        <!-- 모바일 디버깅용 정보 패널 -->
-        <div id="debug-info" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: white; padding: 10px; font-size: 12px; z-index: 1000; max-height: 150px; overflow-y: auto;">
-            <div id="debug-messages">디버깅 시작...</div>
-        </div>
         
         <div class="sign-in-section">
             <button class="sign-in-button" onclick="window.location.href='/auth/google'">
@@ -39,56 +35,10 @@
     </section>
 
     <script>
-        // 모바일 디버깅용 함수
-        function addDebugMessage(message) {
-            const debugMessages = document.getElementById('debug-messages');
-            if (debugMessages) {
-                const time = new Date().toLocaleTimeString();
-                debugMessages.innerHTML += `<br>${time}: ${message}`;
-                debugMessages.scrollTop = debugMessages.scrollHeight;
-            }
-        }
-        
-        // console.log와 console.error를 오버라이드해서 화면에도 표시
-        const originalLog = console.log;
-        const originalError = console.error;
-        
-        console.log = function(...args) {
-            originalLog.apply(console, args);
-            addDebugMessage('LOG: ' + args.join(' '));
-        };
-        
-        console.error = function(...args) {
-            originalError.apply(console, args);
-            addDebugMessage('ERROR: ' + args.join(' '));
-        };
-        
         // 랜딩 페이지용 캐러셀 초기화
         document.addEventListener('DOMContentLoaded', function() {
-            addDebugMessage('DOM loaded, starting carousel init...');
-            console.log('🔍 DOM loaded, checking if initLandingCarousel exists:', typeof initLandingCarousel);
-            
-            // 디버깅용 - 화면에 상태 표시
-            const track = document.getElementById('carousel-track');
-            if (track) {
-                track.innerHTML = '<div style="text-align: center; padding: 20px; color: white;">Loading carousel...</div>';
-            }
-            
-            try {
-                if (typeof initLandingCarousel === 'function') {
-                    addDebugMessage('initLandingCarousel function found, calling...');
-                    initLandingCarousel();
-                } else {
-                    console.error('❌ initLandingCarousel function not found');
-                    if (track) {
-                        track.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Error: Carousel function not loaded</div>';
-                    }
-                }
-            } catch (error) {
-                console.error('❌ Error initializing carousel:', error);
-                if (track) {
-                    track.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Error: ' + error.message + '</div>';
-                }
+            if (typeof initLandingCarousel === 'function') {
+                initLandingCarousel();
             }
         });
     </script>

@@ -300,9 +300,7 @@ function displayRecentlyAdded() {
             return response.json();
         })
         .then(data => {
-            console.log('📊 Received data:', data);
-            console.log('📊 Items count:', data.items ? data.items.length : 'no items property');
-            if (data.items && data.items.length > 0) {
+                                    if (data.items && data.items.length > 0) {
                 // 최대 8개까지만 표시
                 const maxItems = Math.min(data.items.length, 8);
                 
@@ -389,16 +387,13 @@ function displayAllItems() {
     var grid = document.querySelector(".grid_container"); 
     
     // Supabase에서 모든 아이템 가져오기
-    console.log('🔄 Fetching all items from /api/items');
-    fetch('/api/items')
+        fetch('/api/items')
         .then(response => {
             console.log('Response status:', response.status);
             return response.json();
         })
         .then(data => {
-            console.log('📊 Received data:', data);
-            console.log('📊 Items count:', data.items ? data.items.length : 'no items property');
-            if (data.items && data.items.length > 0) {
+                                    if (data.items && data.items.length > 0) {
                 // 모든 아이템 표시 (제한 없음)
                 data.items.forEach((item, index) => {
                     const gridItem = document.createElement('div');
@@ -535,23 +530,17 @@ function setupImageModeToggle() {
 
 // Stitched 이미지 읽기
 function readStitchedImage() {
-    console.log('🖼️ readStitchedImage function called');
-    const file = document.querySelector('.file_uploader_stitched').files[0];
-    console.log('📁 Selected file:', file);
-    if (!file) {
-        console.log('❌ No file selected');
+        const file = document.querySelector('.file_uploader_stitched').files[0];
+        if (!file) {
         return;
     }
     
     const container = document.querySelector('#stitched_mode');
-    console.log('📦 Container found:', !!container);
-    
+        
     // 기존 미리보기 제거
     const existingPreview = container.querySelector('.stitched_preview');
-    console.log('🔍 Existing preview found:', !!existingPreview);
-    if (existingPreview) {
+        if (existingPreview) {
         existingPreview.remove();
-        console.log('🗑️ Removed existing preview');
     }
     
     // + 버튼 숨기기
@@ -559,46 +548,36 @@ function readStitchedImage() {
     console.log('➕ Add button found:', !!addButton);
     if (addButton) {
         addButton.style.display = 'none';
-        console.log('🙈 Add button hidden');
     }
     
     // 새로운 stitched 전용 미리보기 생성
     const preview = document.createElement('div');
     preview.className = 'stitched_preview';
-    console.log('🆕 Created preview element');
     
     const img = document.createElement('img');
     img.src = URL.createObjectURL(file);
-    console.log('🖼️ Created image with URL:', img.src);
     
     // 섹션 개수 정보 표시
     const sectionInfo = document.createElement('div');
     sectionInfo.className = 'section_info';
     const sectionCountElement = document.querySelector('input[name="section_count"]:checked');
-    console.log('🔢 Section count element found:', !!sectionCountElement);
     const sectionCount = sectionCountElement ? sectionCountElement.value : '2';
     sectionInfo.textContent = `${sectionCount} sections`;
-    console.log('🔢 Section count:', sectionCount);
     
     preview.appendChild(img);
     preview.appendChild(sectionInfo);
-    console.log('📋 Appended image and section info to preview');
     
     // + 버튼이 있던 위치에 삽입
     if (addButton && addButton.parentNode) {
         addButton.parentNode.insertBefore(preview, addButton);
-        console.log('✅ Preview inserted into DOM');
     } else {
-        console.log('❌ Could not insert preview - add button or parent not found');
         container.appendChild(preview);
-        console.log('📌 Appended preview to container instead');
     }
     
     // section 선택 UI 표시
     const stitchedInfo = container.querySelector('.stitched_info');
     if (stitchedInfo) {
         stitchedInfo.style.display = 'block';
-        console.log('📋 Section selection UI shown');
     }
     
     // 클릭시 제거하고 + 버튼 다시 표시
@@ -615,7 +594,6 @@ function readStitchedImage() {
         const fileInput = document.querySelector('.file_uploader_stitched');
         if (fileInput) {
             fileInput.value = '';
-            console.log('🗑️ File input cleared');
         }
     });
 }
@@ -626,7 +604,6 @@ let mainImageIndex = 0;
 
 // 랜딩 페이지 캐러셀 초기화 함수
 function initLandingCarousel() {
-    console.log('🎠 Initializing landing page carousel...');
     
     // fallback 데이터 (API 실패시에만 사용)
     const fallbackData = {
@@ -668,7 +645,6 @@ function initLandingCarousel() {
             return response.json();
         })
         .then(data => {
-            console.log('✅ API data loaded:', data);
             processCarouselData(data);
         })
         .catch(error => {
@@ -693,8 +669,7 @@ function processCarouselData(data) {
                     return;
                 }
                 
-                console.log('📊 Found', data.items.length, 'items for carousel');
-                
+                                
                 // 기존 내용 제거
                 carouselTrack.innerHTML = '';
                 
@@ -723,10 +698,8 @@ function processCarouselData(data) {
                             if (imageUrl.includes('pub-d30acb5ff7c3432aad2e05bfbfd34c6d.r2.dev')) {
                                 const filename = imageUrl.split('/').pop();
                                 img.src = `/api/image-proxy/${filename}`;
-                                console.log('✅ Setting proxied image src to:', img.src);
                             } else {
                                 img.src = imageUrl;
-                                console.log('✅ Setting direct image src to:', imageUrl);
                             }
                         } else {
                             console.log(`No real image found for item ${item.item_id}, using color background`);
@@ -740,7 +713,6 @@ function processCarouselData(data) {
                         // 이미지 로드 완료 시 부드러운 표시
                         img.onload = function() {
                             this.classList.add('image-loaded');
-                            console.log('✅ Landing carousel image loaded:', this.src);
                         };
                         
                         img.onerror = function() {
@@ -782,11 +754,8 @@ function processCarouselData(data) {
                     });
                 }
                 
-                console.log(`✅ Carousel initialized with ${selectedItems.length} items (duplicated for infinite scroll)`);
                 
-                console.log('✅ Carousel setup complete - using CSS animation for infinite loop');
             } else {
-                console.log('⚠️ No items found for carousel');
                 showFallbackCarousel();
             }
 }
@@ -800,8 +769,7 @@ function showFallbackCarousel() {
     
     carouselTrack.innerHTML = '';
     
-    console.log('🔧 Creating fallback carousel with external images...');
-    
+        
     // 플레이스홀더 아이템들 생성 (외부 이미지 사용)
     const placeholderImages = [
         'https://via.placeholder.com/300x400/ff6b6b/ffffff?text=Closet+1',
@@ -835,9 +803,7 @@ function showFallbackCarousel() {
         });
     }
     
-    console.log('📦 Fallback carousel created with', placeholderImages.length * 2, 'items');
     
-    console.log('✅ Fallback carousel setup complete - using CSS animation for infinite loop');
 }
 
 // 검색 기능 초기화
@@ -2693,7 +2659,6 @@ function populateItemView(item) {
         imageContainer.innerHTML = ''; // 기존 내용 제거
         
         if (isStitchedImage(item.images)) {
-            console.log('🧩 Displaying stitched images as carousel');
             displayStitchedImagesAsCarousel(item.images, imageContainer);
         } else {
             console.log('🖼️ Displaying individual images (non-stitched)');
@@ -2741,7 +2706,6 @@ function populateItemView(item) {
         const measurementContainer = document.getElementById('measurement_container');
         if (measurementContainer) {
             measurementContainer.innerHTML = ''; // 기존 내용 제거
-            console.log('📏 Creating measurements for category:', item.category);
             
             // 카테고리별 measurement 생성
             if (item.category === 'top') {
@@ -3260,7 +3224,6 @@ function updateItemDisplay(item) {
     updateCompositionDisplay(item);
     
     // Measurement 처리는 populateItemView에서만 수행하도록 중복 제거
-    console.log('📍 updateItemDisplay: Skipping measurement processing to avoid duplicates');
 }
 
 // 사이즈 정보 업데이트 함수
@@ -3461,7 +3424,6 @@ function updateMeasurementDisplay(item) {
             createTopMeasurement(measurementContainer, measurements);
         }
         
-        console.log('Updated measurement display for category:', category, measurements);
     } catch (error) {
         console.error('Error updating measurements:', error);
     }
@@ -3544,22 +3506,14 @@ function createTopLongSleeveMeasurement(container, measurements) {
 function createDressMeasurement(container, measurements, subcategory, subcategory2) {
     const subcategoryLower = (subcategory || '').toLowerCase();
     const subcategory2Lower = (subcategory2 || '').toLowerCase();
-    console.log('🔍 Dress measurement - subcategory:', subcategory);
-    console.log('🔍 Dress measurement - subcategory2:', subcategory2);
-    console.log('🔍 Includes short sleeve:', subcategoryLower.includes('short sleeve'));
-    console.log('🔍 Includes mini:', subcategory2Lower.includes('mini'));
     
     if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('mini')) {
-        console.log('✅ Using createDressShortSleeveMiniMeasurement');
         createDressShortSleeveMiniMeasurement(container, measurements);
     } else if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('midi')) {
-        console.log('✅ Using createDressShortSleeveMidiMeasurement');
         createDressShortSleeveMidiMeasurement(container, measurements);
     } else if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('long')) {
-        console.log('✅ Using createDressShortSleeveLongMeasurement');
         createDressShortSleeveLongMeasurement(container, measurements);
     } else {
-        console.log('⚠️ Using fallback createTopMeasurement for dress');
         // 기본 dress 처리 (현재는 top과 동일)
         createTopMeasurement(container, measurements);
     }
@@ -3569,7 +3523,7 @@ function createDressMeasurement(container, measurements, subcategory, subcategor
 function createDressShortSleeveMiniMeasurement(container, measurements) {
     // 베이스 이미지
     const baseImg = document.createElement('img');
-    baseImg.src = '/static/src/img/measurement/dress_short sleeve, mini.png';
+    baseImg.src = '/static/src/img/measurement/dress_short sleeve, mini.svg';
     baseImg.className = 'measurement_base';
     container.appendChild(baseImg);
     
@@ -3745,7 +3699,6 @@ function stitchImagesBack(imageUrls, container) {
                 if (validImages.length > 0) {
                     combineImages(validImages, canvas, ctx, container);
                 } else {
-                    console.log('No valid images to combine, falling back to horizontal carousel');
                     displayStitchedImagesAsCarousel(imageUrls, container);
                 }
             }
@@ -3758,7 +3711,6 @@ function stitchImagesBack(imageUrls, container) {
 
 // Stitched 이미지들을 carousel로 표시하는 함수 (제대로 된 버전)
 function displayStitchedImagesAsCarousel(imageUrls, container) {
-    console.log('Displaying stitched images as horizontal carousel with proper structure');
     
     // 외부 패딩 컨테이너 (40px padding)
     const paddingContainer = document.createElement('div');
@@ -3799,7 +3751,6 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             const totalCarouselWidth = totalWidth + gapWidth;
             const containerWidth = carouselContainer.clientWidth;
             
-            console.log(`📏 총 캐러셀 너비: ${totalCarouselWidth}px`);
             console.log(`📏 컨테이너 너비: ${containerWidth}px`);
             
             if (totalCarouselWidth < containerWidth) {
@@ -3834,7 +3785,6 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         };
         
         img.onload = function() {
-            console.log(`✅ Carousel image ${index + 1} loaded successfully`);
             console.log(`📐 Image dimensions: ${this.naturalWidth}x${this.naturalHeight}`);
             console.log(`🎨 Image styles: height=${this.style.height}, width=${this.style.width}`);
             
@@ -3843,7 +3793,6 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         };
         
         img.onerror = function() {
-            console.log(`❌ Carousel image ${index + 1} failed to load: ${url}`);
             console.log(`⚠️ This image may not exist in R2 bucket`);
             // 플레이스홀더로 대체하되 더 명확한 메시지
             img.src = '/static/src/img/plus.png';
@@ -3861,12 +3810,9 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     paddingContainer.appendChild(carouselContainer);
     container.appendChild(paddingContainer);
     
-    console.log(`✅ Displayed ${imageUrls.length} stitched sections as proper horizontal carousel`);
     console.log(`🏗️ Container structure:`);
     console.log(`   📦 Main container:`, container);
     console.log(`   📦 Padding container:`, paddingContainer);
-    console.log(`   📦 Carousel container:`, carouselContainer);
-    console.log(`   🖼️ Total images in carousel:`, carouselContainer.children.length);
 }
 
 // 이미지들을 Canvas에서 가로로 합치기
@@ -3907,7 +3853,6 @@ function combineImages(images, canvas, ctx, container) {
         console.log('Falling back to gallery display for stitched images');
         
         // CORS 오류 시 horizontal carousel로 표시
-        console.log('CORS error - displaying as horizontal carousel instead');
         
         // 외부 패딩 컨테이너
         const paddingContainer = document.createElement('div');
@@ -3944,7 +3889,6 @@ function combineImages(images, canvas, ctx, container) {
         // 구조: paddingContainer > carouselContainer > images
         paddingContainer.appendChild(carouselContainer);
         container.appendChild(paddingContainer);
-        console.log('Displayed', images.length, 'sections as horizontal carousel with proper padding');
     }
 }
 

@@ -10,15 +10,16 @@
     border-radius: 30px;
 }
 .view_item_image {
-    margin-top: 40px;
-    margin-bottom: 0;
-    height: 840px;
+    margin: 40px 0;
     text-align: center;
 }
 .view_item_image img {
     height: 100%;
     border-radius: 30px;
     object-fit: cover;
+}
+.view_item_image .carousel-padding-container {
+    padding: 0;
 }
 
 /* 이미지가 윈도우보다 작을 때만 중앙 정렬 */
@@ -88,48 +89,48 @@
     transform: translate(-50%, -50%); /* Center align on position coordinates */
 }
 .view_measurement .chest {
-    top: 36%;
-    left: 46%;
+    top: 38%;
+    left: 50%;
 }
 .view_measurement .shoulder {
-    top: 12%;
-    left: 46%;
+    top: 16%;
+    left: 50%;
 }
 .view_measurement .sleeve {
     top: 20%;
     left: 83%;
 }
 .view_measurement .length {
-    top: 54%;
-    left: 55%;
+    top: 58%;
+    left: 60%;
 }
 .view_measurement .waist {
-    top: 80%;
-    left: 46%;
+    top: 85%;
+    left: 50%;
 }
 .view_measurement .sleeveOpening {
     top: 70%;
     left: 83%;
 }
 .view_measurement .armhole {
-    top: 25%;
-    left: 75%;
+    top: 30%;
+    left: 27%;
 }
 
 /* Short Sleeve Mini Dress 전용 위치 설정 */
 .view_measurement .chest.short-sleeve-mini-dress {
     top: 28%;
-    left: 46%;
+    left: 50%;
 }
 
 .view_measurement .shoulder.short-sleeve-mini-dress {
     top: 11%;
-    left: 46%;
+    left: 50%;
 }
 
 .view_measurement .sleeve.short-sleeve-mini-dress {
-    top: 25%;
-    left: 73%;
+    top: 29%;
+    left: 76%;
 }
 
 .view_measurement .sleeveOpening.short-sleeve-mini-dress {
@@ -138,18 +139,18 @@
 }
 
 .view_measurement .armhole.short-sleeve-mini-dress {
-    top: 21%;
-    left: 25%;
+    top: 25%;
+    left: 27%;
 }
 
 .view_measurement .waist.short-sleeve-mini-dress {
-    top: 46%;
-    left: 46%;
+    top: 51%;
+    left: 50%;
 }
 
 .view_measurement .length.short-sleeve-mini-dress {
-    top: 63.5%;
-    left: 59%;
+    top: 65%;
+    left: 63%;
 }
 
 .view_measurement .hemWidth.short-sleeve-mini-dress {
@@ -183,12 +184,12 @@
 /* Short Sleeve Long Dress 전용 위치 설정 */
 .view_measurement .chest.short-sleeve-long-dress {
     top: 20%;
-    left: 46%;
+    left: 50%;
 }
 
 .view_measurement .shoulder.short-sleeve-long-dress {
     top: 8%;
-    left: 46%;
+    left: 50%;
 }
 
 .view_measurement .sleeve.short-sleeve-long-dress {
@@ -207,13 +208,13 @@
 }
 
 .view_measurement .waist.short-sleeve-long-dress {
-    top: 40%;
-    left: 46%;
+    top: 33%;
+    left: 50%;
 }
 
 .view_measurement .length.short-sleeve-long-dress {
     top: 75%;
-    left: 59%;
+    left: 62%;
 }
 
 .view_measurement .hemWidth.short-sleeve-long-dress {
@@ -246,16 +247,16 @@
 
 /* Long sleeve 전용 위치 설정 */
 .view_measurement .shoulder.long-sleeve {
-    top: 17.1%; /* 94px / 550px = 17.1% */
-    left: 46%;
+    top: 20%; 
+    left: 50%;
 }
 .view_measurement .sleeve.long-sleeve {
-    top: 36.4%; /* 200px / 550px = 36.4% */
-    left: 80.5%; /* 443px / 550px = 80.5% */
+    top: 39%;
+    left: 85%; 
 }
 .view_measurement .length.long-sleeve {
-    top: 50%;
-    left: 56.4%; /* 310px / 550px = 56.4% */
+    top: 55%;
+    left: 60%;
 }
 .measurement_base {
     width: 100%;
@@ -273,7 +274,7 @@
     background-color: transparent;
 }
 .view_size {
-    padding-bottom: 20px;
+    padding: 10px 0 20px;
     font-size: 1.4em;
     font-family: 'Sequel85', sans-serif;
     text-transform: uppercase;
@@ -298,6 +299,7 @@
         height: auto;
         text-align: center;
         border-radius: 30px;
+        margin: 20px 0;
     }
     
     /* 모바일에서 carousel container 조정 */
