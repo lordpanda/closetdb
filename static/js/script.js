@@ -2058,7 +2058,7 @@ function displaySizesByRegion(region) {
     if (region == "US") {
         accordingSizes.push("00", "0", "2");
     } else if (region == "UK") {
-        accordingSizes.push(4, 6, 8, 10);
+        accordingSizes.push(4, 6);
     } else if (region == "EU") {
         accordingSizes.push(35, 35.5, 36, 36.5, 37);
     } else if (region == "FR") {
@@ -2068,9 +2068,9 @@ function displaySizesByRegion(region) {
     } else if (region == "IT") {
         accordingSizes.push(34, 36, 38);
     } else if (region == "WW") {
-        accordingSizes.push("one size", "XXXS", "XXS", "XS", "S", "M", "L", "XL");
+        accordingSizes.push("one size", "XXXS", "XXS", "XS", "S", "M", "L");
     } else if (region == "KR") {
-        accordingSizes.push(230, 235, 240);
+        accordingSizes.push(225, 230, 235, 240);
     } else if (region == "Kids") {
         accordingSizes.push("10Y", "11Y", "12Y", "13Y", "14Y", "15Y", "16Y", "130cm", "140cm", "150cm");
     } else if (region == "Ring") {
@@ -3419,6 +3419,8 @@ function updateMeasurementDisplay(item) {
             }
         } else if (category === 'dress') {
             createDressMeasurement(measurementContainer, measurements, item.subcategory, item.subcategory2);
+        } else if (category === 'skirt') {
+            createSkirtMeasurement(measurementContainer, measurements, item.subcategory2);
         } else {
             // 기본값으로 top 사용
             createTopMeasurement(measurementContainer, measurements);
@@ -3633,6 +3635,100 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
             container.appendChild(box);
             
             // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Skirt 카테고리 measurement 생성
+function createSkirtMeasurement(container, measurements, subcategory2) {
+    const subcategory2Lower = (subcategory2 || '').toLowerCase();
+    
+    if (subcategory2Lower.includes('mini')) {
+        createSkirtMiniMeasurement(container, measurements);
+    } else if (subcategory2Lower.includes('long')) {
+        createSkirtLongMeasurement(container, measurements);
+    } else {
+        // 기본값으로 mini 사용
+        createSkirtMiniMeasurement(container, measurements);
+    }
+}
+
+// Skirt Mini measurement 생성
+function createSkirtMiniMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/skirt_mini.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // Mini skirt measurement 정의
+    const measurementItems = [
+        { key: 'waist', label: '허리', guideline: 'measurement_skirt_mini_waist.svg' },
+        { key: 'hip', label: '엉덩이', guideline: 'measurement_skirt_mini_hip.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_skirt_mini_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_skirt_mini_hemwidth.svg' }
+    ];
+    
+    // 각 measurement에 대한 박스와 가이드라인 생성
+    measurementItems.forEach(item => {
+        const measurementValue = measurements && measurements[item.key] ? measurements[item.key] : '';
+        
+        if (measurementValue) {
+            // Measurement 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} skirt_mini`;
+            box.style.transform = 'translate(-50%, -50%)';
+            box.textContent = measurementValue;
+            container.appendChild(box);
+        }
+        
+        // 가이드라인 이미지 생성
+        if (item.guideline) {
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Skirt Long measurement 생성
+function createSkirtLongMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/skirt_long.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // Long skirt measurement 정의
+    const measurementItems = [
+        { key: 'waist', label: '허리', guideline: 'measurement_skirt_long_waist.svg' },
+        { key: 'hip', label: '엉덩이', guideline: 'measurement_skirt_long_hip.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_skirt_long_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_skirt_long_hemwidth.svg' }
+    ];
+    
+    // 각 measurement에 대한 박스와 가이드라인 생성
+    measurementItems.forEach(item => {
+        const measurementValue = measurements && measurements[item.key] ? measurements[item.key] : '';
+        
+        if (measurementValue) {
+            // Measurement 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} skirt_long`;
+            box.style.transform = 'translate(-50%, -50%)';
+            box.textContent = measurementValue;
+            container.appendChild(box);
+        }
+        
+        // 가이드라인 이미지 생성
+        if (item.guideline) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';

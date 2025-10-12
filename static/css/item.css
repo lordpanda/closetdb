@@ -258,6 +258,43 @@
     top: 55%;
     left: 60%;
 }
+
+/* Skirt Mini measurement positions */
+.view_measurement .waist.skirt_mini {
+    top: 15%;
+    left: 50%;
+}
+.view_measurement .hip.skirt_mini {
+    top: 35%;
+    left: 50%;
+}
+.view_measurement .length.skirt_mini {
+    top: 55%;
+    left: 65%;
+}
+.view_measurement .hemWidth.skirt_mini {
+    top: 75%;
+    left: 50%;
+}
+
+/* Skirt Long measurement positions */
+.view_measurement .waist.skirt_long {
+    top: 12%;
+    left: 50%;
+}
+.view_measurement .hip.skirt_long {
+    top: 25%;
+    left: 50%;
+}
+.view_measurement .length.skirt_long {
+    top: 65%;
+    left: 65%;
+}
+.view_measurement .hemWidth.skirt_long {
+    top: 85%;
+    left: 50%;
+}
+
 .measurement_base {
     width: 100%;
     top: 0;
