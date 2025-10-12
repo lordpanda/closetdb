@@ -9,7 +9,7 @@ supabase==2.3.4
 python-dotenv==1.0.1
 
 # Cloud Storage & AWS
-boto3==1.34.34
+boto3==1.40.50
 
 # HTTP & Authentication
 requests>=2.32.4
