@@ -9,14 +9,14 @@
 .image_mode_toggle {
     display: flex;
     justify-content: right;
-    margin: 10px 0;
-    padding: 15px;
+    align-items: center;
+    margin: 0;
+    padding: 0;
 }
 
 .toggle_switch_container {
     display: flex;
     align-items: center;
-    gap: 15px;
 }
 
 .toggle_label_text {
@@ -27,9 +27,13 @@
 
 .toggle_switch {
     position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 30px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1em;
+    line-height: normal;
+    border-radius: 0;
+    border: none;
 }
 
 .toggle_switch input {
@@ -39,35 +43,18 @@
 }
 
 .toggle_slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    border-radius: 30px;
-    transition: .4s;
-}
-
-.toggle_slider:before {
-    position: absolute;
-    content: "";
-    height: 22px;
-    width: 22px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    border-radius: 50%;
-    transition: .4s;
+    width: 30px;
+    height: 30px;
+    background-image: url('/static/src/img/checked=false.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: .2s;
+    margin-right: 10px;
 }
 
 input:checked + .toggle_slider {
-    background-color: #667eea;
-}
-
-input:checked + .toggle_slider:before {
-    transform: translateX(30px);
+    background-image: url('/static/src/img/checked=true.svg');
 }
 
 /* 이미지 모드별 정보 */
@@ -606,8 +593,9 @@ input:checked + .toggle_slider:before {
     transform: scale(1.1);
 }
 
-/* Composition 섹션의 subheader만 특별히 처리 */
-.subheader:has(.add_composition_set_btn) {
+/* Composition 섹션의 subheader와 image 섹션의 subheader 특별히 처리 */
+.subheader:has(.add_composition_set_btn),
+.subheader:has(.image_mode_toggle) {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -819,10 +807,10 @@ input:checked + .toggle_slider:before {
 }
 
 /* Add/Edit page specific styles */
-.mode-toggle {
+.mode_toggle {
     display: block !important;
 }
 
-.mode-toggle.hidden {
+.mode_toggle.hidden {
     display: none !important;
 }

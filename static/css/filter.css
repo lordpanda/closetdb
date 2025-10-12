@@ -34,34 +34,34 @@
 }
 
 /* Filter results container */
-.filter-results {
+.filter_results {
     margin-top: 40px;
     padding-left: 40px;
     padding-right: 40px;
 }
 
 /* Size grid layout */
-.size-grid {
+.size_grid {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
 }
 
 /* Container height adjustments for different sections */
-.container-height-120 {
+.container_height_120 {
     height: 120px;
 }
 
-.container-height-180 {
+.container_height_180 {
     height: 180px;
 }
 
-.container-height-80 {
+.container_height_80 {
     height: 80px;
 }
 
 /* ETC input display */
-.size-etc-input-visible {
+.size_etc_input_visible {
     display: inline-block;
 }
 

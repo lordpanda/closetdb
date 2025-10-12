@@ -138,14 +138,14 @@ function displayGlobalMenu(parm1) {
     }
     document.write(`
     <div class="logo">
-        <a href="#" id="logo-link"><h1>closetDB</h1></a>
+        <a href="#" id="logo_link"><h1>closetDB</h1></a>
     </div>
     <input type="checkbox" class="toggler">
     <div class="hamburger"><div></div></div>
     <ul class="menu">
-        <li><a class="`+activeItem[0]+`" href="#" id="view-all-link">View all</a></li>
-        <li><a class="`+activeItem[1]+`" href="#" id="filter-link">Filter</a></li>
-        <li><a class="`+activeItem[2]+`" href="#" id="add-new-link">Add</a></li>
+        <li><a class="`+activeItem[0]+`" href="#" id="view_all_link">View all</a></li>
+        <li><a class="`+activeItem[1]+`" href="#" id="filter_link">Filter</a></li>
+        <li><a class="`+activeItem[2]+`" href="#" id="add_new_link">Add</a></li>
     </ul>
     `);
 }
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 약간의 지연을 두고 링크를 찾음 (displayGlobalMenu가 실행된 후)
     setTimeout(() => {
         // closetDB 로고 링크
-        const logoLink = document.getElementById('logo-link');
+        const logoLink = document.getElementById('logo_link');
         if (logoLink) {
             console.log('Found logo link, attaching event');
             logoLink.addEventListener('click', function(e) {
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // View all 링크
-        const viewAllLink = document.getElementById('view-all-link');
+        const viewAllLink = document.getElementById('view_all_link');
         if (viewAllLink) {
             console.log('Found view all link, attaching event');
             viewAllLink.addEventListener('click', function(e) {
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Filter 링크
-        const filterLink = document.getElementById('filter-link');
+        const filterLink = document.getElementById('filter_link');
         if (filterLink) {
             console.log('Found filter link, attaching event');
             filterLink.addEventListener('click', function(e) {
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Add new 링크
-        const addNewLink = document.getElementById('add-new-link');
+        const addNewLink = document.getElementById('add_new_link');
         if (addNewLink) {
             console.log('Found Add new link, attaching event');
             addNewLink.addEventListener('click', function(e) {
@@ -322,7 +322,7 @@ function displayRecentlyAdded() {
                     } else {
                         // 기본 이미지
                         img.src = "/static/src/img/plus.png";
-                        img.classList.add('image-placeholder');
+                        img.classList.add('image_placeholder');
                         console.log('No images found for item:', item); // 디버깅용
                     }
                     
@@ -330,7 +330,7 @@ function displayRecentlyAdded() {
                         // 이미지 로드 실패시 기본 이미지
                         console.log('Image load failed:', this.src); // 디버깅용
                         this.src = "/static/src/img/plus.png";
-                        this.classList.add('image-placeholder');
+                        this.classList.add('image_placeholder');
                     };
                     
                     gridItem.appendChild(img);
@@ -412,7 +412,7 @@ function displayAllItems() {
                     } else {
                         // 기본 이미지
                         img.src = "/static/src/img/plus.png";
-                        img.classList.add('image-placeholder');
+                        img.classList.add('image_placeholder');
                         console.log('No images found for item:', item); // 디버깅용
                     }
                     
@@ -420,7 +420,7 @@ function displayAllItems() {
                         // 이미지 로드 실패시 기본 이미지
                         console.log('Image load failed:', this.src); // 디버깅용
                         this.src = "/static/src/img/plus.png";
-                        this.classList.add('image-placeholder');
+                        this.classList.add('image_placeholder');
                     };
                     
                     gridItem.appendChild(img);
@@ -663,7 +663,7 @@ function processCarouselData(data) {
                 const selectedItems = shuffledItems.slice(0, maxItems);
                 
                 // 캐러셀 트랙 가져오기
-                const carouselTrack = document.getElementById('carousel-track');
+                const carouselTrack = document.getElementById('carousel_track');
                 if (!carouselTrack) {
                     console.error('Carousel track not found');
                     return;
@@ -677,7 +677,7 @@ function processCarouselData(data) {
                 for (let round = 0; round < 2; round++) {
                     selectedItems.forEach((item, index) => {
                         const carouselItem = document.createElement('div');
-                        carouselItem.className = 'carousel-item';
+                        carouselItem.className = 'carousel_item';
                         
                         const img = document.createElement('img');
                         img.loading = 'eager'; // 캐러셀은 즉시 로드
@@ -764,7 +764,7 @@ function processCarouselData(data) {
 
 // 대체 캐러셀 (데이터 로딩 실패시)
 function showFallbackCarousel() {
-    const carouselTrack = document.getElementById('carousel-track');
+    const carouselTrack = document.getElementById('carousel_track');
     if (!carouselTrack) return;
     
     carouselTrack.innerHTML = '';
@@ -781,11 +781,11 @@ function showFallbackCarousel() {
     for (let round = 0; round < 2; round++) {
         placeholderImages.forEach((imgSrc, i) => {
             const carouselItem = document.createElement('div');
-            carouselItem.className = 'carousel-item';
+            carouselItem.className = 'carousel_item';
             
             const img = document.createElement('img');
             img.src = imgSrc;
-            img.classList.add('small-radius');
+            img.classList.add('small_radius');
             
             img.onload = function() {
                 console.log('✅ Fallback image loaded:', this.src);
@@ -794,7 +794,7 @@ function showFallbackCarousel() {
             img.onerror = function() {
                 console.error('❌ Fallback image failed:', this.src);
                 // 최후의 수단: 색상 박스
-                this.classList.add('fallback-carousel-item', `color-bg-${['red', 'teal', 'blue', 'brown'][i % 4]}`);
+                this.classList.add('fallback-carousel_item', `color-bg-${['red', 'teal', 'blue', 'brown'][i % 4]}`);
                 this.alt = `Placeholder ${i + 1}`;
             };
             
@@ -946,7 +946,7 @@ function displaySearchResultsForAll(items, query) {
             img.src = item.images[0];
         } else {
             img.src = '/static/src/img/plus.png';
-            img.classList.add('image-placeholder');
+            img.classList.add('image_placeholder');
         }
         
         img.alt = item.brand || 'Item';
@@ -1040,7 +1040,7 @@ function displaySearchResults(items, query) {
             img.src = item.images[0];
         } else {
             img.src = '/static/src/img/plus.png';
-            img.classList.add('image-placeholder');
+            img.classList.add('image_placeholder');
         }
         
         img.alt = item.brand || 'Item';
@@ -1202,7 +1202,7 @@ function populateEditForm(item) {
                         const etcInput = document.getElementById('size_etc_input');
                         if (etcInput) {
                             etcInput.value = item.size;
-                            etcInput.classList.add('size-etc-input-visible');
+                            etcInput.classList.add('size_etc_input_visible');
                         }
                     } else {
                         const sizeRadio = document.querySelector(`input[name="size_key"][value="${item.size}"]`);
@@ -1328,7 +1328,7 @@ function displayExistingImages(images) {
         const addImage = stitchedMode.querySelector('.add_image');
         const preview = document.createElement('div');
         preview.className = 'stitched_preview existing_image';
-        preview.setAttribute('data-image-urls', JSON.stringify(images));
+        preview.setAttribute('data_image_urls', JSON.stringify(images));
         preview.innerHTML = `
             <img src="${images[0]}" alt="Stitched image preview">
             <div class="section_info">Stitched Image (${images.length} sections) - Click to remove</div>
@@ -1341,7 +1341,7 @@ function displayExistingImages(images) {
         // 클릭 이벤트 추가: stitched 이미지 삭제 기능
         preview.addEventListener('click', () => {
             // 모든 섹션 이미지 제거
-            const imageUrls = JSON.parse(preview.getAttribute('data-image-urls'));
+            const imageUrls = JSON.parse(preview.getAttribute('data_image_urls'));
             
             // 삭제된 이미지들을 전역 배열에 추가
             if (!window.deletedImageUrls) window.deletedImageUrls = [];
@@ -1379,7 +1379,7 @@ function displayExistingImages(images) {
         images.forEach((imageUrl, index) => {
             const preview = document.createElement('div');
             preview.className = 'preview_image existing_image';
-            preview.setAttribute('data-image-url', imageUrl);
+            preview.setAttribute('data_image_url', imageUrl);
             if (index === 0) preview.classList.add('main_image');
             
             const img = document.createElement('img');
@@ -1421,7 +1421,7 @@ function displayExistingImages(images) {
                 }
                 
                 // 기존 이미지 제거
-                const removedUrl = preview.getAttribute('data-image-url');
+                const removedUrl = preview.getAttribute('data_image_url');
                 const imageIndex = images.indexOf(removedUrl);
                 if (imageIndex > -1) {
                     images.splice(imageIndex, 1);
@@ -1958,7 +1958,7 @@ function displayFilterSize() {
     const sizeContainer = document.createElement('div');
     
     const sizeGrid = document.createElement('div');
-    sizeGrid.className = 'size-grid';
+    sizeGrid.className = 'size_grid';
     
     // 실제 시스템에서 사용되는 사이즈 목록 (displaySizesByRegion 기준)
     const allSizes = [
@@ -2047,7 +2047,7 @@ function displaySizesByRegion(region) {
             console.log('🔧 Created new etc input element');
         }
         
-        etcInput.classList.add('size-etc-input-visible');
+        etcInput.classList.add('size_etc_input_visible');
         grid.appendChild(etcInput);
         etcInput.focus();
         console.log('✅ etc input displayed and focused');
@@ -2086,11 +2086,11 @@ function displaySizesByRegion(region) {
     }
     var cont = document.querySelector(".grid_container_size");
     if (accordingSizes.length > 5){
-        cont.classList.add('container-height-120');
+        cont.classList.add('container_height_120');
     } else if (accordingSizes.length > 10){
-        cont.classList.add('container-height-180');
+        cont.classList.add('container_height_180');
     } else {
-        cont.classList.add('container-height-80');
+        cont.classList.add('container_height_80');
     }
 }
 function selectedSizeRegion(region){
@@ -2631,8 +2631,8 @@ function populateItemView(item) {
     console.log('🖼️ Populating item view with data:', item);
     
     // 브랜드와 카테고리 정보 표시
-    const brandElement = document.getElementById('item-brand');
-    const categoryElement = document.getElementById('item-category');
+    const brandElement = document.getElementById('item_brand');
+    const categoryElement = document.getElementById('item_category');
     
     if (brandElement) {
         brandElement.textContent = item.brand || 'Brand Name';
@@ -2641,7 +2641,7 @@ function populateItemView(item) {
         if (item.brand) {
             const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
             if (hasKorean) {
-                brandElement.classList.add('item-brand');
+                brandElement.classList.add('item_brand');
             }
         }
     }
@@ -2665,7 +2665,7 @@ function populateItemView(item) {
             // 첫 번째 이미지만 표시 (또는 갤러리 형태로)
             const img = document.createElement('img');
             img.src = item.images[0];
-            img.classList.add('fallback-image');
+            img.classList.add('fallback_image');
             img.onload = () => {
                 // 이미지가 윈도우보다 작으면 중앙 정렬
                 console.log('🖼️ Image width:', img.naturalWidth);
@@ -2673,8 +2673,8 @@ function populateItemView(item) {
                 console.log('🖼️ Should center?', img.naturalWidth < window.innerWidth);
                 
                 if (img.naturalWidth < window.innerWidth) {
-                    console.log('✅ Adding center-align class');
-                    img.classList.add('center-align');
+                    console.log('✅ Adding center_align class');
+                    img.classList.add('center_align');
                 } else {
                     console.log('❌ Image is wider than window, no centering');
                 }
@@ -2697,8 +2697,8 @@ function populateItemView(item) {
         }
         sizeElement.textContent = sizeText;
         sizeElement.style.display = ''; // 인라인 스타일 제거
-        sizeElement.classList.remove('hidden', 'item-size-hidden');
-        sizeElement.classList.add('item-size');
+        sizeElement.classList.remove('hidden', 'item_size-hidden');
+        sizeElement.classList.add('item_size');
     }
     
     // Measurement 표시
@@ -3194,19 +3194,19 @@ function loadItemDetails() {
 
 function updateItemDisplay(item) {
     // 브랜드 이름 업데이트
-    const brandElement = document.getElementById('item-brand');
+    const brandElement = document.getElementById('item_brand');
     if (brandElement && item.brand) {
         brandElement.textContent = item.brand;
         
         // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
         const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
         if (hasKorean) {
-            brandElement.classList.add('item-brand');
+            brandElement.classList.add('item_brand');
         }
     }
     
     // 카테고리 업데이트
-    const categoryElement = document.getElementById('item-category');
+    const categoryElement = document.getElementById('item_category');
     if (categoryElement) {
         const categoryText = [item.subcategory, item.category].filter(Boolean).join(' ');
         if (categoryText) {
@@ -3254,13 +3254,13 @@ function updateSizeDisplay(item) {
             });
             sizeElement.textContent = sizeText;
             sizeElement.style.display = ''; // 인라인 스타일 제거
-            sizeElement.classList.remove('hidden', 'item-size-hidden');
-            sizeElement.classList.add('item-size');
+            sizeElement.classList.remove('hidden', 'item_size-hidden');
+            sizeElement.classList.add('item_size');
             console.log('Updated size display:', sizeText);
         } else {
             // 사이즈 정보가 없으면 숨김
-            sizeElement.classList.remove('item-size');
-            sizeElement.classList.add('item-size-hidden');
+            sizeElement.classList.remove('item_size');
+            sizeElement.classList.add('item_size-hidden');
             console.log('No size information, hiding size element');
         }
     }
@@ -3295,12 +3295,12 @@ function updateCompositionDisplay(item) {
                     if (material) {
                         const compDiv = document.createElement('div');
                         compDiv.className = 'label_with_value';
-                        compDiv.classList.add('composition-block');
+                        compDiv.classList.add('composition_block');
                         
                         const labelDiv = document.createElement('div');
                         labelDiv.className = 'comp_label';
                         labelDiv.textContent = material;
-                        labelDiv.classList.add('composition-label');
+                        labelDiv.classList.add('composition_label');
                         
                         compDiv.appendChild(labelDiv);
                         compositionContainer.appendChild(compDiv);
@@ -3688,7 +3688,7 @@ function stitchImagesBack(imageUrls, container) {
                 console.log('Using fallback original image display for first image');
                 const fallbackImg = document.createElement('img');
                 fallbackImg.src = url; // 원본 URL 사용
-                fallbackImg.className = 'fallback-image';
+                fallbackImg.className = 'fallback_image';
                 container.appendChild(fallbackImg);
             }
             
@@ -3714,12 +3714,12 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     
     // 외부 패딩 컨테이너 (40px padding)
     const paddingContainer = document.createElement('div');
-    paddingContainer.className = 'carousel-padding-container';
-    paddingContainer.classList.add('max-height-override');
+    paddingContainer.className = 'carousel_padding_container';
+    paddingContainer.classList.add('max_height_override');
     
     // 내부 carousel 컨테이너 (좌우 스크롤)
     const carouselContainer = document.createElement('div');
-    carouselContainer.className = 'horizontal-carousel';
+    carouselContainer.className = 'horizontal_carousel';
     
     // 이미지에서만 좌우 스크롤, 빈 공간에서는 위아래 스크롤 허용
     carouselContainer.addEventListener('wheel', (e) => {
@@ -3755,10 +3755,10 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             
             if (totalCarouselWidth < containerWidth) {
                 console.log('🎯 캐러셀이 컨테이너보다 작음 - 중앙 정렬 적용');
-                carouselContainer.classList.add('center-align');
+                carouselContainer.classList.add('center_align');
             } else {
                 console.log('📍 캐러셀이 컨테이너보다 큼 - 좌측 정렬 유지');
-                carouselContainer.classList.remove('center-align');
+                carouselContainer.classList.remove('center_align');
             }
         }
     }
@@ -3768,17 +3768,17 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         const img = document.createElement('img');
         // 직접 URL 사용
         img.src = url;
-        img.className = 'carousel-image';
+        img.className = 'carousel_image';
         
         // 클릭 시 확대
         img.onclick = () => {
             const modal = document.createElement('div');
-            modal.className = 'fullscreen-modal';
+            modal.className = 'fullscreen_modal';
             modal.onclick = () => document.body.removeChild(modal);
             
             const modalImg = document.createElement('img');
             modalImg.src = url;
-            modalImg.className = 'modal-image';
+            modalImg.className = 'modal_image';
             
             modal.appendChild(modalImg);
             document.body.appendChild(modal);
@@ -3796,7 +3796,7 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             console.log(`⚠️ This image may not exist in R2 bucket`);
             // 플레이스홀더로 대체하되 더 명확한 메시지
             img.src = '/static/src/img/plus.png';
-            img.classList.add('image-placeholder');
+            img.classList.add('image_placeholder');
             img.title = 'Image not found in storage';
             
             loadedCount++;
@@ -3843,7 +3843,7 @@ function combineImages(images, canvas, ctx, container) {
     try {
         const combinedImg = document.createElement('img');
         combinedImg.src = canvas.toDataURL('image/jpeg', 0.9);
-        combinedImg.className = 'combined-image';
+        combinedImg.className = 'combined_image';
         
         console.log('Appending combined image to container');
         container.appendChild(combinedImg);
@@ -3856,21 +3856,21 @@ function combineImages(images, canvas, ctx, container) {
         
         // 외부 패딩 컨테이너
         const paddingContainer = document.createElement('div');
-        paddingContainer.className = 'carousel-padding-container';
+        paddingContainer.className = 'carousel_padding_container';
         
         // 내부 carousel 컨테이너 
         const carouselContainer = document.createElement('div');
-        carouselContainer.className = 'carousel-container-flex';
+        carouselContainer.className = 'carousel_container_flex';
         
         // Webkit 브라우저용 스크롤바 숨기기
         const style = document.createElement('style');
         style.textContent = `
-            .horizontal-carousel::-webkit-scrollbar {
+            .horizontal_carousel::-webkit-scrollbar {
                 display: none;
             }
         `;
         document.head.appendChild(style);
-        carouselContainer.className = 'horizontal-carousel';
+        carouselContainer.className = 'horizontal_carousel';
         
         // 이미지 영역에서만 좌우 스크롤 이벤트 추가
         carouselContainer.addEventListener('wheel', (e) => {
@@ -3881,7 +3881,7 @@ function combineImages(images, canvas, ctx, container) {
         images.forEach((img, index) => {
             const displayImg = document.createElement('img');
             displayImg.src = img.src;
-            displayImg.className = 'carousel-item-image';
+            displayImg.className = 'carousel_item-image';
             
             carouselContainer.appendChild(displayImg);
         });
@@ -3984,15 +3984,15 @@ function displayFilterResults(items, count) {
     if (!submitButton) return;
     
     // 기존 결과 제거
-    const existingResults = document.querySelector('.filter-results');
+    const existingResults = document.querySelector('.filter_results');
     if (existingResults) {
         existingResults.remove();
     }
     
     // 새 결과 컨테이너 생성 - 적절한 마진과 패딩 추가
     const resultsContainer = document.createElement('div');
-    resultsContainer.className = 'filter-results';
-    resultsContainer.className = 'filter-results';
+    resultsContainer.className = 'filter_results';
+    resultsContainer.className = 'filter_results';
     resultsContainer.innerHTML = `
         <div class="subheader">
             <div class="text">
@@ -4021,7 +4021,7 @@ function displayFilterResults(items, count) {
             img.src = item.images[0];
         } else {
             img.src = '/static/src/img/plus.png';
-            img.classList.add('image-placeholder');
+            img.classList.add('image_placeholder');
         }
         
         img.alt = item.brand || 'Item';
@@ -4213,11 +4213,11 @@ function addImageFiles(files) {
             // 미리보기 요소 생성
             const preview = document.createElement('div');
             preview.className = 'preview_image';
-            preview.classList.add('preview-relative');
+            preview.classList.add('preview_relative');
             
             const img = document.createElement('img');
             img.src = e.target.result;
-            img.classList.add('preview-image-cover');
+            img.classList.add('preview_image_cover');
             
             preview.appendChild(img);
             
