@@ -3488,7 +3488,7 @@ function createTopLongSleeveMeasurement(container, measurements) {
         if (measurements && measurements[item.key]) {
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} long-sleeve`;
+            box.className = `box ${item.key} long_sleeve`;
             box.textContent = measurements[item.key];
             container.appendChild(box);
             
@@ -3546,7 +3546,7 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
         if (measurements && measurementValue) {
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} short-sleeve-mini-dress`;
+            box.className = `box ${item.key} short_sleeve_mini_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -3587,7 +3587,7 @@ function createDressShortSleeveMidiMeasurement(container, measurements) {
         if (measurements && measurementValue) {
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} short-sleeve-midi-dress`;
+            box.className = `box ${item.key} short_sleeve_midi_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -3628,7 +3628,7 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
         if (measurements && measurementValue) {
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} short-sleeve-long-dress`;
+            box.className = `box ${item.key} short_sleeve_long_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             

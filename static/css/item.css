@@ -118,55 +118,55 @@
 }
 
 /* Short Sleeve Mini Dress 전용 위치 설정 */
-.view_measurement .chest.short-sleeve-mini-dress {
+.view_measurement .chest.short_sleeve_mini_dress {
     top: 28%;
     left: 50%;
 }
 
-.view_measurement .shoulder.short-sleeve-mini-dress {
+.view_measurement .shoulder.short_sleeve_mini_dress {
     top: 11%;
     left: 50%;
 }
 
-.view_measurement .sleeve.short-sleeve-mini-dress {
+.view_measurement .sleeve.short_sleeve_mini_dress {
     top: 29%;
     left: 76%;
 }
 
-.view_measurement .sleeveOpening.short-sleeve-mini-dress {
+.view_measurement .sleeveOpening.short_sleeve_mini_dress {
     top: 47%;
     left: 22%;
 }
 
-.view_measurement .armhole.short-sleeve-mini-dress {
+.view_measurement .armhole.short_sleeve_mini_dress {
     top: 25%;
     left: 27%;
 }
 
-.view_measurement .waist.short-sleeve-mini-dress {
+.view_measurement .waist.short_sleeve_mini_dress {
     top: 51%;
     left: 50%;
 }
 
-.view_measurement .length.short-sleeve-mini-dress {
+.view_measurement .length.short_sleeve_mini_dress {
     top: 65%;
     left: 63%;
 }
 
-.view_measurement .hemWidth.short-sleeve-mini-dress {
+.view_measurement .hemWidth.short_sleeve_mini_dress {
     top: 75%;
     left: 46%;
 }
 
 /* Short Sleeve Mini Dress 각 measurement 요소별 개별 스타일링 */
-.view_measurement .chest.short-sleeve-mini-dress,
-.view_measurement .shoulder.short-sleeve-mini-dress,
-.view_measurement .sleeve.short-sleeve-mini-dress,
-.view_measurement .sleeveOpening.short-sleeve-mini-dress,
-.view_measurement .armhole.short-sleeve-mini-dress,
-.view_measurement .waist.short-sleeve-mini-dress,
-.view_measurement .length.short-sleeve-mini-dress,
-.view_measurement .hemWidth.short-sleeve-mini-dress {
+.view_measurement .chest.short_sleeve_mini_dress,
+.view_measurement .shoulder.short_sleeve_mini_dress,
+.view_measurement .sleeve.short_sleeve_mini_dress,
+.view_measurement .sleeveOpening.short_sleeve_mini_dress,
+.view_measurement .armhole.short_sleeve_mini_dress,
+.view_measurement .waist.short_sleeve_mini_dress,
+.view_measurement .length.short_sleeve_mini_dress,
+.view_measurement .hemWidth.short_sleeve_mini_dress {
     position: absolute;
     z-index: 11;
     padding: 8px 12px;
@@ -182,55 +182,55 @@
 }
 
 /* Short Sleeve Long Dress 전용 위치 설정 */
-.view_measurement .chest.short-sleeve-long-dress {
+.view_measurement .chest.short_sleeve_long_dress {
     top: 20%;
     left: 50%;
 }
 
-.view_measurement .shoulder.short-sleeve-long-dress {
+.view_measurement .shoulder.short_sleeve_long_dress {
     top: 8%;
     left: 50%;
 }
 
-.view_measurement .sleeve.short-sleeve-long-dress {
+.view_measurement .sleeve.short_sleeve_long_dress {
     top: 18%;
     left: 73%;
 }
 
-.view_measurement .sleeveOpening.short-sleeve-long-dress {
+.view_measurement .sleeveOpening.short_sleeve_long_dress {
     top: 28%;
     left: 20%;
 }
 
-.view_measurement .armhole.short-sleeve-long-dress {
+.view_measurement .armhole.short_sleeve_long_dress {
     top: 15%;
     left: 24%;
 }
 
-.view_measurement .waist.short-sleeve-long-dress {
+.view_measurement .waist.short_sleeve_long_dress {
     top: 33%;
     left: 50%;
 }
 
-.view_measurement .length.short-sleeve-long-dress {
+.view_measurement .length.short_sleeve_long_dress {
     top: 75%;
     left: 62%;
 }
 
-.view_measurement .hemWidth.short-sleeve-long-dress {
+.view_measurement .hemWidth.short_sleeve_long_dress {
     top: 85%;
     left: 46%;
 }
 
 /* Short Sleeve Long Dress 각 measurement 요소별 개별 스타일링 */
-.view_measurement .chest.short-sleeve-long-dress,
-.view_measurement .shoulder.short-sleeve-long-dress,
-.view_measurement .sleeve.short-sleeve-long-dress,
-.view_measurement .sleeveOpening.short-sleeve-long-dress,
-.view_measurement .armhole.short-sleeve-long-dress,
-.view_measurement .waist.short-sleeve-long-dress,
-.view_measurement .length.short-sleeve-long-dress,
-.view_measurement .hemWidth.short-sleeve-long-dress {
+.view_measurement .chest.short_sleeve_long_dress,
+.view_measurement .shoulder.short_sleeve_long_dress,
+.view_measurement .sleeve.short_sleeve_long_dress,
+.view_measurement .sleeveOpening.short_sleeve_long_dress,
+.view_measurement .armhole.short_sleeve_long_dress,
+.view_measurement .waist.short_sleeve_long_dress,
+.view_measurement .length.short_sleeve_long_dress,
+.view_measurement .hemWidth.short_sleeve_long_dress {
     position: absolute;
     z-index: 11;
     padding: 8px 12px;
@@ -246,15 +246,15 @@
 }
 
 /* Long sleeve 전용 위치 설정 */
-.view_measurement .shoulder.long-sleeve {
+.view_measurement .shoulder.long_sleeve {
     top: 20%; 
     left: 50%;
 }
-.view_measurement .sleeve.long-sleeve {
+.view_measurement .sleeve.long_sleeve {
     top: 39%;
     left: 85%; 
 }
-.view_measurement .length.long-sleeve {
+.view_measurement .length.long_sleeve {
     top: 55%;
     left: 60%;
 }
@@ -345,22 +345,22 @@
     }
     
     /* Short Sleeve Mini Dress 모바일 전용 스타일 */
-    .view_measurement .chest.short-sleeve-mini-dress,
-    .view_measurement .shoulder.short-sleeve-mini-dress,
-    .view_measurement .sleeve.short-sleeve-mini-dress,
-    .view_measurement .sleeveOpening.short-sleeve-mini-dress,
-    .view_measurement .armhole.short-sleeve-mini-dress,
-    .view_measurement .waist.short-sleeve-mini-dress,
-    .view_measurement .length.short-sleeve-mini-dress,
-    .view_measurement .hemWidth.short-sleeve-mini-dress,
-    .view_measurement .chest.short-sleeve-long-dress,
-    .view_measurement .shoulder.short-sleeve-long-dress,
-    .view_measurement .sleeve.short-sleeve-long-dress,
-    .view_measurement .sleeveOpening.short-sleeve-long-dress,
-    .view_measurement .armhole.short-sleeve-long-dress,
-    .view_measurement .waist.short-sleeve-long-dress,
-    .view_measurement .length.short-sleeve-long-dress,
-    .view_measurement .hemWidth.short-sleeve-long-dress {
+    .view_measurement .chest.short_sleeve_mini_dress,
+    .view_measurement .shoulder.short_sleeve_mini_dress,
+    .view_measurement .sleeve.short_sleeve_mini_dress,
+    .view_measurement .sleeveOpening.short_sleeve_mini_dress,
+    .view_measurement .armhole.short_sleeve_mini_dress,
+    .view_measurement .waist.short_sleeve_mini_dress,
+    .view_measurement .length.short_sleeve_mini_dress,
+    .view_measurement .hemWidth.short_sleeve_mini_dress,
+    .view_measurement .chest.short_sleeve_long_dress,
+    .view_measurement .shoulder.short_sleeve_long_dress,
+    .view_measurement .sleeve.short_sleeve_long_dress,
+    .view_measurement .sleeveOpening.short_sleeve_long_dress,
+    .view_measurement .armhole.short_sleeve_long_dress,
+    .view_measurement .waist.short_sleeve_long_dress,
+    .view_measurement .length.short_sleeve_long_dress,
+    .view_measurement .hemWidth.short_sleeve_long_dress {
         padding: 6px 10px;
         min-width: 32px;
         border-radius: 20px;
