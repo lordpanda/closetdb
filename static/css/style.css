@@ -281,6 +281,13 @@
 }
 
 /* Filter content styles */
+.new_filter_category_grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 10px;
+    margin-bottom: 20px;
+}
+
 .filter_measurement_item {
     display: flex;
     justify-content: space-between;

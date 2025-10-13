@@ -2045,8 +2045,7 @@ function initializeFilterCategories() {
     categoryGrid.innerHTML = '';
     for (let i = 0; i < categories.length; i++) {
         const item = document.createElement('div');
-        item.className = "grid_category";
-        item.innerHTML = `<input type="radio" name="filter_category" class="category_image" id="filter_category_${i}" value="${categories[i]}"/><label for="filter_category_${i}">${categories[i]}</label>`;
+        item.innerHTML = `<input type="radio" name="filter_category" id="filter_category_${i}" value="${categories[i]}"/><label for="filter_category_${i}">${categories[i]}</label>`;
         
         // Add event listener for category selection
         const radio = item.querySelector('input[type="radio"]');
@@ -2163,12 +2162,6 @@ function reconfigureSizes(availableSizes) {
                 </div>
             `).join('')}
         </div>
-        <button class="load_more_button" onclick="toggleSizeList()">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_size_expanded" id="new_filter_size_expanded" style="display: none;">
-            <!-- Will be populated when expanded -->
-        </div>
     `;
 }
 
@@ -2184,19 +2177,13 @@ function initializeFilterMeasurements() {
                 <div class="filter_measurement_item">
                     <label>${measurement}</label>
                     <div style="display: flex; align-items: center;">
-                        <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement}" />
+                        <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement}" style="width: 80px; padding: 5px; border: 1px solid var(--gray); border-radius: 5px;" />
                         <button class="clear_button" onclick="clearMeasurementInput('${measurement}')" style="margin-left: 10px;">
                             <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
                         </button>
                     </div>
                 </div>
             `).join('')}
-        </div>
-        <button class="load_more_button" onclick="toggleMeasurementList()">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_measurement_expanded" id="new_filter_measurement_expanded" style="display: none;">
-            <!-- Will be populated when expanded -->
         </div>
     `;
 }
@@ -2216,12 +2203,6 @@ function initializeFilterCompositions() {
                 </div>
             `).join('')}
         </div>
-        <button class="load_more_button" onclick="toggleCompositionList()">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_composition_expanded" id="new_filter_composition_expanded" style="display: none;">
-            <!-- Will be populated when expanded -->
-        </div>
     `;
 }
 
@@ -2239,12 +2220,6 @@ function initializeFilterSizes() {
                     <label for="size_${size}">${size.toUpperCase()}</label>
                 </div>
             `).join('')}
-        </div>
-        <button class="load_more_button" onclick="toggleSizeList()">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_size_expanded" id="new_filter_size_expanded" style="display: none;">
-            <!-- Will be populated when expanded -->
         </div>
     `;
 }
