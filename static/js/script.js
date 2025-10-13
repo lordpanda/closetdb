@@ -1944,30 +1944,24 @@ function openFilterPanel() {
         filterPanel = document.getElementById('filter_panel');
     }
     
-    // Create overlay if it doesn't exist
-    let overlay = document.getElementById('filter_overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.className = 'filter_overlay';
-        overlay.id = 'filter_overlay';
-        overlay.addEventListener('click', closeFilterPanel);
-        document.body.appendChild(overlay);
-    }
+    // Push content to the left by adding margin to body
+    document.body.style.marginRight = '600px';
+    document.body.style.transition = 'margin-right 0.3s ease-in-out';
     
-    // Show panel and overlay
+    // Show panel
     setTimeout(() => {
         filterPanel.classList.add('open');
-        overlay.classList.add('open');
     }, 10);
 }
 
 function closeFilterPanel() {
     console.log('Closing filter panel');
     const filterPanel = document.getElementById('filter_panel');
-    const overlay = document.getElementById('filter_overlay');
+    
+    // Reset body margin to original
+    document.body.style.marginRight = '0';
     
     if (filterPanel) filterPanel.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
 }
 
 function createFilterPanel() {
@@ -2183,14 +2177,22 @@ function initializeFilterMeasurements() {
             ${basicMeasurements.map(measurement => `
                 <div class="filter_measurement_item">
                     <label>${measurement}</label>
-                    <div style="display: flex; align-items: center;">
-                        <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement}" style="width: 80px; padding: 5px; border: 1px solid var(--gray); border-radius: 5px;" />
-                        <button class="clear_button" onclick="clearMeasurementInput('${measurement}')" style="margin-left: 10px;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <input type="text" placeholder="from" class="measurement_input" id="measurement_${measurement}_from" style="width: 60px; padding: 5px; border: 1px solid var(--gray); border-radius: 5px;" />
+                        <span>-</span>
+                        <input type="text" placeholder="to" class="measurement_input" id="measurement_${measurement}_to" style="width: 60px; padding: 5px; border: 1px solid var(--gray); border-radius: 5px;" />
+                        <button class="clear_button" onclick="clearMeasurementRange('${measurement}')" style="margin-left: 8px;">
                             <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
                         </button>
                     </div>
                 </div>
             `).join('')}
+        </div>
+        <button class="load_more_button" onclick="toggleMeasurementList()" style="margin-top: 10px;">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_measurement_expanded" id="new_filter_measurement_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
         </div>
     `;
 }
@@ -2210,6 +2212,12 @@ function initializeFilterCompositions() {
                 </div>
             `).join('')}
         </div>
+        <button class="load_more_button" onclick="toggleCompositionList()" style="margin-top: 10px;">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_composition_expanded" id="new_filter_composition_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
+        </div>
     `;
 }
 
@@ -2223,19 +2231,29 @@ function initializeFilterSizes() {
         'DE': ['32', '34', '36', '38', '40', '42']
     };
     
-    container.innerHTML = Object.entries(sizeOptions).map(([region, sizes]) => `
-        <div class="size_region_section" style="margin-bottom: 15px;">
-            <h3 style="font-family: 'Sequel75', sans-serif; font-size: 1.1em; margin-bottom: 10px;">${region}</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                ${sizes.map(size => `
-                    <div class="tag_item">
-                        <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
-                        <label for="size_${region.toLowerCase()}_${size}" style="min-width: auto; padding: 0 12px;">${size}</label>
+    container.innerHTML = `
+        <div class="filter_size_basic" id="new_filter_size_basic">
+            ${Object.entries(sizeOptions).map(([region, sizes]) => `
+                <div class="size_region_section" style="margin-bottom: 15px;">
+                    <h3 style="font-family: 'Sequel75', sans-serif; font-size: 1.1em; margin-bottom: 10px;">${region}</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        ${sizes.map(size => `
+                            <div class="tag_item">
+                                <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
+                                <label for="size_${region.toLowerCase()}_${size}" style="min-width: auto; padding: 0 12px;">${size}</label>
+                            </div>
+                        `).join('')}
                     </div>
-                `).join('')}
-            </div>
+                </div>
+            `).join('')}
         </div>
-    `).join('');
+        <button class="load_more_button" onclick="toggleSizeList()" style="margin-top: 10px;">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_size_expanded" id="new_filter_size_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
+        </div>
+    `;
 }
 
 // Toggle functions for load more buttons
@@ -2321,6 +2339,13 @@ function clearMeasurementInput(measurementName) {
     if (input) {
         input.value = '';
     }
+}
+
+function clearMeasurementRange(measurementName) {
+    const fromInput = document.getElementById(`measurement_${measurementName}_from`);
+    const toInput = document.getElementById(`measurement_${measurementName}_to`);
+    if (fromInput) fromInput.value = '';
+    if (toInput) toInput.value = '';
 }
 
 function applyFilters() {
