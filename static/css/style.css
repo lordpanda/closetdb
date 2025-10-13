@@ -319,6 +319,71 @@
     margin-bottom: 20px;
 }
 
+/* Hide checkboxes in filter panel */
+.filter_panel .tag_item input[type="checkbox"] {
+    position: fixed;
+    opacity: 0;
+    visibility: hidden;
+    height: 0;
+    width: 0;
+    border: none;
+}
+
+.filter_panel .tag_item input[type="checkbox"]:checked + label {
+    background-color: var(--black);
+    color: white;
+}
+
+/* Push content left when filter panel is open */
+body.filter-open {
+    margin-right: 600px;
+    transition: margin-right 0.3s ease-in-out;
+}
+
+body.filter-open .grid_container {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+}
+
+/* Mobile responsive for filter open state */
+@media screen and (max-width: 1200px) {
+    body.filter-open {
+        margin-right: 500px;
+    }
+    
+    .filter_panel {
+        width: 500px;
+        right: -500px;
+    }
+}
+
+@media screen and (max-width: 960px) {
+    body.filter-open {
+        margin-right: 400px;
+    }
+    
+    .filter_panel {
+        width: 400px;
+        right: -400px;
+    }
+}
+
+@media screen and (max-width: 620px) {
+    body.filter-open {
+        margin-right: 300px;
+    }
+    
+    .filter_panel {
+        width: 300px;
+        right: -300px;
+    }
+    
+    body.filter-open .grid_container {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: repeat(4, 1fr);
+    }
+}
+
 .load_more_button, .clear_button {
     background: none;
     border: 1px solid var(--gray);

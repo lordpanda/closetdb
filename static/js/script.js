@@ -1944,9 +1944,8 @@ function openFilterPanel() {
         filterPanel = document.getElementById('filter_panel');
     }
     
-    // Push content to the left by adding margin to body
-    document.body.style.marginRight = '600px';
-    document.body.style.transition = 'margin-right 0.3s ease-in-out';
+    // Add filter-open class to body for CSS styling
+    document.body.classList.add('filter-open');
     
     // Show panel
     setTimeout(() => {
@@ -1958,8 +1957,8 @@ function closeFilterPanel() {
     console.log('Closing filter panel');
     const filterPanel = document.getElementById('filter_panel');
     
-    // Reset body margin to original
-    document.body.style.marginRight = '0';
+    // Remove filter-open class from body
+    document.body.classList.remove('filter-open');
     
     if (filterPanel) filterPanel.classList.remove('open');
 }
