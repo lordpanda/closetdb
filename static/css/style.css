@@ -336,13 +336,23 @@
 
 /* Push content left when filter panel is open */
 body.filter-open {
-    margin-right: 600px;
+    margin-right: 600px !important;
     transition: margin-right 0.3s ease-in-out;
+}
+
+body.filter-open .content,
+body.filter-open .header,
+body.filter-open .subheader {
+    margin-right: 0;
+    width: calc(100vw - 600px);
+    transition: width 0.3s ease-in-out;
 }
 
 body.filter-open .grid_container {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(4, 1fr);
+    max-height: 800px;
+    overflow: visible;
 }
 
 /* Filter panel layout classes */

@@ -1946,10 +1946,13 @@ function openFilterPanel() {
     
     // Add filter-open class to body for CSS styling
     document.body.classList.add('filter-open');
+    console.log('Added filter-open class to body');
+    console.log('Body classes:', document.body.className);
     
     // Show panel
     setTimeout(() => {
         filterPanel.classList.add('open');
+        console.log('Panel classes:', filterPanel.className);
     }, 10);
 }
 
@@ -1959,8 +1962,13 @@ function closeFilterPanel() {
     
     // Remove filter-open class from body
     document.body.classList.remove('filter-open');
+    console.log('Removed filter-open class from body');
+    console.log('Body classes:', document.body.className);
     
-    if (filterPanel) filterPanel.classList.remove('open');
+    if (filterPanel) {
+        filterPanel.classList.remove('open');
+        console.log('Panel classes:', filterPanel.className);
+    }
 }
 
 function createFilterPanel() {
