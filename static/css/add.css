@@ -523,12 +523,11 @@ input:checked + .toggle_slider {
 
 /* Composition Sets 스타일 */
 .composition_sets_container {
-    margin-bottom: 20px;
 }
 
 .composition_set {
     border-radius: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     position: relative;
 }
 
@@ -769,7 +768,7 @@ input:checked + .toggle_slider {
     }   
     .size_region {
         width: 60px;
-        height: 40px;
+        height: 47px;
         border-radius: 1.5rem;
         padding: 0 10px;
         box-sizing: content-box;
@@ -796,13 +795,18 @@ input:checked + .toggle_slider {
     .grid_container_composition {
         grid-template-columns: auto auto;
     }
+
+    .composition_set_header {
+        padding: 0;
+        margin-bottom: 20px;
+    }
     .grid_container_season {
         grid-template-columns: auto auto;
     }
     
     .grid_container_tags {
         gap: 1em;
-        justify-content: center;
+        justify-content: left;
     }
     
     .tag_item label {

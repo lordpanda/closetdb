@@ -220,6 +220,120 @@
     cursor: pointer;
 }
 
+/* Filter Panel styles */
+.filter_panel {
+    position: fixed;
+    top: 0;
+    right: -800px;
+    width: 800px;
+    height: 100vh;
+    background-color: white;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+    z-index: 2000;
+    transition: right 0.3s ease-in-out;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.filter_panel.open {
+    right: 0;
+}
+
+.filter_overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.filter_overlay.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.filter_apply_button {
+    width: 100%;
+    text-align: center;
+    border: none;
+    font-size: 1.2em;
+    line-height: 58px;
+    border-radius: 30px;
+    transition: 0.5s;
+    font-family: 'Sequel85';
+    padding-bottom: 4px;
+    color: white;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% auto;
+    cursor: pointer;
+}
+
+.filter_apply_button:hover {
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Filter content styles */
+.filter_measurement_item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: var(--gray);
+    border-radius: 10px;
+}
+
+.filter_measurement_item label {
+    font-family: 'Sequel75', sans-serif;
+    font-size: 1.1em;
+    margin: 0;
+    border: none;
+    background: none;
+    min-width: 100px;
+}
+
+.filter_measurement_basic, .filter_measurement_expanded {
+    margin-bottom: 20px;
+}
+
+.filter_composition_basic, .filter_composition_expanded,
+.filter_size_basic, .filter_size_expanded {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.load_more_button, .clear_button {
+    background: none;
+    border: 1px solid var(--gray);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.load_more_button:hover, .clear_button:hover {
+    background-color: var(--black);
+    border-color: var(--black);
+}
+
+.load_more_button:hover img, .clear_button:hover img {
+    filter: invert(1);
+}
+
 .modal_image {
     max-width: 90%;
     max-height: 90%;

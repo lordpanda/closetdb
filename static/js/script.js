@@ -144,8 +144,8 @@ function displayGlobalMenu(parm1) {
     <div class="hamburger"><div></div></div>
     <ul class="menu">
         <li><a class="`+activeItem[0]+`" href="#" id="view_all_link">View all</a></li>
-        <li><a class="`+activeItem[1]+`" href="#" id="filter_link">Filter</a></li>
         <li><a class="`+activeItem[2]+`" href="#" id="add_new_link">Add</a></li>
+        <li><a class="`+activeItem[1]+`" href="#" id="filter_link">Filter</a></li>
     </ul>
     `);
 }
@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filterLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 console.log('Filter clicked!');
-                checkLoginAndRedirect('./filter.html');
+                openFilterPanel();
             });
         }
         
@@ -1931,6 +1931,409 @@ function updateFileInput(files) {
             fileInput.files = dt.files;
         }
     }
+}
+
+// Filter panel functions
+function openFilterPanel() {
+    console.log('Opening filter panel');
+    
+    // Create filter panel if it doesn't exist
+    let filterPanel = document.getElementById('filter_panel');
+    if (!filterPanel) {
+        createFilterPanel();
+        filterPanel = document.getElementById('filter_panel');
+    }
+    
+    // Create overlay if it doesn't exist
+    let overlay = document.getElementById('filter_overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'filter_overlay';
+        overlay.id = 'filter_overlay';
+        overlay.addEventListener('click', closeFilterPanel);
+        document.body.appendChild(overlay);
+    }
+    
+    // Show panel and overlay
+    setTimeout(() => {
+        filterPanel.classList.add('open');
+        overlay.classList.add('open');
+    }, 10);
+}
+
+function closeFilterPanel() {
+    console.log('Closing filter panel');
+    const filterPanel = document.getElementById('filter_panel');
+    const overlay = document.getElementById('filter_overlay');
+    
+    if (filterPanel) filterPanel.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+}
+
+function createFilterPanel() {
+    const filterPanel = document.createElement('div');
+    filterPanel.className = 'filter_panel';
+    filterPanel.id = 'filter_panel';
+    
+    filterPanel.innerHTML = `
+        <div style="padding: 40px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h1 style="font-family: 'Sequel85', sans-serif; font-size: 2em; margin: 0;">Filter</h1>
+                <button onclick="closeFilterPanel()" style="background: none; border: none; font-size: 2em; cursor: pointer; color: var(--black);">×</button>
+            </div>
+            
+            <div class="filter_content">
+                <div class="subheader">
+                    <h1>category</h1>
+                </div>
+                <div class="new_filter_category_grid" id="new_filter_category_grid">
+                </div>
+                
+                <div class="subheader">
+                    <h1>measurement</h1>
+                </div>
+                <div class="new_filter_measurement_container" id="new_filter_measurement_container">
+                </div>
+                
+                <div class="subheader">
+                    <h1>composition</h1>
+                </div>
+                <div class="new_filter_composition_container" id="new_filter_composition_container">
+                </div>
+                
+                <div class="subheader">
+                    <h1>size</h1>
+                </div>
+                <div class="new_filter_size_container" id="new_filter_size_container">
+                </div>
+            </div>
+        </div>
+        
+        <div style="position: sticky; bottom: 0; background: white; padding: 20px 40px; border-top: 1px solid var(--gray);">
+            <button class="filter_apply_button" onclick="applyFilters()">Apply</button>
+        </div>
+    `;
+    
+    document.body.appendChild(filterPanel);
+    
+    // Initialize filter content
+    initializeFilterContent();
+}
+
+function initializeFilterContent() {
+    // Initialize categories
+    initializeFilterCategories();
+    
+    // Initialize measurements (기본 3개)
+    initializeFilterMeasurements();
+    
+    // Initialize compositions (기본 6개)
+    initializeFilterCompositions();
+    
+    // Initialize sizes (기본 3개)
+    initializeFilterSizes();
+}
+
+function initializeFilterCategories() {
+    const categoryGrid = document.getElementById('new_filter_category_grid');
+    if (!categoryGrid || !categoryList) return;
+    
+    categoryGrid.innerHTML = '';
+    for (let i = 0; i < categoryList.length; i++) {
+        const item = document.createElement('div');
+        item.className = "grid_category";
+        item.innerHTML = `<input type="radio" name="filter_category" class="category_image" id="filter_category_${i}" value="${categoryList[i]}"/><label for="filter_category_${i}">${categoryList[i]}</label>`;
+        
+        // Add event listener for category selection
+        const radio = item.querySelector('input[type="radio"]');
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                onCategorySelected(this.value);
+            }
+        });
+        
+        categoryGrid.appendChild(item);
+    }
+}
+
+function onCategorySelected(selectedCategory) {
+    console.log(`Category selected: ${selectedCategory}`);
+    
+    // TODO: Fetch existing data for this category from database
+    // For now, we'll simulate this with some sample data
+    const mockDataForCategory = getMockDataForCategory(selectedCategory);
+    
+    // Reconfigure filter options based on existing data
+    reconfigureFilterOptions(mockDataForCategory);
+}
+
+function getMockDataForCategory(category) {
+    // This would normally fetch from your database
+    // Returning mock data for demonstration
+    const mockData = {
+        'dress': {
+            measurements: ['length', 'chest', 'waist', 'hem width'],
+            compositions: ['cotton', 'silk', 'polyester'],
+            sizes: ['ww', 'us']
+        },
+        'top': {
+            measurements: ['chest', 'sleeve', 'shoulder'],
+            compositions: ['cotton', 'wool', 'viscose'],
+            sizes: ['ww', 'us', 'de']
+        },
+        'pants': {
+            measurements: ['waist', 'hip', 'inseam', 'leg opening'],
+            compositions: ['denim', 'cotton', 'polyester'],
+            sizes: ['ww', 'kr']
+        }
+    };
+    
+    return mockData[category] || {
+        measurements: ['length', 'chest', 'sleeve'],
+        compositions: ['cotton', 'silk', 'wool'],
+        sizes: ['ww', 'us', 'de']
+    };
+}
+
+function reconfigureFilterOptions(data) {
+    // Reconfigure measurements
+    reconfigureMeasurements(data.measurements);
+    
+    // Reconfigure compositions  
+    reconfigureCompositions(data.compositions);
+    
+    // Reconfigure sizes
+    reconfigureSizes(data.sizes);
+}
+
+function reconfigureMeasurements(availableMeasurements) {
+    const container = document.getElementById('new_filter_measurement_container');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="filter_measurement_basic" id="new_filter_measurement_basic">
+            ${availableMeasurements.map(measurement => `
+                <div class="filter_measurement_item">
+                    <label>${measurement}</label>
+                    <div style="display: flex; align-items: center;">
+                        <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
+                        <button class="clear_button" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')" style="margin-left: 10px;">
+                            <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function reconfigureCompositions(availableCompositions) {
+    const container = document.getElementById('new_filter_composition_container');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <div class="filter_composition_basic" id="new_filter_composition_basic">
+            ${availableCompositions.map(composition => `
+                <div class="tag_item">
+                    <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
+                    <label for="composition_${composition}">${composition}</label>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+function reconfigureSizes(availableSizes) {
+    const container = document.getElementById('new_filter_size_container');
+    if (!container) return;
+    
+    // Always keep only the basic 3 sizes regardless of category
+    const basicSizes = ['ww', 'us', 'de'];
+    
+    container.innerHTML = `
+        <div class="filter_size_basic" id="new_filter_size_basic">
+            ${basicSizes.map(size => `
+                <div class="tag_item">
+                    <input type="checkbox" id="size_${size}" name="filter_sizes" value="${size}">
+                    <label for="size_${size}">${size.toUpperCase()}</label>
+                </div>
+            `).join('')}
+        </div>
+        <button class="load_more_button" onclick="toggleSizeList()">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_size_expanded" id="new_filter_size_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
+        </div>
+    `;
+}
+
+function initializeFilterMeasurements() {
+    const container = document.getElementById('new_filter_measurement_container');
+    if (!container) return;
+    
+    const basicMeasurements = ['length', 'chest', 'sleeve'];
+    
+    container.innerHTML = `
+        <div class="filter_measurement_basic" id="new_filter_measurement_basic">
+            ${basicMeasurements.map(measurement => `
+                <div class="filter_measurement_item">
+                    <label>${measurement}</label>
+                    <div style="display: flex; align-items: center;">
+                        <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement}" />
+                        <button class="clear_button" onclick="clearMeasurementInput('${measurement}')" style="margin-left: 10px;">
+                            <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <button class="load_more_button" onclick="toggleMeasurementList()">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_measurement_expanded" id="new_filter_measurement_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
+        </div>
+    `;
+}
+
+function initializeFilterCompositions() {
+    const container = document.getElementById('new_filter_composition_container');
+    if (!container) return;
+    
+    const basicCompositions = ['cotton', 'silk', 'wool', 'leather', 'viscose', 'polyester'];
+    
+    container.innerHTML = `
+        <div class="filter_composition_basic" id="new_filter_composition_basic">
+            ${basicCompositions.map(composition => `
+                <div class="tag_item">
+                    <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
+                    <label for="composition_${composition}">${composition}</label>
+                </div>
+            `).join('')}
+        </div>
+        <button class="load_more_button" onclick="toggleCompositionList()">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_composition_expanded" id="new_filter_composition_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
+        </div>
+    `;
+}
+
+function initializeFilterSizes() {
+    const container = document.getElementById('new_filter_size_container');
+    if (!container) return;
+    
+    const basicSizes = ['ww', 'us', 'de'];
+    
+    container.innerHTML = `
+        <div class="filter_size_basic" id="new_filter_size_basic">
+            ${basicSizes.map(size => `
+                <div class="tag_item">
+                    <input type="checkbox" id="size_${size}" name="filter_sizes" value="${size}">
+                    <label for="size_${size}">${size.toUpperCase()}</label>
+                </div>
+            `).join('')}
+        </div>
+        <button class="load_more_button" onclick="toggleSizeList()">
+            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
+        </button>
+        <div class="filter_size_expanded" id="new_filter_size_expanded" style="display: none;">
+            <!-- Will be populated when expanded -->
+        </div>
+    `;
+}
+
+// Toggle functions for load more buttons
+function toggleMeasurementList() {
+    const expanded = document.getElementById('new_filter_measurement_expanded');
+    const button = document.querySelector('#new_filter_measurement_container .load_more_button');
+    
+    if (expanded.style.display === 'none') {
+        // Expand - show all measurements
+        const allMeasurements = ['waist', 'hip', 'shoulder', 'armhole', 'sleeve opening', 'hem width', 'inseam', 'leg opening', 'heel', 'width', 'height', 'circumference'];
+        
+        expanded.innerHTML = allMeasurements.map(measurement => `
+            <div class="filter_measurement_item">
+                <label>${measurement}</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
+                    <button class="clear_button" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')" style="margin-left: 10px;">
+                        <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        expanded.style.display = 'block';
+        button.innerHTML = '<img src="/static/src/img/collapse.svg" style="width: 20px; height: 20px;" />';
+    } else {
+        // Collapse
+        expanded.style.display = 'none';
+        button.innerHTML = '<img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />';
+    }
+}
+
+function toggleCompositionList() {
+    const expanded = document.getElementById('new_filter_composition_expanded');
+    const button = document.querySelector('#new_filter_composition_container .load_more_button');
+    
+    if (expanded.style.display === 'none') {
+        // Expand - show all compositions
+        const allCompositions = ['cashmere', 'polyamide', 'modal', 'linen', 'denim', 'fleece', 'chiffon'];
+        
+        expanded.innerHTML = allCompositions.map(composition => `
+            <div class="tag_item">
+                <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
+                <label for="composition_${composition}">${composition}</label>
+            </div>
+        `).join('');
+        
+        expanded.style.display = 'block';
+        button.innerHTML = '<img src="/static/src/img/collapse.svg" style="width: 20px; height: 20px;" />';
+    } else {
+        // Collapse
+        expanded.style.display = 'none';
+        button.innerHTML = '<img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />';
+    }
+}
+
+function toggleSizeList() {
+    const expanded = document.getElementById('new_filter_size_expanded');
+    const button = document.querySelector('#new_filter_size_container .load_more_button');
+    
+    if (expanded.style.display === 'none') {
+        // Expand - show all sizes
+        const allSizes = ['kr', 'jp', 'it', 'fr', 'uk'];
+        
+        expanded.innerHTML = allSizes.map(size => `
+            <div class="tag_item">
+                <input type="checkbox" id="size_${size}" name="filter_sizes" value="${size}">
+                <label for="size_${size}">${size.toUpperCase()}</label>
+            </div>
+        `).join('');
+        
+        expanded.style.display = 'block';
+        button.innerHTML = '<img src="/static/src/img/collapse.svg" style="width: 20px; height: 20px;" />';
+    } else {
+        // Collapse
+        expanded.style.display = 'none';
+        button.innerHTML = '<img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />';
+    }
+}
+
+function clearMeasurementInput(measurementName) {
+    const input = document.getElementById(`measurement_${measurementName}`);
+    if (input) {
+        input.value = '';
+    }
+}
+
+function applyFilters() {
+    // TODO: Implement filter application logic
+    console.log('Applying filters...');
+    closeFilterPanel();
 }
 
 function displayFilterCategory() {
