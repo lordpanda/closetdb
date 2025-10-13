@@ -2392,15 +2392,18 @@ function addCompositionSet(setName = '') {
         
         // 새로운 세트 추가 (이름 있음)
         createCompositionSet(1, setName || '안감');
+        return; // 여기서 함수 종료
     } else {
         // 이미 다중 세트 모드인 경우 새 세트만 추가
         const setIndex = window.compositionSets.length;
         createCompositionSet(setIndex, setName || `Set ${setIndex + 1}`);
+        return; // 여기서 함수 종료
     }
 }
 
 // 실제 composition 세트 생성 함수
 function createCompositionSet(setIndex, setName, existingValues = {}) {
+    console.log(`🧪 Creating composition set ${setIndex} with name: "${setName}"`);
     const container = document.getElementById('composition_sets_container');
     
     // 새 세트 객체 생성
@@ -2431,6 +2434,7 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
     `;
     
     container.appendChild(setDiv);
+    console.log(`✅ Set ${setIndex} HTML created and appended`);
     
     // composition 입력 필드들 생성
     const grid = document.getElementById(`composition_grid_${setIndex}`);
@@ -2499,30 +2503,29 @@ function removeCompositionSet(setIndex) {
 
 // composition 세트들 새로고침 (인덱스 재정렬)
 function refreshCompositionSets() {
+    console.log('🔄 Refreshing composition sets');
     const container = document.getElementById('composition_sets_container');
     if (!container) return;
+    
+    // 기존 데이터 백업
+    const sets = [...window.compositionSets];
+    console.log('📦 Backed up sets:', sets);
     
     // 기존 HTML 전체 제거
     container.innerHTML = '';
     
     // 세트들 다시 생성
-    const sets = [...window.compositionSets];
     window.compositionSets = [];
     
     sets.forEach((set, index) => {
-        addCompositionSet(set.name);
-        // 기존 데이터 복원
-        Object.keys(set.compositions).forEach(material => {
-            const input = document.getElementById(`compositionInput_${index}_${compositionList.indexOf(material)}`);
-            if (input) {
-                input.value = set.compositions[material];
-                updateCompositionValue(index, material, set.compositions[material]);
-            }
-        });
+        createCompositionSet(index, set.name, set.compositions);
     });
     
     // 세트가 하나만 남은 경우 원래 스타일로 복원
     if (sets.length === 1) {
+        console.log('🔄 Reverting to single set mode');
+        window.usingMultiSets = false; // 단일 모드로 되돌림
+        
         const container = document.getElementById('composition_sets_container');
         if (container) {
             // composition_set 스타일 제거
