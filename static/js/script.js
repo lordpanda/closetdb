@@ -2274,27 +2274,38 @@ function toggleMeasurementList() {
     const expanded = document.getElementById('new_filter_measurement_expanded');
     const button = document.querySelector('#new_filter_measurement_container .load_more_button');
     
-    if (expanded.style.display === 'none') {
-        // Expand - show all measurements
-        const allMeasurements = ['waist', 'hip', 'shoulder', 'armhole', 'sleeve opening', 'hem width', 'inseam', 'leg opening', 'heel', 'width', 'height', 'circumference'];
+    console.log('toggleMeasurementList called');
+    console.log('expanded element:', expanded);
+    console.log('button element:', button);
+    
+    if (expanded.classList.contains('filter_expanded')) {
+        // Expand - show all measurements from existing measurementMap definitions
+        const allMeasurements = [
+            'chest', 'shoulder', 'sleeve', 'sleeveOpening', 'armhole', 'length', 'waist', 
+            'hip', 'rise', 'inseam', 'legOpening', 'hemwidth', 'heel', 'width', 'height', 
+            'depth', 'circumference'
+        ];
         
         expanded.innerHTML = allMeasurements.map(measurement => `
             <div class="filter_measurement_item">
                 <label>${measurement}</label>
                 <div class="filter_measurement_range">
-                    <input type="text" placeholder="Enter value" class="measurement_input filter_measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
-                    <button class="clear_button filter_measurement_clear" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')">
+                    <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                    <span>-</span>
+                    <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                    <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
                         <img src="/static/src/img/clear.svg" class="clear_icon" />
                     </button>
                 </div>
             </div>
         `).join('');
         
-        expanded.style.display = 'block';
+        expanded.classList.remove('filter_expanded');
         button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
     } else {
-        // Collapse
-        expanded.style.display = 'none';
+        // Collapse - hide expanded list
+        expanded.innerHTML = '';
+        expanded.classList.add('filter_expanded');
         button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
     }
 }
@@ -2303,9 +2314,12 @@ function toggleCompositionList() {
     const expanded = document.getElementById('new_filter_composition_expanded');
     const button = document.querySelector('#new_filter_composition_container .load_more_button');
     
-    if (expanded.style.display === 'none') {
-        // Expand - show all compositions
-        const allCompositions = ['cashmere', 'polyamide', 'modal', 'linen', 'denim', 'fleece', 'chiffon'];
+    console.log('toggleCompositionList called');
+    
+    if (expanded.classList.contains('filter_expanded')) {
+        // Expand - show all compositions from compositionList
+        const allCompositions = typeof compositionList !== 'undefined' && compositionList ? compositionList : 
+            ['cotton', 'silk', 'wool', 'cashmere', 'leather', 'viscose', 'polyester', 'polyamide', 'elastane', 'lyocell', 'acryl', 'acetate', 'spandex', 'metallic', 'brass', 'rubber', 'sterling silver', 'gold 14K', 'gold 18K'];
         
         expanded.innerHTML = allCompositions.map(composition => `
             <div class="tag_item">
@@ -2314,11 +2328,12 @@ function toggleCompositionList() {
             </div>
         `).join('');
         
-        expanded.style.display = 'block';
+        expanded.classList.remove('filter_expanded');
         button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
     } else {
-        // Collapse
-        expanded.style.display = 'none';
+        // Collapse - hide expanded list
+        expanded.innerHTML = '';
+        expanded.classList.add('filter_expanded');
         button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
     }
 }
@@ -2327,22 +2342,48 @@ function toggleSizeList() {
     const expanded = document.getElementById('new_filter_size_expanded');
     const button = document.querySelector('#new_filter_size_container .load_more_button');
     
-    if (expanded.style.display === 'none') {
-        // Expand - show all sizes
-        const allSizes = ['kr', 'jp', 'it', 'fr', 'uk'];
+    console.log('toggleSizeList called');
+    
+    if (expanded.classList.contains('filter_expanded')) {
+        // Expand - show all size regions from sizeRegionList
+        const allSizeRegions = typeof sizeRegionList !== 'undefined' && sizeRegionList ? sizeRegionList : 
+            ['WW', 'US', 'EU', 'FR', 'IT', 'DE', 'UK', 'KR', 'JP', 'Kids', 'Ring', 'etc'];
         
-        expanded.innerHTML = allSizes.map(size => `
-            <div class="tag_item">
-                <input type="checkbox" id="size_${size}" name="filter_sizes" value="${size}">
-                <label for="size_${size}">${size.toUpperCase()}</label>
+        const expandedSizeOptions = {
+            'KR': ['44', '55', '66', '77', '88'],
+            'JP': ['S', 'M', 'L', 'XL', 'XXL'],
+            'EU': ['34', '36', '38', '40', '42', '44'],
+            'FR': ['36', '38', '40', '42', '44', '46'],
+            'IT': ['38', '40', '42', '44', '46', '48'],
+            'UK': ['6', '8', '10', '12', '14', '16'],
+            'Kids': ['4T', '5T', '6T', '7T', '8T'],
+            'Ring': ['5', '6', '7', '8', '9', '10'],
+            'etc': ['Free', 'One Size']
+        };
+        
+        // Show all additional size regions (beyond basic WW, US, DE)
+        const additionalRegions = allSizeRegions.filter(region => !['WW', 'US', 'DE'].includes(region));
+        
+        expanded.innerHTML = additionalRegions.map(region => `
+            <div class="size_region_section">
+                <h3 class="size_region_title">${region}</h3>
+                <div class="size_region_options">
+                    ${(expandedSizeOptions[region] || ['Free']).map(size => `
+                        <div class="tag_item">
+                            <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
+                            <label for="size_${region.toLowerCase()}_${size}" class="size_option_label">${size}</label>
+                        </div>
+                    `).join('')}
+                </div>
             </div>
         `).join('');
         
-        expanded.style.display = 'block';
+        expanded.classList.remove('filter_expanded');
         button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
     } else {
-        // Collapse
-        expanded.style.display = 'none';
+        // Collapse - hide expanded list
+        expanded.innerHTML = '';
+        expanded.classList.add('filter_expanded');
         button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
     }
 }
