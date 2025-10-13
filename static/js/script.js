@@ -929,7 +929,7 @@ function displaySearchResultsForAll(items, query) {
     container.innerHTML = '';
     
     if (items.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No items found</div>';
+        container.innerHTML = '<div class="no_items_message">No items found</div>';
         return;
     }
     
@@ -1023,7 +1023,7 @@ function displaySearchResults(items, query) {
     container.innerHTML = '';
     
     if (items.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No items found</div>';
+        container.innerHTML = '<div class="no_items_message">No items found</div>';
         return;
     }
     
@@ -1969,10 +1969,10 @@ function createFilterPanel() {
     filterPanel.id = 'filter_panel';
     
     filterPanel.innerHTML = `
-        <div style="padding: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <h1 style="font-family: 'Sequel85', sans-serif; font-size: 2em; margin: 0;">Filter</h1>
-                <button onclick="closeFilterPanel()" style="background: none; border: none; font-size: 2em; cursor: pointer; color: var(--black);">×</button>
+        <div class="filter_panel_content">
+            <div class="filter_panel_header">
+                <h1 class="filter_panel_title">Filter</h1>
+                <button onclick="closeFilterPanel()" class="filter_panel_close">×</button>
             </div>
             
             <div class="filter_content">
@@ -2002,7 +2002,7 @@ function createFilterPanel() {
             </div>
         </div>
         
-        <div style="position: sticky; bottom: 0; background: white; padding: 20px 40px; border-top: 1px solid var(--gray);">
+        <div class="filter_panel_footer">
             <button class="filter_apply_button" onclick="applyFilters()">Apply</button>
         </div>
     `;
@@ -2111,10 +2111,10 @@ function reconfigureMeasurements(availableMeasurements) {
             ${availableMeasurements.map(measurement => `
                 <div class="filter_measurement_item">
                     <label>${measurement}</label>
-                    <div style="display: flex; align-items: center;">
-                        <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
-                        <button class="clear_button" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')" style="margin-left: 10px;">
-                            <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
+                    <div class="filter_measurement_range">
+                        <input type="text" placeholder="Enter value" class="measurement_input filter_measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
+                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')">
+                            <img src="/static/src/img/clear.svg" class="clear_icon" />
                         </button>
                     </div>
                 </div>
@@ -2151,13 +2151,13 @@ function reconfigureSizes(availableSizes) {
     };
     
     container.innerHTML = Object.entries(sizeOptions).map(([region, sizes]) => `
-        <div class="size_region_section" style="margin-bottom: 15px;">
-            <h3 style="font-family: 'Sequel75', sans-serif; font-size: 1.1em; margin-bottom: 10px;">${region}</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <div class="size_region_section">
+            <h3 class="size_region_title">${region}</h3>
+            <div class="size_region_options">
                 ${sizes.map(size => `
                     <div class="tag_item">
                         <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
-                        <label for="size_${region.toLowerCase()}_${size}" style="min-width: auto; padding: 0 12px;">${size}</label>
+                        <label for="size_${region.toLowerCase()}_${size}" class="size_option_label">${size}</label>
                     </div>
                 `).join('')}
             </div>
@@ -2176,21 +2176,23 @@ function initializeFilterMeasurements() {
             ${basicMeasurements.map(measurement => `
                 <div class="filter_measurement_item">
                     <label>${measurement}</label>
-                    <div style="display: flex; align-items: center; gap: 5px;">
-                        <input type="text" placeholder="from" class="measurement_input" id="measurement_${measurement}_from" style="width: 60px; padding: 5px; border: 1px solid var(--gray); border-radius: 5px;" />
+                    <div class="filter_measurement_range">
+                        <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
                         <span>-</span>
-                        <input type="text" placeholder="to" class="measurement_input" id="measurement_${measurement}_to" style="width: 60px; padding: 5px; border: 1px solid var(--gray); border-radius: 5px;" />
-                        <button class="clear_button" onclick="clearMeasurementRange('${measurement}')" style="margin-left: 8px;">
-                            <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
+                        <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                            <img src="/static/src/img/clear.svg" class="clear_icon" />
                         </button>
                     </div>
                 </div>
             `).join('')}
         </div>
-        <button class="load_more_button" onclick="toggleMeasurementList()" style="margin-top: 10px;">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_measurement_expanded" id="new_filter_measurement_expanded" style="display: none;">
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleMeasurementList()">
+                <img src="/static/src/img/load_more.svg" class="load_more_icon" />
+            </button>
+        </div>
+        <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
             <!-- Will be populated when expanded -->
         </div>
     `;
@@ -2211,10 +2213,12 @@ function initializeFilterCompositions() {
                 </div>
             `).join('')}
         </div>
-        <button class="load_more_button" onclick="toggleCompositionList()" style="margin-top: 10px;">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_composition_expanded" id="new_filter_composition_expanded" style="display: none;">
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleCompositionList()">
+                <img src="/static/src/img/load_more.svg" class="load_more_icon" />
+            </button>
+        </div>
+        <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
             <!-- Will be populated when expanded -->
         </div>
     `;
@@ -2233,23 +2237,25 @@ function initializeFilterSizes() {
     container.innerHTML = `
         <div class="filter_size_basic" id="new_filter_size_basic">
             ${Object.entries(sizeOptions).map(([region, sizes]) => `
-                <div class="size_region_section" style="margin-bottom: 15px;">
-                    <h3 style="font-family: 'Sequel75', sans-serif; font-size: 1.1em; margin-bottom: 10px;">${region}</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <div class="size_region_section">
+                    <h3 class="size_region_title">${region}</h3>
+                    <div class="size_region_options">
                         ${sizes.map(size => `
                             <div class="tag_item">
                                 <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
-                                <label for="size_${region.toLowerCase()}_${size}" style="min-width: auto; padding: 0 12px;">${size}</label>
+                                <label for="size_${region.toLowerCase()}_${size}" class="size_option_label">${size}</label>
                             </div>
                         `).join('')}
                     </div>
                 </div>
             `).join('')}
         </div>
-        <button class="load_more_button" onclick="toggleSizeList()" style="margin-top: 10px;">
-            <img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />
-        </button>
-        <div class="filter_size_expanded" id="new_filter_size_expanded" style="display: none;">
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleSizeList()">
+                <img src="/static/src/img/load_more.svg" class="load_more_icon" />
+            </button>
+        </div>
+        <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
             <!-- Will be populated when expanded -->
         </div>
     `;
@@ -2267,21 +2273,21 @@ function toggleMeasurementList() {
         expanded.innerHTML = allMeasurements.map(measurement => `
             <div class="filter_measurement_item">
                 <label>${measurement}</label>
-                <div style="display: flex; align-items: center;">
-                    <input type="text" placeholder="Enter value" class="measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
-                    <button class="clear_button" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')" style="margin-left: 10px;">
-                        <img src="/static/src/img/clear.svg" style="width: 20px; height: 20px;" />
+                <div class="filter_measurement_range">
+                    <input type="text" placeholder="Enter value" class="measurement_input filter_measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
+                    <button class="clear_button filter_measurement_clear" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')">
+                        <img src="/static/src/img/clear.svg" class="clear_icon" />
                     </button>
                 </div>
             </div>
         `).join('');
         
         expanded.style.display = 'block';
-        button.innerHTML = '<img src="/static/src/img/collapse.svg" style="width: 20px; height: 20px;" />';
+        button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
     } else {
         // Collapse
         expanded.style.display = 'none';
-        button.innerHTML = '<img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />';
+        button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
     }
 }
 
@@ -2301,11 +2307,11 @@ function toggleCompositionList() {
         `).join('');
         
         expanded.style.display = 'block';
-        button.innerHTML = '<img src="/static/src/img/collapse.svg" style="width: 20px; height: 20px;" />';
+        button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
     } else {
         // Collapse
         expanded.style.display = 'none';
-        button.innerHTML = '<img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />';
+        button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
     }
 }
 
@@ -2325,11 +2331,11 @@ function toggleSizeList() {
         `).join('');
         
         expanded.style.display = 'block';
-        button.innerHTML = '<img src="/static/src/img/collapse.svg" style="width: 20px; height: 20px;" />';
+        button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
     } else {
         // Collapse
         expanded.style.display = 'none';
-        button.innerHTML = '<img src="/static/src/img/load_more.svg" style="width: 20px; height: 20px;" />';
+        button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
     }
 }
 
@@ -4701,7 +4707,7 @@ function displayFilterResults(items, count) {
     
     // 결과 없음 메시지
     if (items.length === 0) {
-        resultsGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No items found</div>';
+        resultsGrid.innerHTML = '<div class="no_items_message">No items found</div>';
     }
     
     // Apply filters 버튼 다음에 결과 추가

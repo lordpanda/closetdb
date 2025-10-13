@@ -345,6 +345,100 @@ body.filter-open .grid_container {
     grid-template-rows: repeat(4, 1fr);
 }
 
+/* Filter panel layout classes */
+.filter_panel_content {
+    padding: 40px;
+}
+
+.filter_panel_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.filter_panel_title {
+    font-family: 'Sequel85', sans-serif;
+    font-size: 2em;
+    margin: 0;
+}
+
+.filter_panel_close {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: var(--black);
+}
+
+.filter_panel_footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 20px 40px;
+    border-top: 1px solid var(--gray);
+}
+
+/* Measurement input styles */
+.filter_measurement_range {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.filter_measurement_input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid var(--gray);
+    border-radius: 5px;
+}
+
+.filter_measurement_clear {
+    margin-left: 8px;
+}
+
+/* Size region styles */
+.size_region_section {
+    margin-bottom: 15px;
+}
+
+.size_region_title {
+    font-family: 'Sequel75', sans-serif;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.size_region_options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.size_option_label {
+    min-width: auto;
+    padding: 0 12px;
+}
+
+/* Load more button styles */
+.load_more_section {
+    margin-top: 10px;
+}
+
+.load_more_icon, .clear_icon, .collapse_icon {
+    width: 20px;
+    height: 20px;
+}
+
+.filter_expanded {
+    display: none;
+}
+
+.no_items_message {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+}
+
 /* Mobile responsive for filter open state */
 @media screen and (max-width: 1200px) {
     body.filter-open {
