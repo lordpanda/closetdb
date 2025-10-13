@@ -2150,19 +2150,26 @@ function reconfigureSizes(availableSizes) {
     const container = document.getElementById('new_filter_size_container');
     if (!container) return;
     
-    // Always keep only the basic 3 sizes regardless of category
-    const basicSizes = ['ww', 'us', 'de'];
+    // Use same structure as initializeFilterSizes
+    const sizeOptions = {
+        'WW': ['00', '0', '2', '4', '6', '8', '10', '12'],
+        'US': ['XS', 'S', 'M', 'L', 'XL'],
+        'DE': ['32', '34', '36', '38', '40', '42']
+    };
     
-    container.innerHTML = `
-        <div class="filter_size_basic" id="new_filter_size_basic">
-            ${basicSizes.map(size => `
-                <div class="tag_item">
-                    <input type="checkbox" id="size_${size}" name="filter_sizes" value="${size}">
-                    <label for="size_${size}">${size.toUpperCase()}</label>
-                </div>
-            `).join('')}
+    container.innerHTML = Object.entries(sizeOptions).map(([region, sizes]) => `
+        <div class="size_region_section" style="margin-bottom: 15px;">
+            <h3 style="font-family: 'Sequel75', sans-serif; font-size: 1.1em; margin-bottom: 10px;">${region}</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                ${sizes.map(size => `
+                    <div class="tag_item">
+                        <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
+                        <label for="size_${region.toLowerCase()}_${size}" style="min-width: auto; padding: 0 12px;">${size}</label>
+                    </div>
+                `).join('')}
+            </div>
         </div>
-    `;
+    `).join('');
 }
 
 function initializeFilterMeasurements() {
@@ -2210,18 +2217,25 @@ function initializeFilterSizes() {
     const container = document.getElementById('new_filter_size_container');
     if (!container) return;
     
-    const basicSizes = ['ww', 'us', 'de'];
+    const sizeOptions = {
+        'WW': ['00', '0', '2', '4', '6', '8', '10', '12'],
+        'US': ['XS', 'S', 'M', 'L', 'XL'],
+        'DE': ['32', '34', '36', '38', '40', '42']
+    };
     
-    container.innerHTML = `
-        <div class="filter_size_basic" id="new_filter_size_basic">
-            ${basicSizes.map(size => `
-                <div class="tag_item">
-                    <input type="checkbox" id="size_${size}" name="filter_sizes" value="${size}">
-                    <label for="size_${size}">${size.toUpperCase()}</label>
-                </div>
-            `).join('')}
+    container.innerHTML = Object.entries(sizeOptions).map(([region, sizes]) => `
+        <div class="size_region_section" style="margin-bottom: 15px;">
+            <h3 style="font-family: 'Sequel75', sans-serif; font-size: 1.1em; margin-bottom: 10px;">${region}</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                ${sizes.map(size => `
+                    <div class="tag_item">
+                        <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
+                        <label for="size_${region.toLowerCase()}_${size}" style="min-width: auto; padding: 0 12px;">${size}</label>
+                    </div>
+                `).join('')}
+            </div>
         </div>
-    `;
+    `).join('');
 }
 
 // Toggle functions for load more buttons
