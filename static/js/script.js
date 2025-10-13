@@ -2036,13 +2036,17 @@ function initializeFilterContent() {
 
 function initializeFilterCategories() {
     const categoryGrid = document.getElementById('new_filter_category_grid');
-    if (!categoryGrid || !categoryList) return;
+    if (!categoryGrid) return;
+    
+    // Fallback category list if db.js not loaded yet
+    const categories = typeof categoryList !== 'undefined' && categoryList ? categoryList : 
+        ["top", "dress", "outer", "skirt", "pants", "shoes", "jewelry", "etc."];
     
     categoryGrid.innerHTML = '';
-    for (let i = 0; i < categoryList.length; i++) {
+    for (let i = 0; i < categories.length; i++) {
         const item = document.createElement('div');
         item.className = "grid_category";
-        item.innerHTML = `<input type="radio" name="filter_category" class="category_image" id="filter_category_${i}" value="${categoryList[i]}"/><label for="filter_category_${i}">${categoryList[i]}</label>`;
+        item.innerHTML = `<input type="radio" name="filter_category" class="category_image" id="filter_category_${i}" value="${categories[i]}"/><label for="filter_category_${i}">${categories[i]}</label>`;
         
         // Add event listener for category selection
         const radio = item.querySelector('input[type="radio"]');
