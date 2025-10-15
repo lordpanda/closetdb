@@ -324,8 +324,8 @@ function displayRecentlyAdded() {
                         img.src = item.images[0];
                         console.log('Loading original image:', item.images[0]); // 디버깅용
                     } else {
-                        // 기본 이미지
-                        img.src = "/static/src/img/plus.png";
+                        // 기본 이미지 (short sleeve top measurement)
+                        img.src = "/static/src/img/measurement/measurement_top.svg";
                         img.classList.add('image_placeholder');
                         console.log('No images found for item:', item); // 디버깅용
                     }
@@ -333,7 +333,7 @@ function displayRecentlyAdded() {
                     img.onerror = function() {
                         // 이미지 로드 실패시 기본 이미지
                         console.log('Image load failed:', this.src); // 디버깅용
-                        this.src = "/static/src/img/plus.png";
+                        this.src = "/static/src/img/measurement/measurement_top.svg";
                         this.classList.add('image_placeholder');
                     };
                     
@@ -414,8 +414,8 @@ function displayAllItems() {
                         img.src = item.images[0];
                         console.log('Loading original image:', item.images[0]); // 디버깅용
                     } else {
-                        // 기본 이미지
-                        img.src = "/static/src/img/plus.png";
+                        // 기본 이미지 (short sleeve top measurement)
+                        img.src = "/static/src/img/measurement/measurement_top.svg";
                         img.classList.add('image_placeholder');
                         console.log('No images found for item:', item); // 디버깅용
                     }
@@ -423,7 +423,7 @@ function displayAllItems() {
                     img.onerror = function() {
                         // 이미지 로드 실패시 기본 이미지
                         console.log('Image load failed:', this.src); // 디버깅용
-                        this.src = "/static/src/img/plus.png";
+                        this.src = "/static/src/img/measurement/measurement_top.svg";
                         this.classList.add('image_placeholder');
                     };
                     
@@ -697,7 +697,7 @@ function processCarouselData(data) {
                             console.log(`Using first image for item ${item.item_id}:`, imageUrl);
                         }
                         
-                        if (imageUrl && imageUrl !== '/static/src/img/plus.png') {
+                        if (imageUrl && imageUrl !== '/static/src/img/measurement/measurement_top.svg') {
                             // R2 이미지는 프록시를 통해 로드
                             if (imageUrl.includes('pub-d30acb5ff7c3432aad2e05bfbfd34c6d.r2.dev')) {
                                 const filename = imageUrl.split('/').pop();
@@ -707,7 +707,7 @@ function processCarouselData(data) {
                             }
                         } else {
                             console.log(`No real image found for item ${item.item_id}, using color background`);
-                            // 이미지가 없거나 plus.png이면 색상 배경 사용
+                            // 이미지가 없거나 measurement_top.svg이면 색상 배경 사용
                             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#8b4513'];
                             const colorIndex = index % colors.length; // 인덱스 기반으로 일관된 색상
                             carouselItem.classList.add(`color-bg-${['red', 'teal', 'blue', 'brown'][colorIndex]}`);
@@ -878,13 +878,39 @@ function performSearchForAll(query) {
         .then(response => response.json())
         .then(data => {
             if (data.items) {
-                // 향상된 검색 필터링 (다중 키워드 및 region+size 조합 포함)
+                // 향상된 검색 필터링 (measurement 조건, composition OR 조건, 다중 키워드 및 region+size 조합 포함)
                 const filteredItems = data.items.filter(item => {
                     const searchText = query.toLowerCase();
                     const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
                     
-                    // 모든 검색어가 매치되어야 함 (AND 조건)
-                    return searchTerms.every(term => {
+                    // 검색어를 타입별로 분류
+                    const measurementTerms = [];
+                    const compositionTerms = [];
+                    const generalTerms = [];
+                    
+                    searchTerms.forEach(term => {
+                        const measurementMatch = checkMeasurementCondition(term, item);
+                        const compositionMatch = checkCompositionSearch(term, item);
+                        
+                        if (measurementMatch !== null) {
+                            measurementTerms.push({term, match: measurementMatch});
+                        } else if (compositionMatch !== null) {
+                            compositionTerms.push({term, match: compositionMatch});
+                        } else {
+                            generalTerms.push(term);
+                        }
+                    });
+                    
+                    // Measurement 조건들은 모두 만족해야 함 (AND)
+                    const measurementResult = measurementTerms.length === 0 || 
+                        measurementTerms.every(mt => mt.match);
+                    
+                    // Composition 조건들은 하나라도 만족하면 됨 (OR)
+                    const compositionResult = compositionTerms.length === 0 || 
+                        compositionTerms.some(ct => ct.match);
+                    
+                    // 일반 검색어들은 모두 만족해야 함 (AND)
+                    const generalResult = generalTerms.length === 0 || generalTerms.every(term => {
                         // 각 검색어가 어떤 필드든 하나라도 매치하면 됨
                         const fieldMatch = (
                             (item.brand && item.brand.toLowerCase().includes(term)) ||
@@ -902,6 +928,8 @@ function performSearchForAll(query) {
                         
                         return fieldMatch || regionSizeMatch;
                     });
+                    
+                    return measurementResult && compositionResult && generalResult;
                 });
                 
                 console.log(`📊 Found ${filteredItems.length} items matching "${query}"`);
@@ -949,7 +977,7 @@ function displaySearchResultsForAll(items, query) {
         } else if (item.images && item.images.length > 0) {
             img.src = item.images[0];
         } else {
-            img.src = '/static/src/img/plus.png';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
         }
         
@@ -970,13 +998,39 @@ function performSearch(query) {
         .then(response => response.json())
         .then(data => {
             if (data.items) {
-                // 향상된 검색 필터링 (다중 키워드 및 region+size 조합 포함)
+                // 향상된 검색 필터링 (measurement 조건, composition OR 조건, 다중 키워드 및 region+size 조합 포함)
                 const filteredItems = data.items.filter(item => {
                     const searchText = query.toLowerCase();
                     const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
                     
-                    // 모든 검색어가 매치되어야 함 (AND 조건)
-                    return searchTerms.every(term => {
+                    // 검색어를 타입별로 분류
+                    const measurementTerms = [];
+                    const compositionTerms = [];
+                    const generalTerms = [];
+                    
+                    searchTerms.forEach(term => {
+                        const measurementMatch = checkMeasurementCondition(term, item);
+                        const compositionMatch = checkCompositionSearch(term, item);
+                        
+                        if (measurementMatch !== null) {
+                            measurementTerms.push({term, match: measurementMatch});
+                        } else if (compositionMatch !== null) {
+                            compositionTerms.push({term, match: compositionMatch});
+                        } else {
+                            generalTerms.push(term);
+                        }
+                    });
+                    
+                    // Measurement 조건들은 모두 만족해야 함 (AND)
+                    const measurementResult = measurementTerms.length === 0 || 
+                        measurementTerms.every(mt => mt.match);
+                    
+                    // Composition 조건들은 하나라도 만족하면 됨 (OR)
+                    const compositionResult = compositionTerms.length === 0 || 
+                        compositionTerms.some(ct => ct.match);
+                    
+                    // 일반 검색어들은 모두 만족해야 함 (AND)
+                    const generalResult = generalTerms.length === 0 || generalTerms.every(term => {
                         // 각 검색어가 어떤 필드든 하나라도 매치하면 됨
                         const fieldMatch = (
                             (item.brand && item.brand.toLowerCase().includes(term)) ||
@@ -994,6 +1048,8 @@ function performSearch(query) {
                         
                         return fieldMatch || regionSizeMatch;
                     });
+                    
+                    return measurementResult && compositionResult && generalResult;
                 });
                 
                 console.log(`📊 Found ${filteredItems.length} items matching "${query}"`);
@@ -1005,6 +1061,131 @@ function performSearch(query) {
         .catch(error => {
             console.error('❌ Search error:', error);
         });
+}
+
+// Measurement 조건 체크 함수 (chest<40, length>50, waist>=35 등)
+function checkMeasurementCondition(term, item) {
+    // Measurement 조건 패턴 매칭: measurement + operator + value
+    // 지원하는 패턴: chest<40, length>50, waist>=35, shoulder<=45, sleeve=60
+    const measurementPattern = /^([a-z_]+)(>=|<=|>|<|=)(\d+(?:\.\d+)?)$/;
+    const match = term.match(measurementPattern);
+    
+    if (!match) {
+        return null; // measurement 조건이 아님
+    }
+    
+    const [, measurementName, operator, valueStr] = match;
+    const targetValue = parseFloat(valueStr);
+    
+    console.log(`🔍 Checking measurement condition: ${measurementName} ${operator} ${targetValue}`);
+    
+    // 아이템에서 measurement 값 가져오기
+    let itemValue = null;
+    
+    // Try direct field access first
+    if (item[measurementName] !== undefined && item[measurementName] !== null) {
+        itemValue = parseFloat(item[measurementName]);
+    }
+    // Try measurements object access
+    else if (item.measurements && item.measurements[measurementName] !== undefined) {
+        itemValue = parseFloat(item.measurements[measurementName]);
+    }
+    
+    if (isNaN(itemValue) || itemValue <= 0) {
+        console.log(`❌ No valid ${measurementName} value found for item`);
+        return false; // measurement 값이 없으면 조건 불만족
+    }
+    
+    // 조건 확인
+    let conditionMet = false;
+    switch (operator) {
+        case '<':
+            conditionMet = itemValue < targetValue;
+            break;
+        case '<=':
+            conditionMet = itemValue <= targetValue;
+            break;
+        case '>':
+            conditionMet = itemValue > targetValue;
+            break;
+        case '>=':
+            conditionMet = itemValue >= targetValue;
+            break;
+        case '=':
+            conditionMet = Math.abs(itemValue - targetValue) < 0.1; // 약간의 오차 허용
+            break;
+        default:
+            return false;
+    }
+    
+    console.log(`📐 Item ${measurementName}: ${itemValue} ${operator} ${targetValue} = ${conditionMet}`);
+    return conditionMet;
+}
+
+// Composition 검색 함수 (cotton, silk, leather 등)
+function checkCompositionSearch(term, item) {
+    // db.js의 원본 compositionList 사용 (임의 데이터 생성 금지)
+    if (typeof compositionList === 'undefined') {
+        console.log('⚠️ compositionList not available, skipping composition search');
+        return null;
+    }
+    
+    // 검색어가 composition 재료가 아니면 null 반환 (일반 텍스트 검색으로 처리)
+    const isCompositionTerm = compositionList.some(comp => 
+        term.toLowerCase().includes(comp.toLowerCase()) || comp.toLowerCase().includes(term.toLowerCase())
+    );
+    
+    if (!isCompositionTerm) {
+        return null; // composition 검색이 아님
+    }
+    
+    console.log(`🧵 Checking composition search for material: "${term}"`);
+    
+    // compositions 필드가 없으면 false 반환 (composition 검색이지만 데이터 없음)
+    if (!item.compositions) {
+        console.log(`❌ No compositions data for item`);
+        return false;
+    }
+    
+    console.log(`🧵 Item compositions:`, item.compositions);
+    
+    // compositions가 객체 형태인지 확인
+    if (typeof item.compositions === 'object' && item.compositions !== null) {
+        // 객체의 키들을 확인 (예: {cotton: 100, polyester: 0})
+        const compositionKeys = Object.keys(item.compositions);
+        const hasComposition = compositionKeys.some(key => 
+            key.toLowerCase().includes(term.toLowerCase()) || term.toLowerCase().includes(key.toLowerCase())
+        );
+        
+        if (hasComposition) {
+            console.log(`✅ Found composition match: "${term}" in ${compositionKeys.join(', ')}`);
+            return true;
+        }
+    }
+    
+    // compositions가 배열이나 문자열 형태인 경우도 처리
+    if (Array.isArray(item.compositions)) {
+        const hasComposition = item.compositions.some(comp => 
+            comp.toLowerCase().includes(term.toLowerCase()) || term.toLowerCase().includes(comp.toLowerCase())
+        );
+        if (hasComposition) {
+            console.log(`✅ Found composition match in array: "${term}"`);
+            return true;
+        }
+    }
+    
+    if (typeof item.compositions === 'string') {
+        const hasComposition = item.compositions.toLowerCase().includes(term.toLowerCase()) || 
+                              term.toLowerCase().includes(item.compositions.toLowerCase());
+        if (hasComposition) {
+            console.log(`✅ Found composition match in string: "${term}"`);
+            return true;
+        }
+    }
+    
+    // composition 검색이지만 매치되지 않음
+    console.log(`❌ No composition match found for "${term}"`);
+    return false;
 }
 
 // 검색 결과 표시
@@ -1043,7 +1224,7 @@ function displaySearchResults(items, query) {
         } else if (item.images && item.images.length > 0) {
             img.src = item.images[0];
         } else {
-            img.src = '/static/src/img/plus.png';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
         }
         
@@ -2011,7 +2192,7 @@ function createFilterPanel() {
         </div>
         
         <div class="filter_panel_footer">
-            <button class="filter_apply_button" onclick="applyFilters()">Apply</button>
+            <button class="filter_panel_button" onclick="applyFilters()">Apply</button>
         </div>
     `;
     
@@ -2033,6 +2214,26 @@ function initializeFilterContent() {
     
     // Initialize sizes (기본 3개)
     initializeFilterSizes();
+    
+    // Add category change event listeners
+    addCategoryEventListeners();
+}
+
+function addCategoryEventListeners() {
+    // Category 체크박스 변경 시 measurement 업데이트
+    const categoryInputs = document.querySelectorAll('#new_filter_category_grid input[type="checkbox"]');
+    categoryInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            const selectedCategories = [];
+            const checkedInputs = document.querySelectorAll('#new_filter_category_grid input[type="checkbox"]:checked');
+            checkedInputs.forEach(checkedInput => {
+                selectedCategories.push(checkedInput.value);
+            });
+            
+            // Measurement 섹션 업데이트
+            updateFilterMeasurements(selectedCategories);
+        });
+    });
 }
 
 function initializeFilterCategories() {
@@ -2061,14 +2262,178 @@ function initializeFilterCategories() {
 }
 
 function onCategorySelected(selectedCategory) {
-    console.log(`Category selected: ${selectedCategory}`);
+    console.log(`📂 Category selected: ${selectedCategory}`);
     
-    // TODO: Fetch existing data for this category from database
-    // For now, we'll simulate this with some sample data
-    const mockDataForCategory = getMockDataForCategory(selectedCategory);
+    // Fetch existing data for this category from database
+    fetchCategoryData(selectedCategory)
+        .then(categoryData => {
+            console.log(`📊 Received data for ${selectedCategory}:`, categoryData);
+            console.log(`📏 Measurements found:`, Object.keys(categoryData.measurements));
+            console.log(`🧵 Compositions found:`, categoryData.compositions);
+            console.log(`📐 Sizes found:`, categoryData.sizes);
+            
+            // Reconfigure filter options based on existing data
+            reconfigureFilterOptions(categoryData);
+        })
+        .catch(error => {
+            console.error(`❌ Error fetching category data:`, error);
+            console.error(`❌ Error details:`, error.stack);
+            // Fallback to basic options on error
+            resetFilterOptions();
+        });
+}
+
+function fetchCategoryData(category) {
+    console.log(`🔍 Fetching data for category: ${category}`);
     
-    // Reconfigure filter options based on existing data
-    reconfigureFilterOptions(mockDataForCategory);
+    return fetch(`/api/items?category=${category}`)
+        .then(response => response.json())
+        .then(data => {
+            const items = data.items || [];
+            console.log(`📦 Found ${items.length} items for category ${category}`);
+            
+            // Log detailed info about first few items
+            if (items.length > 0) {
+                console.log(`🔍 First item structure:`, items[0]);
+                console.log(`🔍 First item fields:`, Object.keys(items[0]));
+                
+                if (items.length > 1) {
+                    console.log(`🔍 Second item:`, items[1]);
+                }
+            }
+            
+            // Extract unique values from actual data
+            const categoryData = {
+                measurements: extractMeasurements(items, category),
+                compositions: extractCompositions(items),
+                sizes: extractSizes(items)
+            };
+            
+            return categoryData;
+        });
+}
+
+function extractMeasurements(items, category) {
+    const measurements = {};
+    
+    console.log(`🔍 Sample item structure:`, items.length > 0 ? items[0] : 'No items');
+    
+    // Define measurement fields based on category (from script.js displayMeasurementInput)
+    let measurementFields = [];
+    if (category === "top" || category === "outer") {
+        measurementFields = ["chest", "shoulder", "sleeve", "sleeve_opening", "armhole", "waist", "length"];
+    } else if (category === "dress") {
+        measurementFields = ["chest", "shoulder", "sleeve", "sleeve_opening", "armhole", "waist", "length", "hem_width"];
+    } else if (category === "pants") {
+        measurementFields = ["waist", "hip", "rise", "leg_opening", "length"];
+    } else if (category === "skirt") {
+        measurementFields = ["waist", "hip", "length", "hem_width"];
+    } else if (category === "shoes") {
+        measurementFields = ["heel"];
+    } else {
+        measurementFields = ["width", "height", "length", "circumference"];
+    }
+    
+    console.log(`🔍 Looking for measurement fields:`, measurementFields);
+    
+    measurementFields.forEach(field => {
+        // Check in measurements object if it exists
+        const values = [];
+        
+        items.forEach(item => {
+            let value = null;
+            
+            // Try direct field access first
+            if (item[field] !== undefined && item[field] !== null) {
+                value = parseFloat(item[field]);
+            }
+            // Try measurements object access
+            else if (item.measurements && item.measurements[field] !== undefined) {
+                value = parseFloat(item.measurements[field]);
+            }
+            
+            if (!isNaN(value) && value > 0) {
+                values.push(value);
+            }
+        });
+        
+        if (values.length > 0) {
+            measurements[field] = {
+                min: Math.min(...values),
+                max: Math.max(...values),
+                count: values.length
+            };
+            console.log(`✅ Found ${values.length} values for ${field}: ${Math.min(...values)}-${Math.max(...values)}`);
+        } else {
+            console.log(`❌ No values found for ${field}`);
+        }
+    });
+    
+    console.log(`📏 Extracted measurements for ${category}:`, measurements);
+    return measurements;
+}
+
+function extractCompositions(items) {
+    const compositions = new Set();
+    
+    console.log(`🔍 Checking compositions in ${items.length} items`);
+    
+    items.forEach((item, index) => {
+        if (index < 5) {
+            console.log(`🔍 Item ${index} (${item.category}) compositions:`, item.compositions, typeof item.compositions);
+        }
+        
+        if (item.compositions) {
+            if (Array.isArray(item.compositions)) {
+                item.compositions.forEach(comp => {
+                    if (comp && comp.trim()) {
+                        compositions.add(comp.trim().toLowerCase());
+                    }
+                });
+            } else if (typeof item.compositions === 'string') {
+                // Handle string compositions (comma-separated or single)
+                const compList = item.compositions.split(',');
+                compList.forEach(comp => {
+                    if (comp && comp.trim()) {
+                        compositions.add(comp.trim().toLowerCase());
+                    }
+                });
+            } else if (typeof item.compositions === 'object' && item.compositions !== null) {
+                // Handle object compositions like {cotton: 100}
+                Object.keys(item.compositions).forEach(comp => {
+                    if (comp && comp.trim()) {
+                        compositions.add(comp.trim().toLowerCase());
+                        console.log(`✅ Added composition from object: ${comp}`);
+                    }
+                });
+            }
+        }
+    });
+    
+    const compositionArray = Array.from(compositions).sort();
+    console.log(`🧵 Extracted compositions:`, compositionArray);
+    return compositionArray;
+}
+
+function extractSizes(items) {
+    const sizes = new Set();
+    
+    console.log(`🔍 Checking sizes in ${items.length} items`);
+    
+    items.forEach((item, index) => {
+        if (index < 3) {
+            console.log(`🔍 Item ${index} size:`, item.size, typeof item.size);
+        }
+        
+        // 실제 사이즈 값 추출 (size 필드에서)
+        if (item.size && item.size.trim()) {
+            sizes.add(item.size.trim());
+        }
+    });
+    
+    const sizeArray = Array.from(sizes).sort();
+    console.log(`📐 Extracted actual sizes from data:`, sizeArray);
+    return sizeArray;
 }
 
 function getMockDataForCategory(category) {
@@ -2099,75 +2464,246 @@ function getMockDataForCategory(category) {
     };
 }
 
-function reconfigureFilterOptions(data) {
+function reconfigureFilterOptions(categoryData) {
+    console.log('🔄 Reconfiguring filter options with data:', categoryData);
+    
     // Reconfigure measurements
-    reconfigureMeasurements(data.measurements);
+    reconfigureMeasurements(categoryData.measurements);
     
     // Reconfigure compositions  
-    reconfigureCompositions(data.compositions);
+    reconfigureCompositions(categoryData.compositions);
     
     // Reconfigure sizes
-    reconfigureSizes(data.sizes);
+    reconfigureSizes(categoryData.sizes);
 }
 
-function reconfigureMeasurements(availableMeasurements) {
+function reconfigureMeasurements(measurementData) {
     const container = document.getElementById('new_filter_measurement_container');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ new_filter_measurement_container not found');
+        return;
+    }
+    
+    // Store measurement data globally for load more functionality
+    window.currentCategoryMeasurements = measurementData;
+    
+    const availableMeasurements = Object.keys(measurementData);
+    console.log(`📏 Updating measurements with: ${availableMeasurements.join(', ')}`);
+    
+    if (availableMeasurements.length === 0) {
+        container.innerHTML = '<div class="no_measurements">No measurements available for this category</div>';
+        window.currentCategoryMeasurements = null;
+        return;
+    }
+    
+    // Show first 3 measurements by default
+    const basicMeasurements = availableMeasurements.slice(0, 3);
+    const expandedMeasurements = availableMeasurements.slice(3);
     
     container.innerHTML = `
         <div class="filter_measurement_basic" id="new_filter_measurement_basic">
-            ${availableMeasurements.map(measurement => `
-                <div class="filter_measurement_item">
-                    <label>${measurement}</label>
-                    <div class="filter_measurement_range">
-                        <input type="text" placeholder="Enter value" class="measurement_input filter_measurement_input" id="measurement_${measurement.replace(/\s+/g, '_')}" />
-                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementInput('${measurement.replace(/\s+/g, '_')}')">
-                            <img src="/static/src/img/clear.svg" class="clear_icon" />
-                        </button>
+            ${basicMeasurements.map(measurement => {
+                const data = measurementData[measurement];
+                return `
+                    <div class="filter_measurement_item">
+                        <label>${measurement} (${data.min}-${data.max})</label>
+                        <div class="filter_measurement_range">
+                            <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                            <span>-</span>
+                            <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                                <span class="clear_icon"></span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `).join('')}
+                `;
+            }).join('')}
+        </div>
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleMeasurementList()" style="display: ${expandedMeasurements.length > 0 ? 'block' : 'none'}">
+                <span class="load_more_icon"></span>
+            </button>
+        </div>
+        <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
+            ${expandedMeasurements.map(measurement => {
+                const data = measurementData[measurement];
+                return `
+                    <div class="filter_measurement_item">
+                        <label>${measurement} (${data.min}-${data.max})</label>
+                        <div class="filter_measurement_range">
+                            <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                            <span>-</span>
+                            <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                                <span class="clear_icon"></span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
         </div>
     `;
 }
 
-function reconfigureCompositions(availableCompositions) {
+function reconfigureCompositions(compositions) {
     const container = document.getElementById('new_filter_composition_container');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ new_filter_composition_container not found');
+        return;
+    }
+    
+    console.log(`🧵 Updating compositions with: ${compositions.join(', ')}`);
+    
+    if (compositions.length === 0) {
+        container.innerHTML = '<div class="no_compositions">No compositions available for this category</div>';
+        return;
+    }
+    
+    // Show first 6 compositions by default
+    const basicCompositions = compositions.slice(0, 6);
+    const expandedCompositions = compositions.slice(6);
     
     container.innerHTML = `
         <div class="filter_composition_basic" id="new_filter_composition_basic">
-            ${availableCompositions.map(composition => `
+            ${basicCompositions.map(composition => `
                 <div class="tag_item">
                     <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
                     <label for="composition_${composition}">${composition}</label>
                 </div>
             `).join('')}
         </div>
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleCompositionList()" style="display: ${expandedCompositions.length > 0 ? 'block' : 'none'}">
+                <span class="load_more_icon"></span>
+            </button>
+        </div>
+        <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
+            ${expandedCompositions.map(composition => `
+                <div class="tag_item">
+                    <input type="checkbox" id="composition_${composition}_expanded" name="filter_compositions" value="${composition}">
+                    <label for="composition_${composition}_expanded">${composition}</label>
+                </div>
+            `).join('')}
+        </div>
     `;
 }
 
-function reconfigureSizes(availableSizes) {
+function reconfigureSizes(sizes) {
     const container = document.getElementById('new_filter_size_container');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ new_filter_size_container not found');
+        return;
+    }
     
-    // Use same structure as initializeFilterSizes
-    const sizeOptions = {
-        'WW': ['00', '0', '2', '4', '6', '8', '10', '12'],
-        'US': ['XS', 'S', 'M', 'L', 'XL'],
-        'DE': ['32', '34', '36', '38', '40', '42']
-    };
+    console.log(`📐 Reconfiguring sizes with actual data: ${sizes.join(', ')}`);
     
-    container.innerHTML = Object.entries(sizeOptions).map(([region, sizes]) => `
-        <div class="size_region_section">
-            <h3 class="size_region_title">${region}</h3>
-            <div class="size_region_options">
-                ${sizes.map(size => `
+    if (sizes.length === 0) {
+        console.log('⚠️ No sizes found in data, keeping default regions');
+        // Keep the default WW, US, DE regions if no actual sizes found
+        return;
+    }
+    
+    // Show actual sizes from the data, not regions
+    const basicSizes = sizes.slice(0, 6);  // Show more actual sizes
+    const expandedSizes = sizes.slice(6);
+    
+    container.innerHTML = `
+        <div class="filter_size_basic" id="new_filter_size_basic">
+            <h4>Actual Sizes</h4>
+            <div class="size_values_container">
+                ${basicSizes.map(size => `
                     <div class="tag_item">
-                        <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
-                        <label for="size_${region.toLowerCase()}_${size}" class="size_option_label">${size}</label>
+                        <input type="checkbox" id="size_actual_${size.replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                        <label for="size_actual_${size.replace(/\s+/g, '_')}" class="size_option_label">${size}</label>
                     </div>
                 `).join('')}
+            </div>
+        </div>
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleSizeList()" style="display: ${expandedSizes.length > 0 ? 'block' : 'none'}">
+                <span class="load_more_icon"></span>
+            </button>
+        </div>
+        <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
+            <div class="size_values_container">
+                ${expandedSizes.map(size => `
+                    <div class="tag_item">
+                        <input type="checkbox" id="size_actual_${size.replace(/\s+/g, '_')}_expanded" name="filter_sizes" value="${size}">
+                        <label for="size_actual_${size.replace(/\s+/g, '_')}_expanded" class="size_option_label">${size}</label>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function resetFilterOptions() {
+    console.log('🔄 Resetting filter options to defaults');
+    
+    // Reset to basic options if category data fetch fails
+    initializeFilterMeasurements();
+    initializeFilterCompositions();
+    initializeFilterSizes();
+}
+
+
+// script.js displayMeasurementInput 로직을 공통 함수로 분리
+function getMeasurementsByCategory(category) {
+    if (category == "top" || category == "outer") {
+        return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length"];
+    } else if (category == "dress") {
+        return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width"];
+    } else if (category == "pants") {
+        return ["waist", "hip", "rise", "inseam", "thigh", "legOpening", "length"];
+    } else if (category == "pants_short") {
+        return ["waist", "hip", "rise", "inseam", "thigh", "legOpening", "length"];
+    } else if (category == "pants_long") {
+        return ["waist", "hip", "rise", "inseam", "thigh", "legOpening", "length"];
+    } else if (category == "skirt") {
+        return ["waist", "hip", "length", "hem width"];
+    } else if (category == "shoes") {
+        return ["heel"];
+    } else if (category == "jewerly" || category == ".etc" || category == "etc." || category == "etc") {
+        return ["width", "height", "length", "circumference"];
+    }
+    return [];
+}
+
+// Category 선택 시 measurement 업데이트 (중복 정의 방지)
+function updateFilterMeasurements(selectedCategories) {
+    const container = document.getElementById('new_filter_measurement_basic');
+    if (!container) return;
+    
+    let allMeasurements = [];
+    
+    if (selectedCategories.length === 0) {
+        // 카테고리 선택 안했을 때는 TOP 기준
+        allMeasurements = getMeasurementsByCategory("top").slice(0, 3);
+    } else {
+        // 선택된 카테고리들의 measurements 수집
+        selectedCategories.forEach(category => {
+            const accordingSizes = getMeasurementsByCategory(category);
+            accordingSizes.forEach(measurement => {
+                if (!allMeasurements.includes(measurement)) {
+                    allMeasurements.push(measurement);
+                }
+            });
+        });
+        
+        // 기본 3개만 표시
+        allMeasurements = allMeasurements.slice(0, 3);
+    }
+    
+    container.innerHTML = allMeasurements.map(measurement => `
+        <div class="filter_measurement_item">
+            <label>${measurement}</label>
+            <div class="filter_measurement_range">
+                <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                <span>-</span>
+                <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                    <span class="clear_icon"></span>
+                </button>
             </div>
         </div>
     `).join('');
@@ -2177,7 +2713,8 @@ function initializeFilterMeasurements() {
     const container = document.getElementById('new_filter_measurement_container');
     if (!container) return;
     
-    const basicMeasurements = ['length', 'chest', 'sleeve'];
+    // 기본 측정값은 TOP 카테고리 기준 (script.js displayMeasurementInput 참조)
+    const basicMeasurements = ['chest', 'shoulder', 'sleeve'];
     
     container.innerHTML = `
         <div class="filter_measurement_basic" id="new_filter_measurement_basic">
@@ -2189,7 +2726,7 @@ function initializeFilterMeasurements() {
                         <span>-</span>
                         <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
                         <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                            <img src="/static/src/img/clear.svg" class="clear_icon" />
+                            <span class="clear_icon"></span>
                         </button>
                     </div>
                 </div>
@@ -2197,7 +2734,7 @@ function initializeFilterMeasurements() {
         </div>
         <div class="load_more_section">
             <button class="load_more_button" onclick="toggleMeasurementList()">
-                <img src="/static/src/img/load_more.svg" class="load_more_icon" />
+                <span class="load_more_icon"></span>
             </button>
         </div>
         <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
@@ -2208,9 +2745,25 @@ function initializeFilterMeasurements() {
 
 function initializeFilterCompositions() {
     const container = document.getElementById('new_filter_composition_container');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ new_filter_composition_container not found');
+        return;
+    }
     
-    const basicCompositions = ['cotton', 'silk', 'wool', 'leather', 'viscose', 'polyester'];
+    // db.js의 compositionList 직접 참조 - 새로 정의 금지
+    if (typeof compositionList === 'undefined' || !compositionList) {
+        console.error('❌ compositionList not found in db.js, using fallback');
+        // Fallback list
+        const compositionList = ["cotton", "silk", "wool", "cashmere", "leather", "viscose"];
+    } else {
+        console.log('✅ Found compositionList:', compositionList);
+    }
+    
+    const actualList = typeof compositionList !== 'undefined' && compositionList ? compositionList : 
+        ["cotton", "silk", "wool", "cashmere", "leather", "viscose"];
+    
+    // 기본 6개만 표시
+    const basicCompositions = actualList.slice(0, 6);
     
     container.innerHTML = `
         <div class="filter_composition_basic" id="new_filter_composition_basic">
@@ -2223,7 +2776,7 @@ function initializeFilterCompositions() {
         </div>
         <div class="load_more_section">
             <button class="load_more_button" onclick="toggleCompositionList()">
-                <img src="/static/src/img/load_more.svg" class="load_more_icon" />
+                <span class="load_more_icon"></span>
             </button>
         </div>
         <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
@@ -2232,41 +2785,109 @@ function initializeFilterCompositions() {
     `;
 }
 
+// Size region and size value mapping from script.js 원본 구현 사용
+function getSizesByRegion(region) {
+    var accordingSizes = [];
+    if (region == "US") {
+        accordingSizes.push("00", 0, 2);
+    } else if (region == "UK") {
+        accordingSizes.push(4, 6, 8, 10);
+    } else if (region == "EU") {
+        accordingSizes.push(35, 35.5, 36, 36.5, 37);
+    } else if (region == "FR") {
+        accordingSizes.push(32, 34, 36);
+    }else if (region == "DE") {
+        accordingSizes.push(32, 34, 36);
+    } else if (region == "IT") {
+        accordingSizes.push(34, 36, 38);
+    } else if (region == "WW") {
+        accordingSizes.push("One Size", "XXXS", "XXS", "XS", "S", "M", "L", "XL");
+    } else if (region == "KR") {
+        accordingSizes.push(230, 235, 240);
+    } else if (region == "Ring") {
+        accordingSizes.push(48, 50, 52, 4, 5, 6, "KR 5", "KR 6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J", "IT5");
+    }
+    return accordingSizes;
+}
+
 function initializeFilterSizes() {
     const container = document.getElementById('new_filter_size_container');
-    if (!container) return;
+    if (!container) {
+        console.error('❌ new_filter_size_container not found');
+        return;
+    }
     
-    const sizeOptions = {
-        'WW': ['00', '0', '2', '4', '6', '8', '10', '12'],
-        'US': ['XS', 'S', 'M', 'L', 'XL'],
-        'DE': ['32', '34', '36', '38', '40', '42']
-    };
+    // 기본값: WW, US, DE 지역만 디폴트로 표시 (임의 사이즈 생성 금지)
+    const defaultRegions = ["WW", "US", "DE"];
+    
+    let sizeRegionsHtml = '';
+    
+    defaultRegions.forEach(region => {
+        const regionSizes = getSizesByRegion(region);
+        
+        sizeRegionsHtml += `
+            <div class="size_region_container">
+                <h4>${region}</h4>
+                <div class="size_values_container">
+                    ${regionSizes.map(size => `
+                        <div class="tag_item">
+                            <input type="checkbox" id="size_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                            <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_option_label">${size}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
     
     container.innerHTML = `
         <div class="filter_size_basic" id="new_filter_size_basic">
-            ${Object.entries(sizeOptions).map(([region, sizes]) => `
-                <div class="size_region_section">
-                    <h3 class="size_region_title">${region}</h3>
-                    <div class="size_region_options">
-                        ${sizes.map(size => `
-                            <div class="tag_item">
-                                <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
-                                <label for="size_${region.toLowerCase()}_${size}" class="size_option_label">${size}</label>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('')}
+            ${sizeRegionsHtml}
         </div>
         <div class="load_more_section">
             <button class="load_more_button" onclick="toggleSizeList()">
-                <img src="/static/src/img/load_more.svg" class="load_more_icon" />
+                <span class="load_more_icon"></span>
             </button>
         </div>
         <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
-            <!-- Will be populated when expanded -->
+            <!-- Will be populated when expanded with more regions -->
         </div>
     `;
+}
+
+function toggleSizeList() {
+    const expanded = document.getElementById('new_filter_size_expanded');
+    const button = document.querySelector('#new_filter_size_container .load_more_button');
+    
+    if (expanded.classList.contains('filter_expanded')) {
+        // Expand - show all sizes from db.js sizeRegionList (참조만, 새로 정의 금지)
+        const allSizes = [];
+        if (typeof sizeRegionList !== 'undefined' && sizeRegionList) {
+            sizeRegionList.forEach(region => {
+            const regionSizes = getSizesByRegion(region);
+            regionSizes.forEach(size => {
+                const sizeStr = size.toString();
+                if (!allSizes.includes(sizeStr)) {
+                    allSizes.push(sizeStr);
+                }
+            });
+        });
+        }
+        
+        expanded.innerHTML = allSizes.map(size => `
+            <div class="tag_item">
+                <input type="checkbox" id="size_expanded_${size.replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                <label for="size_expanded_${size.replace(/\s+/g, '_')}">${size}</label>
+            </div>
+        `).join('');
+        
+        expanded.classList.remove('filter_expanded');
+        button.classList.add('load_more_collapsed');
+    } else {
+        // Collapse - hide expanded list
+        expanded.classList.add('filter_expanded');
+        button.classList.remove('load_more_collapsed');
+    }
 }
 
 // Toggle functions for load more buttons
@@ -2279,34 +2900,62 @@ function toggleMeasurementList() {
     console.log('button element:', button);
     
     if (expanded.classList.contains('filter_expanded')) {
-        // Expand - show all measurements from existing measurementMap definitions
-        const allMeasurements = [
-            'chest', 'shoulder', 'sleeve', 'sleeveOpening', 'armhole', 'length', 'waist', 
-            'hip', 'rise', 'inseam', 'legOpening', 'hemwidth', 'heel', 'width', 'height', 
-            'depth', 'circumference'
-        ];
+        // Expand - show additional measurements only (no duplicates)
         
-        expanded.innerHTML = allMeasurements.map(measurement => `
-            <div class="filter_measurement_item">
-                <label>${measurement}</label>
-                <div class="filter_measurement_range">
-                    <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
-                    <span>-</span>
-                    <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                    <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                        <img src="/static/src/img/clear.svg" class="clear_icon" />
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        // Check if we have current measurement data from category selection
+        if (window.currentCategoryMeasurements) {
+            // Use the measurements from current category
+            const allMeasurements = Object.keys(window.currentCategoryMeasurements);
+            const basicContainer = document.getElementById('new_filter_measurement_basic');
+            const existingMeasurements = new Set();
+            
+            // Get existing measurements to avoid duplicates
+            if (basicContainer) {
+                const existingLabels = basicContainer.querySelectorAll('.filter_measurement_item label');
+                existingLabels.forEach(label => {
+                    const measurementName = label.textContent.split(' (')[0]; // Remove range info
+                    existingMeasurements.add(measurementName);
+                });
+            }
+            
+            // Show only measurements not already displayed
+            const additionalMeasurements = allMeasurements.filter(m => !existingMeasurements.has(m));
+            
+            console.log('Existing measurements:', Array.from(existingMeasurements));
+            console.log('Additional measurements to show:', additionalMeasurements);
+            
+            if (additionalMeasurements.length > 0) {
+                const measurementData = window.currentCategoryMeasurements;
+                expanded.innerHTML = additionalMeasurements.map(measurement => {
+                    const data = measurementData[measurement];
+                    return `
+                        <div class="filter_measurement_item">
+                            <label>${measurement} (${data.min}-${data.max})</label>
+                            <div class="filter_measurement_range">
+                                <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                                <span>-</span>
+                                <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                                <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                                    <span class="clear_icon"></span>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                expanded.innerHTML = '<div class="no_additional_measurements">All measurements for this category are already shown</div>';
+            }
+        } else {
+            // Fallback: show default measurements if no category data
+            expanded.innerHTML = '<div class="no_additional_measurements">Select a category to see more measurements</div>';
+        }
         
         expanded.classList.remove('filter_expanded');
-        button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
+        button.classList.add('load_more_collapsed');
     } else {
         // Collapse - hide expanded list
-        expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
-        button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
+        button.classList.remove('load_more_collapsed');
     }
 }
 
@@ -2317,76 +2966,28 @@ function toggleCompositionList() {
     console.log('toggleCompositionList called');
     
     if (expanded.classList.contains('filter_expanded')) {
-        // Expand - show all compositions from compositionList
-        const allCompositions = typeof compositionList !== 'undefined' && compositionList ? compositionList : 
-            ['cotton', 'silk', 'wool', 'cashmere', 'leather', 'viscose', 'polyester', 'polyamide', 'elastane', 'lyocell', 'acryl', 'acetate', 'spandex', 'metallic', 'brass', 'rubber', 'sterling silver', 'gold 14K', 'gold 18K'];
+        // Expand - show all compositions from db.js compositionList (직접 참조만, 새로 정의 금지)
+        if (typeof compositionList === 'undefined' || !compositionList) {
+            console.error('❌ compositionList not found in db.js');
+            return;
+        }
         
-        expanded.innerHTML = allCompositions.map(composition => `
+        expanded.innerHTML = compositionList.map(composition => `
             <div class="tag_item">
-                <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
-                <label for="composition_${composition}">${composition}</label>
+                <input type="checkbox" id="composition_expanded_${composition}" name="filter_compositions" value="${composition}">
+                <label for="composition_expanded_${composition}">${composition}</label>
             </div>
         `).join('');
         
         expanded.classList.remove('filter_expanded');
-        button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
+        button.classList.add('load_more_collapsed');
     } else {
         // Collapse - hide expanded list
-        expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
-        button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
+        button.classList.remove('load_more_collapsed');
     }
 }
 
-function toggleSizeList() {
-    const expanded = document.getElementById('new_filter_size_expanded');
-    const button = document.querySelector('#new_filter_size_container .load_more_button');
-    
-    console.log('toggleSizeList called');
-    
-    if (expanded.classList.contains('filter_expanded')) {
-        // Expand - show all size regions from sizeRegionList
-        const allSizeRegions = typeof sizeRegionList !== 'undefined' && sizeRegionList ? sizeRegionList : 
-            ['WW', 'US', 'EU', 'FR', 'IT', 'DE', 'UK', 'KR', 'JP', 'Kids', 'Ring', 'etc'];
-        
-        const expandedSizeOptions = {
-            'KR': ['44', '55', '66', '77', '88'],
-            'JP': ['S', 'M', 'L', 'XL', 'XXL'],
-            'EU': ['34', '36', '38', '40', '42', '44'],
-            'FR': ['36', '38', '40', '42', '44', '46'],
-            'IT': ['38', '40', '42', '44', '46', '48'],
-            'UK': ['6', '8', '10', '12', '14', '16'],
-            'Kids': ['4T', '5T', '6T', '7T', '8T'],
-            'Ring': ['5', '6', '7', '8', '9', '10'],
-            'etc': ['Free', 'One Size']
-        };
-        
-        // Show all additional size regions (beyond basic WW, US, DE)
-        const additionalRegions = allSizeRegions.filter(region => !['WW', 'US', 'DE'].includes(region));
-        
-        expanded.innerHTML = additionalRegions.map(region => `
-            <div class="size_region_section">
-                <h3 class="size_region_title">${region}</h3>
-                <div class="size_region_options">
-                    ${(expandedSizeOptions[region] || ['Free']).map(size => `
-                        <div class="tag_item">
-                            <input type="checkbox" id="size_${region.toLowerCase()}_${size}" name="filter_sizes" value="${region.toLowerCase()}_${size}">
-                            <label for="size_${region.toLowerCase()}_${size}" class="size_option_label">${size}</label>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
-        
-        expanded.classList.remove('filter_expanded');
-        button.innerHTML = '<img src="/static/src/img/collapse.svg" class="collapse_icon" />';
-    } else {
-        // Collapse - hide expanded list
-        expanded.innerHTML = '';
-        expanded.classList.add('filter_expanded');
-        button.innerHTML = '<img src="/static/src/img/load_more.svg" class="load_more_icon" />';
-    }
-}
 
 function clearMeasurementInput(measurementName) {
     const input = document.getElementById(`measurement_${measurementName}`);
@@ -2403,9 +3004,509 @@ function clearMeasurementRange(measurementName) {
 }
 
 function applyFilters() {
-    // TODO: Implement filter application logic
-    console.log('Applying filters...');
+    console.log('🔧 Applying filters...');
+    
+    // Collect all selected filters
+    const selectedFilters = {
+        categories: [],
+        measurements: {},
+        compositions: [],
+        sizes: []
+    };
+    
+    // Get selected categories (radio buttons)
+    const selectedCategory = document.querySelector('#new_filter_category_grid input[type="radio"]:checked');
+    if (selectedCategory) {
+        selectedFilters.categories.push(selectedCategory.value);
+    }
+    
+    // Get measurement ranges
+    const measurementInputs = document.querySelectorAll('.filter_measurement_input');
+    console.log(`🔍 Found ${measurementInputs.length} measurement inputs`);
+    
+    measurementInputs.forEach(input => {
+        if (input.value && input.value.trim()) {
+            const idParts = input.id.split('_');
+            const measurementName = idParts[1];
+            const isFrom = input.id.includes('_from');
+            
+            console.log(`🔍 Processing input: ${input.id}, value: ${input.value}, measurement: ${measurementName}, isFrom: ${isFrom}`);
+            
+            if (!selectedFilters.measurements[measurementName]) {
+                selectedFilters.measurements[measurementName] = {};
+            }
+            
+            const numValue = parseFloat(input.value);
+            if (!isNaN(numValue)) {
+                if (isFrom) {
+                    selectedFilters.measurements[measurementName].from = numValue;
+                    console.log(`✅ Set ${measurementName} min: ${numValue}`);
+                } else {
+                    selectedFilters.measurements[measurementName].to = numValue;
+                    console.log(`✅ Set ${measurementName} max: ${numValue}`);
+                }
+            }
+        }
+    });
+    
+    console.log('📏 Final measurement filters:', selectedFilters.measurements);
+    
+    // Get selected compositions
+    const compositionInputs = document.querySelectorAll('.filter_panel input[name="filter_compositions"]:checked');
+    compositionInputs.forEach(input => {
+        selectedFilters.compositions.push(input.value);
+    });
+    
+    // Get selected sizes
+    const sizeInputs = document.querySelectorAll('.filter_panel input[name="filter_sizes"]:checked');
+    sizeInputs.forEach(input => {
+        selectedFilters.sizes.push(input.value);
+    });
+    
+    console.log('🎯 Selected filters:', selectedFilters);
+    
+    // Apply filters to all items from backend
+    filterAllItems(selectedFilters);
+    
+    // Close filter panel
     closeFilterPanel();
+}
+
+function filterAllItems(filters) {
+    console.log('🔍 Fetching and filtering all items with:', filters);
+    
+    // Show loading state
+    showLoadingState();
+    
+    // Fetch all items from backend
+    fetch('/api/items')
+        .then(response => response.json())
+        .then(data => {
+            console.log(`📦 Received ${data.items.length} items from backend`);
+            
+            // Apply client-side filtering
+            const filteredItems = applyFiltersToItems(data.items, filters);
+            console.log(`✅ Filtered to ${filteredItems.length} items`);
+            
+            // Re-render grid with filtered items
+            renderFilteredGrid(filteredItems);
+            
+            hideLoadingState();
+        })
+        .catch(error => {
+            console.error('❌ Error fetching items:', error);
+            hideLoadingState();
+            showErrorMessage('Failed to load items');
+        });
+}
+
+function applyFiltersToItems(items, filters) {
+    return items.filter(item => {
+        // Category filtering
+        if (filters.categories.length > 0) {
+            if (!item.category || !filters.categories.includes(item.category.toLowerCase())) {
+                return false;
+            }
+        }
+        
+        // Measurement filtering
+        if (Object.keys(filters.measurements).length > 0) {
+            for (const measurement in filters.measurements) {
+                const range = filters.measurements[measurement];
+                
+                // Try to get measurement value from different possible locations
+                let itemValue = null;
+                
+                // Try direct field access first
+                if (item[measurement] !== undefined && item[measurement] !== null) {
+                    itemValue = parseFloat(item[measurement]);
+                }
+                // Try measurements object access
+                else if (item.measurements && item.measurements[measurement] !== undefined) {
+                    itemValue = parseFloat(item.measurements[measurement]);
+                }
+                
+                console.log(`🔍 Filtering ${measurement}: item value=${itemValue}, range=`, range);
+                
+                if (!isNaN(itemValue) && itemValue > 0) {
+                    if (range.from !== undefined && itemValue < range.from) {
+                        console.log(`❌ Item filtered out: ${measurement} ${itemValue} < ${range.from}`);
+                        return false;
+                    }
+                    if (range.to !== undefined && itemValue > range.to) {
+                        console.log(`❌ Item filtered out: ${measurement} ${itemValue} > ${range.to}`);
+                        return false;
+                    }
+                    console.log(`✅ Item passes ${measurement} filter: ${itemValue} is within range`);
+                } else {
+                    // If no valid measurement value found, exclude this item
+                    console.log(`❌ Item filtered out: no valid ${measurement} value found (${itemValue})`);
+                    return false;
+                }
+            }
+        }
+        
+        // Composition filtering
+        if (filters.compositions.length > 0) {
+            const itemCompositions = item.compositions || [];
+            const hasMatchingComposition = filters.compositions.some(comp => 
+                itemCompositions.some(itemComp => itemComp.toLowerCase().includes(comp.toLowerCase()))
+            );
+            
+            if (!hasMatchingComposition) {
+                return false;
+            }
+        }
+        
+        // Size filtering
+        if (filters.sizes.length > 0) {
+            if (!item.size || !filters.sizes.includes(item.size)) {
+                return false;
+            }
+        }
+        
+        return true;
+    });
+}
+
+function renderFilteredGrid(items) {
+    const gridContainer = document.querySelector('.grid_container');
+    if (!gridContainer) {
+        console.error('❌ Grid container not found');
+        return;
+    }
+    
+    // Update subheader to show filter result
+    updateSubheaderForFilter(items);
+    
+    // Clear existing grid items (keep other elements like subheader)
+    const existingItems = gridContainer.querySelectorAll('.grid_item');
+    existingItems.forEach(item => item.remove());
+    
+    // Hide no items message if it exists
+    hideNoItemsMessage();
+    
+    if (items.length === 0) {
+        showNoItemsMessage();
+        return;
+    }
+    
+    // Render new items
+    items.forEach(item => {
+        const gridItem = createGridItem(item);
+        gridContainer.appendChild(gridItem);
+    });
+    
+    console.log(`🎨 Rendered ${items.length} filtered items to grid`);
+}
+
+function updateSubheaderForFilter(items) {
+    const subheaderText = document.querySelector('.subheader .text h1');
+    if (!subheaderText) {
+        console.error('❌ Subheader text not found');
+        return;
+    }
+    
+    // Get the applied filter info
+    const selectedCategory = document.querySelector('#new_filter_category_grid input[type="radio"]:checked');
+    let filterText = 'Filter Results';
+    
+    if (selectedCategory) {
+        filterText = `Filter Results - "${selectedCategory.value}"`;
+    }
+    
+    if (items.length > 0) {
+        filterText += ` (${items.length} items)`;
+    }
+    
+    subheaderText.textContent = filterText;
+    console.log(`📝 Updated subheader to: ${filterText}`);
+}
+
+function createGridItem(item) {
+    const gridItem = document.createElement('div');
+    gridItem.className = 'grid_item clickable';
+    
+    // Set data attributes for potential future filtering
+    gridItem.dataset.category = item.category || '';
+    gridItem.dataset.size = item.size || '';
+    if (item.length) gridItem.dataset.length = item.length;
+    if (item.chest) gridItem.dataset.chest = item.chest;
+    if (item.waist) gridItem.dataset.waist = item.waist;
+    
+    // Create image with fallback - fix image path and sizing
+    const img = document.createElement('img');
+    
+    // Try different image path formats
+    let imageSrc = '';
+    if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+        imageSrc = item.images[0];
+    } else if (item.thumbnail_url) {
+        imageSrc = item.thumbnail_url;
+    } else if (item.item_id) {
+        imageSrc = `/static/src/db/${item.item_id}.jpg`;
+    } else {
+        imageSrc = '/static/src/img/measurement/measurement_top.svg';
+    }
+    
+    img.src = imageSrc;
+    img.alt = item.name || item.brand || 'Item';
+    
+    // Fallback error handling with multiple attempts
+    img.onerror = function() {
+        console.log(`❌ Failed to load image: ${this.src}`);
+        if (this.src.includes('measurement_top.svg')) {
+            // Already tried placeholder, show colored background
+            this.style.display = 'none';
+            gridItem.style.backgroundColor = '#f0f0f0';
+            gridItem.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-size:12px;text-align:center;">${item.brand || 'No Image'}<br>${item.category || ''}</div>`;
+        } else {
+            // Try placeholder image (short sleeve top measurement)
+            this.src = '/static/src/img/measurement/measurement_top.svg';
+        }
+    };
+    
+    gridItem.appendChild(img);
+    
+    // Add click handler - fix item ID
+    gridItem.addEventListener('click', () => {
+        const itemId = item.item_id || item.id;
+        if (itemId) {
+            window.location.href = `/item.html?id=${itemId}`;
+        } else {
+            console.error('No item ID found for item:', item);
+        }
+    });
+    
+    console.log(`🖼️ Created grid item for: ${item.brand} ${item.name || ''} (${item.category})`);
+    return gridItem;
+}
+
+function showLoadingState() {
+    const gridContainer = document.querySelector('.grid_container');
+    if (gridContainer) {
+        gridContainer.innerHTML = '<div class="loading_message">Loading filtered items...</div>';
+    }
+}
+
+function hideLoadingState() {
+    const loading = document.querySelector('.loading_message');
+    if (loading) {
+        loading.remove();
+    }
+}
+
+function showErrorMessage(message) {
+    const gridContainer = document.querySelector('.grid_container');
+    if (gridContainer) {
+        gridContainer.innerHTML = `<div class="error_message">${message}</div>`;
+    }
+}
+
+function filterCurrentPageItems(filters) {
+    console.log('🔍 Filtering current page items with:', filters);
+    
+    const gridItems = document.querySelectorAll('.grid_item');
+    let visibleCount = 0;
+    let totalCount = gridItems.length;
+    
+    gridItems.forEach(item => {
+        let shouldShow = true;
+        
+        // Category filtering
+        if (filters.categories.length > 0) {
+            const itemCategory = item.dataset.category;
+            console.log(`Item category: ${itemCategory}, Filter: ${filters.categories[0]}`);
+            
+            if (!itemCategory || !filters.categories.includes(itemCategory.toLowerCase())) {
+                shouldShow = false;
+                console.log(`❌ Item hidden due to category mismatch`);
+            }
+        }
+        
+        // Measurement filtering
+        if (shouldShow && Object.keys(filters.measurements).length > 0) {
+            Object.keys(filters.measurements).forEach(measurement => {
+                const range = filters.measurements[measurement];
+                const itemValue = parseFloat(item.dataset[measurement]);
+                
+                console.log(`Checking ${measurement}: item=${itemValue}, range=`, range);
+                
+                if (!isNaN(itemValue)) {
+                    if (range.from !== undefined && itemValue < range.from) {
+                        shouldShow = false;
+                        console.log(`❌ Item hidden: ${measurement} ${itemValue} < ${range.from}`);
+                    }
+                    if (range.to !== undefined && itemValue > range.to) {
+                        shouldShow = false;
+                        console.log(`❌ Item hidden: ${measurement} ${itemValue} > ${range.to}`);
+                    }
+                }
+            });
+        }
+        
+        // Composition filtering
+        if (shouldShow && filters.compositions.length > 0) {
+            const itemCompositions = item.dataset.compositions ? item.dataset.compositions.split(',') : [];
+            const hasMatchingComposition = filters.compositions.some(comp => 
+                itemCompositions.some(itemComp => itemComp.trim().toLowerCase().includes(comp.toLowerCase()))
+            );
+            
+            if (!hasMatchingComposition) {
+                shouldShow = false;
+                console.log(`❌ Item hidden due to composition mismatch`);
+            }
+        }
+        
+        // Size filtering
+        if (shouldShow && filters.sizes.length > 0) {
+            const itemSize = item.dataset.size;
+            if (!itemSize || !filters.sizes.includes(itemSize)) {
+                shouldShow = false;
+                console.log(`❌ Item hidden due to size mismatch`);
+            }
+        }
+        
+        // Show/hide item
+        if (shouldShow) {
+            item.style.display = '';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
+    
+    console.log(`✅ Filtering complete: ${visibleCount}/${totalCount} items visible`);
+    
+    // Show message if no items match
+    if (visibleCount === 0) {
+        showNoItemsMessage();
+    } else {
+        hideNoItemsMessage();
+    }
+}
+
+function showNoItemsMessage() {
+    let message = document.querySelector('.no_items_message');
+    if (!message) {
+        message = document.createElement('div');
+        message.className = 'no_items_message';
+        message.textContent = 'No items match your filters';
+        
+        const gridContainer = document.querySelector('.grid_container');
+        if (gridContainer) {
+            gridContainer.appendChild(message);
+        }
+    }
+    message.style.display = 'block';
+}
+
+function hideNoItemsMessage() {
+    const message = document.querySelector('.no_items_message');
+    if (message) {
+        message.style.display = 'none';
+    }
+}
+
+function sendFiltersToBackend(filters) {
+    console.log('📡 Sending filters to backend:', filters);
+    
+    // Create URLSearchParams for GET request
+    const params = new URLSearchParams();
+    
+    // Add category filter
+    if (filters.categories.length > 0) {
+        params.append('category', filters.categories[0]);
+    }
+    
+    // Add measurement filters
+    Object.keys(filters.measurements).forEach(measurement => {
+        const range = filters.measurements[measurement];
+        if (range.from !== undefined) {
+            params.append(`${measurement}_min`, range.from);
+        }
+        if (range.to !== undefined) {
+            params.append(`${measurement}_max`, range.to);
+        }
+    });
+    
+    // Add composition filters
+    if (filters.compositions.length > 0) {
+        params.append('compositions', filters.compositions.join(','));
+    }
+    
+    // Add size filters
+    if (filters.sizes.length > 0) {
+        params.append('sizes', filters.sizes.join(','));
+    }
+    
+    // Redirect to current page with filters
+    const currentPath = window.location.pathname;
+    const newUrl = `${currentPath}?${params.toString()}`;
+    
+    console.log('🔄 Redirecting to:', newUrl);
+    window.location.href = newUrl;
+}
+
+function filterItems(filters) {
+    const gridItems = document.querySelectorAll('.grid_item');
+    let visibleCount = 0;
+    
+    gridItems.forEach(item => {
+        let shouldShow = true;
+        
+        // Category filtering (if any categories selected)
+        if (filters.categories.length > 0) {
+            const itemCategory = item.dataset.category;
+            if (!filters.categories.includes(itemCategory)) {
+                shouldShow = false;
+            }
+        }
+        
+        // Size filtering (if any sizes selected)
+        if (filters.sizes.length > 0 && shouldShow) {
+            const itemSize = item.dataset.size;
+            if (!filters.sizes.includes(itemSize)) {
+                shouldShow = false;
+            }
+        }
+        
+        // Composition filtering (if any compositions selected)
+        if (filters.compositions.length > 0 && shouldShow) {
+            const itemCompositions = item.dataset.compositions ? item.dataset.compositions.split(',') : [];
+            const hasMatchingComposition = filters.compositions.some(comp => 
+                itemCompositions.some(itemComp => itemComp.trim().toLowerCase().includes(comp.toLowerCase()))
+            );
+            if (!hasMatchingComposition) {
+                shouldShow = false;
+            }
+        }
+        
+        // Show/hide item
+        if (shouldShow) {
+            item.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            item.classList.add('hidden');
+        }
+    });
+    
+    console.log(`🔍 Filtered items: ${visibleCount}/${gridItems.length} visible`);
+    
+    // Show no items message if needed
+    const noItemsMsg = document.querySelector('.no_items_message');
+    if (visibleCount === 0) {
+        if (!noItemsMsg) {
+            const message = document.createElement('div');
+            message.className = 'no_items_message';
+            message.textContent = 'No items match the selected filters.';
+            document.querySelector('.grid_container').appendChild(message);
+        }
+    } else {
+        if (noItemsMsg) {
+            noItemsMsg.remove();
+        }
+    }
 }
 
 function displayFilterCategory() {
@@ -2488,49 +3589,6 @@ function displayFilterSubCategory(cat) {
     }
 }
 
-// Filter 페이지에서 사이즈 필터 표시
-function displayFilterSize() {
-    var grid = document.querySelector(".filter_size");
-    if (!grid) return;
-    
-    // 전체 사이즈 필터 생성 (지역별로 그룹화)
-    const sizeContainer = document.createElement('div');
-    
-    const sizeGrid = document.createElement('div');
-    sizeGrid.className = 'size_grid';
-    
-    // 실제 시스템에서 사용되는 사이즈 목록 (displaySizesByRegion 기준)
-    const allSizes = [
-        // US sizes
-        "00", "0", "2",
-        // UK sizes  
-        "4", "6", "8", "10",
-        // EU sizes
-        "35", "35.5", "36", "36.5", "37",
-        // FR sizes
-        "32", "34", "36",
-        // DE sizes (same as FR)
-        // IT sizes
-        "38",
-        // WW sizes
-        "one size", "XXXS", "XXS", "XS", "S", "M", "L", "XL",
-        // KR sizes
-        "230", "235", "240",
-        // Kids sizes
-        "10Y", "11Y", "12Y", "13Y", "14Y", "15Y", "16Y", "130cm", "140cm", "150cm",
-        // Ring sizes
-        "48", "50", "52", "5", "6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J"
-    ];
-    
-    for (let i = 0; i < allSizes.length; i++) {
-        const item = document.createElement('div');
-        item.innerHTML = `<input type="checkbox" name="size_input" class="category_image" id="size_${i}" value="${allSizes[i]}"/><label for="size_${i}">${allSizes[i]}</label>`;
-        sizeGrid.appendChild(item);
-    }
-    
-    sizeContainer.appendChild(sizeGrid);
-    grid.appendChild(sizeContainer);
-}
 
 /* myFunction toggles between adding and removing the show class, which is used to hide and show the dropdown content */
 function show() {
@@ -2593,28 +3651,8 @@ function displaySizesByRegion(region) {
         return;
     }
     
-    // 기존 region들의 사이즈 목록
-    if (region == "US") {
-        accordingSizes.push("00", "0", "2");
-    } else if (region == "UK") {
-        accordingSizes.push(4, 6);
-    } else if (region == "EU") {
-        accordingSizes.push(35, 35.5, 36, 36.5, 37);
-    } else if (region == "FR") {
-        accordingSizes.push(32, 34, 36);
-    }else if (region == "DE") {
-        accordingSizes.push(32, 34, 36);
-    } else if (region == "IT") {
-        accordingSizes.push(34, 36, 38);
-    } else if (region == "WW") {
-        accordingSizes.push("one size", "XXXS", "XXS", "XS", "S", "M", "L");
-    } else if (region == "KR") {
-        accordingSizes.push(225, 230, 235, 240);
-    } else if (region == "Kids") {
-        accordingSizes.push("10Y", "11Y", "12Y", "13Y", "14Y", "15Y", "16Y", "130cm", "140cm", "150cm");
-    } else if (region == "Ring") {
-        accordingSizes.push(48, 50, 52, 4, 5, 6, "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J");
-    }
+    // getSizesByRegion 함수 참조 - 중복 정의 금지
+    accordingSizes = getSizesByRegion(region);
     
     // 일반 region들의 사이즈 버튼들 생성
     for (var i = 0; i < accordingSizes.length; i++) {
@@ -2736,22 +3774,9 @@ function autocomplete (inp, arr) {
 
 function displayMeasurementInput(selectedCategory) {
     var selected = selectedCategory;
-    var accordingSizes = [];
-
     
-    if (selected == "top" || selected == "outer") {
-        accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length");
-    } else if (selected == "dress") {
-        accordingSizes.push("chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width");
-    } else if (selected == "pants") {
-        accordingSizes = ["waist", "hip", "inseam", "leg opening", "length"];
-    } else if (selected == "skirt") {
-        accordingSizes = ["waist", "hip", "length", "hem width"];
-    } else if (selected == "shoes") {
-        accordingSizes = ["heel"];
-    } else if (selected == "jewerly" || selected == "etc." || selected == "etc") {
-        accordingSizes = ["width", "height", "length", "circumference"];
-    }
+    // 공통 함수만 사용 (모든 중복 정의 금지)
+    var accordingSizes = getMeasurementsByCategory(selected);
     
     // Edit 페이지에서는 기존 measurement 데이터 보존
     const isEditPage = document.getElementById('edit_item_form') !== null;
@@ -2939,10 +3964,7 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
             if (container) {
                 const compositionSet = container.querySelector('.composition_set');
                 if (compositionSet) {
-                    compositionSet.style.backgroundColor = 'transparent';
-                    compositionSet.style.borderRadius = '0';
-                    compositionSet.style.padding = '0';
-                    compositionSet.style.marginBottom = '0';
+                    compositionSet.classList.add('composition_set_transparent');
                 }
                 
                 const setHeader = container.querySelector('.composition_set_header');
@@ -3006,10 +4028,7 @@ function refreshCompositionSets() {
             // composition_set 스타일 제거
             const compositionSet = container.querySelector('.composition_set');
             if (compositionSet) {
-                compositionSet.style.backgroundColor = 'transparent';
-                compositionSet.style.borderRadius = '0';
-                compositionSet.style.padding = '0';
-                compositionSet.style.marginBottom = '0';
+                compositionSet.classList.add('composition_set_transparent');
             }
             
             // 세트 헤더 숨김
@@ -3181,10 +4200,17 @@ function populateItemView(item) {
         
         // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
         if (item.brand) {
-            const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
+            const hasKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(item.brand);
+            console.log(`🔤 Brand: "${item.brand}", hasKorean: ${hasKorean}`);
             if (hasKorean) {
                 brandElement.classList.add('item_brand');
+                console.log('✅ Added item_brand class');
+            } else {
+                brandElement.classList.remove('item_brand');
+                console.log('❌ Removed item_brand class');
             }
+        } else {
+            brandElement.classList.remove('item_brand');
         }
     }
     
@@ -3238,7 +4264,7 @@ function populateItemView(item) {
             sizeText = item.size_region ? `${item.size_region} ${item.size}` : item.size;
         }
         sizeElement.textContent = sizeText;
-        sizeElement.style.display = ''; // 인라인 스타일 제거
+        sizeElement.classList.remove('hidden'); // CSS 클래스 제거
         sizeElement.classList.remove('hidden', 'item_size_hidden');
         sizeElement.classList.add('item_size');
     }
@@ -3256,15 +4282,15 @@ function populateItemView(item) {
             
             // 모바일에서 measurement 값이 없으면 영역 숨김
             if (window.innerWidth <= 400 && !hasMeasurements) {
-                measurementContainer.style.display = 'none';
+                measurementContainer.classList.add('hidden');
                 return;
             } else {
-                measurementContainer.style.display = 'block';
+                measurementContainer.classList.remove('hidden');
             }
             
             // 카테고리별 measurement 생성
-            if (item.category === 'top') {
-                // Top 카테고리 - 서브카테고리에 따라 분기
+            if (item.category === 'top' || item.category === 'outer') {
+                // Top/Outer 카테고리 - 서브카테고리에 따라 분기
                 const subcategory = item.subcategory || '';
                 if (subcategory.toLowerCase().includes('long sleeve')) {
                     createTopLongSleeveMeasurement(measurementContainer, item.measurements);
@@ -3278,6 +4304,14 @@ function populateItemView(item) {
                 // Skirt 카테고리 - 서브카테고리 전달 (subcategory에 long/mini 정보)
                 console.log('📏 Creating skirt measurement in populateItemView for subcategory:', item.subcategory);
                 createSkirtMeasurement(measurementContainer, item.measurements, item.subcategory);
+            } else if (item.category === 'pants_short' || (item.category === 'pants' && item.subcategory === 'short')) {
+                // Pants Short 카테고리 (pants_short 또는 pants+subcategory:short)
+                console.log('📏 Creating pants_short measurement in populateItemView');
+                createPantsShortMeasurement(measurementContainer, item.measurements);
+            } else if (item.category === 'pants_long' || (item.category === 'pants' && item.subcategory === 'long')) {
+                // Pants Long 카테고리 (pants_long 또는 pants+subcategory:long)
+                console.log('📏 Creating pants_long measurement in populateItemView');
+                createPantsLongMeasurement(measurementContainer, item.measurements);
             }
             
             // measurement 값이 없으면 "No measurement" 텍스트 추가
@@ -3305,9 +4339,9 @@ function populateItemView(item) {
             );
             
             if (window.innerWidth <= 400 && !hasMeasurements) {
-                measurementContainer.style.display = 'none';
+                measurementContainer.classList.add('hidden');
             } else {
-                measurementContainer.style.display = 'block';
+                measurementContainer.classList.remove('hidden');
             }
         }
     };
@@ -3788,9 +4822,14 @@ function updateItemDisplay(item) {
         brandElement.textContent = item.brand;
         
         // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
-        const hasKorean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(item.brand);
+        const hasKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(item.brand);
+        console.log(`🔤 UpdateDisplay Brand: "${item.brand}", hasKorean: ${hasKorean}`);
         if (hasKorean) {
             brandElement.classList.add('item_brand');
+            console.log('✅ UpdateDisplay Added item_brand class');
+        } else {
+            brandElement.classList.remove('item_brand');
+            console.log('❌ UpdateDisplay Removed item_brand class');
         }
     }
     
@@ -3842,7 +4881,7 @@ function updateSizeDisplay(item) {
                 final_sizeText: sizeText
             });
             sizeElement.textContent = sizeText;
-            sizeElement.style.display = ''; // 인라인 스타일 제거
+            sizeElement.classList.remove('hidden'); // CSS 클래스 제거
             sizeElement.classList.remove('hidden', 'item_size_hidden');
             sizeElement.classList.add('item_size');
             console.log('Updated size display:', sizeText);
@@ -4009,6 +5048,10 @@ function updateMeasurementDisplay(item) {
             createDressMeasurement(measurementContainer, measurements, item.subcategory, item.subcategory2);
         } else if (category === 'skirt') {
             createSkirtMeasurement(measurementContainer, measurements, item.subcategory);
+        } else if (category === 'pants_short' || (category === 'pants' && item.subcategory === 'short')) {
+            createPantsShortMeasurement(measurementContainer, measurements);
+        } else if (category === 'pants_long' || (category === 'pants' && item.subcategory === 'long')) {
+            createPantsLongMeasurement(measurementContainer, measurements);
         } else {
             // 기본값으로 top 사용
             createTopMeasurement(measurementContainer, measurements);
@@ -4103,6 +5146,10 @@ function createDressMeasurement(container, measurements, subcategory, subcategor
         createDressShortSleeveMidiMeasurement(container, measurements);
     } else if (subcategoryLower.includes('short sleeve') && subcategory2Lower.includes('long')) {
         createDressShortSleeveLongMeasurement(container, measurements);
+    } else if (subcategoryLower.includes('long sleeve') && subcategory2Lower.includes('long')) {
+        createDressLongSleeveLongMeasurement(container, measurements);
+    } else if (subcategoryLower.includes('long sleeve') && subcategory2Lower.includes('midi')) {
+        createDressLongSleeveMidiMeasurement(container, measurements);
     } else {
         // 기본 dress 처리 (현재는 top과 동일)
         createTopMeasurement(container, measurements);
@@ -4131,7 +5178,7 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
     
     measurementMap.forEach(item => {
         // Check for both camelCase (sleeveOpening) and display text (sleeve opening) formats
-        const measurementValue = measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()];
+        const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
             // 수치 박스 생성
@@ -4172,7 +5219,7 @@ function createDressShortSleeveMidiMeasurement(container, measurements) {
     
     measurementMap.forEach(item => {
         // Check for both camelCase (hemWidth) and display text (hem width) formats
-        const measurementValue = measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()];
+        const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
             // 수치 박스 생성
@@ -4213,12 +5260,94 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
     
     measurementMap.forEach(item => {
         // Check for both camelCase (hemWidth) and display text (hem width) formats
-        const measurementValue = measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()];
+        const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
             // 수치 박스 생성
             const box = document.createElement('div');
             box.className = `box ${item.key} short_sleeve_long_dress`;
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Long Sleeve Long Dress 카테고리 measurement 생성
+function createDressLongSleeveLongMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/dress_long sleeve, long.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // long sleeve long dress measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_dress_long sleeve, long_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_dress_long sleeve, long_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_dress_long sleeve, long_sleeve.svg' },
+        { key: 'sleeveOpening', label: '소매단', guideline: 'measurement_dress_long sleeve, long_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_dress_long sleeve, long_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_dress_long sleeve, long_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_dress_long sleeve, long_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_dress_long sleeve, long_hemwidth.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        // Check for both camelCase (hemWidth) and display text (hem width) formats
+        const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
+        
+        if (measurements && measurementValue) {
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} long_sleeve_long_dress`;
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Long Sleeve Midi Dress 카테고리 measurement 생성
+function createDressLongSleeveMidiMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/dress_long sleeve, midi.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // long sleeve midi dress measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_dress_long sleeve, midi_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_dress_long sleeve, midi_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_dress_long sleeve, midi_sleeve.svg' },
+        { key: 'sleeveOpening', label: '소매단', guideline: 'measurement_dress_long sleeve, midi_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_dress_long sleeve, midi_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_dress_long sleeve, midi_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_dress_long sleeve, midi_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_dress_long sleeve, midi_hemwidth.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        // Check for both camelCase (hemWidth) and display text (hem width) formats
+        const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
+        
+        if (measurements && measurementValue) {
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} long_sleeve_midi_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -4240,6 +5369,9 @@ function createSkirtMeasurement(container, measurements, subcategory) {
     if (subcategoryLower.includes('mini')) {
         console.log('✅ Using mini skirt measurement');
         createSkirtMiniMeasurement(container, measurements);
+    } else if (subcategoryLower.includes('midi')) {
+        console.log('✅ Using midi skirt measurement');
+        createSkirtMidiMeasurement(container, measurements);
     } else if (subcategoryLower.includes('long')) {
         console.log('✅ Using long skirt measurement');
         createSkirtLongMeasurement(container, measurements);
@@ -4247,6 +5379,46 @@ function createSkirtMeasurement(container, measurements, subcategory) {
         console.log('⚠️ No specific match, using mini as default');
         createSkirtMiniMeasurement(container, measurements);
     }
+}
+
+// Skirt Midi measurement 생성
+function createSkirtMidiMeasurement(container, measurements) {
+    // 베이스 이미지 (항상 표시)
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/skirt_midi.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // Midi skirt measurement 정의
+    const measurementItems = [
+        { key: 'waist', label: '허리', guideline: 'measurement_skirt_midi_waist.svg' },
+        { key: 'hip', label: '엉덩이', guideline: 'measurement_skirt_midi_hip.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_skirt_midi_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_skirt_midi_hemwidth.svg' }
+    ];
+    
+    // 각 measurement에 대한 박스와 가이드라인 생성
+    measurementItems.forEach(item => {
+        const measurementValue = measurements && measurements[item.key] ? measurements[item.key] : '';
+        
+        if (measurementValue) {
+            // Measurement 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} skirt_midi`;
+            box.classList.add('measurement_box_centered');
+            box.textContent = measurementValue;
+            container.appendChild(box);
+        }
+        
+        // 가이드라인 이미지 생성 (값이 있을 때만)
+        if (measurementValue) {
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        }
+    });
 }
 
 // Skirt Mini measurement 생성
@@ -4273,7 +5445,7 @@ function createSkirtMiniMeasurement(container, measurements) {
             // Measurement 박스 생성
             const box = document.createElement('div');
             box.className = `box ${item.key} skirt_mini`;
-            box.style.transform = 'translate(-50%, -50%)';
+            box.classList.add('measurement_box_centered');
             box.textContent = measurementValue;
             container.appendChild(box);
         }
@@ -4313,7 +5485,7 @@ function createSkirtLongMeasurement(container, measurements) {
             // Measurement 박스 생성
             const box = document.createElement('div');
             box.className = `box ${item.key} skirt_long`;
-            box.style.transform = 'translate(-50%, -50%)';
+            box.classList.add('measurement_box_centered');
             box.textContent = measurementValue;
             container.appendChild(box);
         }
@@ -4325,6 +5497,96 @@ function createSkirtLongMeasurement(container, measurements) {
             guidelineImg.className = 'measurement_guideline';
             guidelineImg.setAttribute('data-measurement', item.key);
             container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Pants Short 카테고리 measurement 생성
+function createPantsShortMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/pants_short.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // measurement 데이터와 가이드라인 이미지 매핑 (실제 이미지 파일이 존재하는 것만)
+    const measurementMap = [
+        { key: 'waist', label: '허리', guideline: 'measurement_pants_short_waist.svg' },
+        { key: 'hip', label: '엉덩이', guideline: 'measurement_pants_short_hip.svg' },
+        { key: 'rise', label: '밑위', guideline: 'measurement_pants_short_rise.svg' },
+        { key: 'inseam', label: '안쪽 솔기', guideline: 'measurement_pants_short_inseam.svg' },
+        { key: 'thigh', label: '허벅지', guideline: 'measurement_pants_short_thigh.svg' },
+        { key: 'legOpening', label: '밑단', guideline: 'measurement_pants_short_legOpening.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_pants_short_length.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        const measurementValue = measurements && measurements[item.key];
+        console.log(`👖 Checking pants_short measurement: ${item.key} = ${measurementValue} (type: ${typeof measurementValue})`);
+        
+        // measurement 값이 존재하고 비어있지 않을 때만 표시
+        if (measurementValue && measurementValue !== '' && measurementValue !== null && measurementValue !== undefined) {
+            console.log(`👖 Adding pants_short measurement: ${item.key} = ${measurementValue}`);
+            
+            // Measurement 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} pants_short`;
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        } else {
+            console.log(`👖 Skipping pants_short measurement: ${item.key} (no valid value)`);
+        }
+    });
+}
+
+// Pants Long 카테고리 measurement 생성
+function createPantsLongMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/pants_long.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // measurement 데이터와 가이드라인 이미지 매핑 (실제 이미지 파일이 존재하는 것만)
+    const measurementMap = [
+        { key: 'waist', label: '허리', guideline: 'measurement_pants_long_waist.svg' },
+        { key: 'hip', label: '엉덩이', guideline: 'measurement_pants_long_hip.svg' },
+        { key: 'rise', label: '밑위', guideline: 'measurement_pants_long_rise.svg' },
+        { key: 'inseam', label: '안쪽 솔기', guideline: 'measurement_pants_long_inseam.svg' },
+        { key: 'thigh', label: '허벅지', guideline: 'measurement_pants_long_thigh.svg' },
+        { key: 'legOpening', label: '밑단', guideline: 'measurement_pants_long_legOpening.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_pants_long_length.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        const measurementValue = measurements && measurements[item.key];
+        console.log(`👖 Checking pants_long measurement: ${item.key} = ${measurementValue} (type: ${typeof measurementValue})`);
+        
+        // measurement 값이 존재하고 비어있지 않을 때만 표시
+        if (measurementValue && measurementValue !== '' && measurementValue !== null && measurementValue !== undefined) {
+            console.log(`👖 Adding pants_long measurement: ${item.key} = ${measurementValue}`);
+            
+            // Measurement 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${item.key} pants_long`;
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', item.key);
+            container.appendChild(guidelineImg);
+        } else {
+            console.log(`👖 Skipping pants_long measurement: ${item.key} (no valid value)`);
         }
     });
 }
@@ -4417,7 +5679,7 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     carouselContainer.addEventListener('mousedown', (e) => {
         isDragging = true;
         hasDragged = false; // 드래그 시작 시 리셋
-        carouselContainer.style.cursor = 'grabbing';
+        carouselContainer.classList.add('carousel_grabbing');
         startX = e.pageX - carouselContainer.offsetLeft;
         scrollLeft = carouselContainer.scrollLeft;
         e.preventDefault();
@@ -4425,12 +5687,12 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     
     carouselContainer.addEventListener('mouseleave', () => {
         isDragging = false;
-        carouselContainer.style.cursor = 'grab';
+        carouselContainer.classList.remove('carousel_grabbing');
     });
     
     carouselContainer.addEventListener('mouseup', () => {
         isDragging = false;
-        carouselContainer.style.cursor = 'grab';
+        carouselContainer.classList.remove('carousel_grabbing');
     });
     
     carouselContainer.addEventListener('mousemove', (e) => {
@@ -4517,7 +5779,7 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
         img.onerror = function() {
             console.log(`⚠️ This image may not exist in R2 bucket`);
             // 플레이스홀더로 대체하되 더 명확한 메시지
-            img.src = '/static/src/img/plus.png';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
             img.title = 'Image not found in storage';
             
@@ -4742,7 +6004,7 @@ function displayFilterResults(items, count) {
         } else if (item.images && item.images.length > 0) {
             img.src = item.images[0];
         } else {
-            img.src = '/static/src/img/plus.png';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
         }
         

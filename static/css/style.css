@@ -224,8 +224,8 @@
 .filter_panel {
     position: fixed;
     top: 0;
-    right: -600px;
-    width: 600px;
+    right: -540px;
+    width: 540px;
     height: 100vh;
     background-color: white;
     box-shadow: -5px 0 5px rgba(0,0,0,0.1);
@@ -258,8 +258,9 @@
     visibility: visible;
 }
 
-.filter_apply_button {
-    width: 100%;
+/* Main button style - shared across all pages */
+.button {
+    width: 200px;
     text-align: center;
     border: none;
     font-size: 1.2em;
@@ -267,6 +268,7 @@
     border-radius: 30px;
     transition: 0.5s;
     font-family: 'Sequel85';
+    margin-top: 30px;
     padding-bottom: 4px;
     color: white;
     background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
@@ -274,7 +276,31 @@
     cursor: pointer;
 }
 
-.filter_apply_button:hover {
+.button:hover {
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Filter panel button - specific styling without full width */
+.filter_panel_button {
+    width: 160px;
+    text-align: center;
+    border: none;
+    font-size: 1em;
+    line-height: 50px;
+    border-radius: 25px;
+    transition: 0.5s;
+    font-family: 'Sequel85';
+    margin-top: 0;
+    padding-bottom: 4px;
+    color: white;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% auto;
+    cursor: pointer;
+}
+
+.filter_panel_button:hover {
     background-position: right center;
     color: #fff;
     text-decoration: none;
@@ -293,18 +319,14 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-    padding: 10px;
-    background-color: var(--gray);
-    border-radius: 10px;
 }
 
 .filter_measurement_item label {
-    font-family: 'Sequel75', sans-serif;
-    font-size: 1.1em;
     margin: 0;
     border: none;
     background: none;
-    min-width: 100px;
+    width: 80px;
+    text-align: left;
 }
 
 .filter_measurement_basic, .filter_measurement_expanded {
@@ -336,7 +358,7 @@
 
 /* Push content left when filter panel is open */
 body.filter-open {
-    margin-right: 600px !important;
+    margin-right: 540px !important;
     transition: margin-right 0.3s ease-in-out;
 }
 
@@ -344,7 +366,7 @@ body.filter-open .content,
 body.filter-open .header,
 body.filter-open .subheader {
     margin-right: 0;
-    width: calc(100vw - 600px);
+    width: calc(100vw - 540px);
     transition: width 0.3s ease-in-out;
 }
 
@@ -353,16 +375,31 @@ body.filter-open .grid_container {
     grid-auto-rows: auto;
     max-height: none;
     overflow: visible;
+    grid-gap: 1.5em;
 }
 
 body.filter-open .grid_item {
     aspect-ratio: 3/4;
-    margin-bottom: 1.5em;
+    margin-bottom: 0;
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+}
+
+/* Ensure filter results show properly when filter panel is closed */
+body:not(.filter-open) .grid_container {
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 1.5em;
+}
+
+body:not(.filter-open) .grid_item {
+    aspect-ratio: 3/4;
+    width: 100%;
 }
 
 /* Filter panel layout classes */
 .filter_panel_content {
-    padding: 40px;
+    padding: 30px;
 }
 
 .filter_panel_header {
@@ -388,6 +425,7 @@ body.filter-open .grid_item {
 
 .filter_panel_footer {
     position: sticky;
+    text-align: center;
     bottom: 0;
     background: white;
     padding: 20px 40px;
@@ -398,7 +436,7 @@ body.filter-open .grid_item {
 .filter_measurement_range {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 10px;
 }
 
 .filter_measurement_input {
@@ -412,21 +450,99 @@ body.filter-open .grid_item {
     margin-left: 8px;
 }
 
-/* Size region styles */
-.size_region_section {
+/* Size region styles - using add.css styles for consistency */
+.size_region_container {
     margin-bottom: 15px;
 }
 
-.size_region_title {
-    font-family: 'Sequel75', sans-serif;
-    font-size: 1.1em;
-    margin-bottom: 10px;
+.size_region_container h4 {
+    margin: 0 0 10px 0;
+    font-family: 'Sequel85', sans-serif;
+    font-size: 1em;
+    color: var(--black);
 }
 
-.size_region_options {
+.filter_size_region_container {
+    margin-bottom: 15px;
+}
+
+.filter_size_values {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
+}
+
+.size_values_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Composition set transparent style */
+.composition_set_transparent {
+    background-color: transparent !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Measurement box positioning */
+.measurement_box_centered {
+    transform: translate(-50%, -50%);
+}
+
+/* Carousel cursor states */
+.carousel_grabbing {
+    cursor: grabbing !important;
+}
+
+.size_region {
+    width: 80px;
+    height: 60px;
+    background-color: var(--gray);
+    display: inline-block;
+    text-align: center;
+    font-size: 1.2em;
+    margin-right: 20px;
+    border-radius: 2rem;
+    border: none;
+    cursor: pointer;
+    padding: 0 14px;
+    box-sizing: content-box;
+    line-height: 60px;
+}
+
+.size_region_dropdown {
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 80px;
+    height: 60px;
+    margin-top: 60px;
+    z-index: 1000;
+    border-radius: 0 !important;
+}
+
+.size_region_dropdown .size_region {
+    border-radius: 0 !important;
+}
+
+.size_region_dropdown .size_region:first-child {
+    border-radius: 2rem 2rem 0 0 !important;
+}
+
+.size_region_dropdown .size_region:last-child {
+    border-radius: 0 0 2rem 2rem !important;
+}
+
+.size_region_dropdown.show {
+    display: block;
+}
+
+.size_values_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .size_option_label {
@@ -437,11 +553,33 @@ body.filter-open .grid_item {
 /* Load more button styles */
 .load_more_section {
     margin-top: 10px;
+    text-align: center;
 }
 
+/* Icon styles - no inline SVG paths needed */
 .load_more_icon, .clear_icon, .collapse_icon {
-    width: 20px;
-    height: 20px;
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.load_more_icon {
+    width: 66px;
+    height: 33px;
+}
+
+.load_more_icon {
+    background-image: url('/static/src/img/button_type=load more.svg');
+}
+
+.clear_icon {
+    background-image: url('/static/src/img/button_type=clear.svg');
+}
+
+.collapse_icon {
+    background-image: url('/static/src/img/collapse.svg');
 }
 
 .filter_expanded {
@@ -495,11 +633,6 @@ body.filter-open .grid_item {
 
 .load_more_button, .clear_button {
     background: none;
-    border: 1px solid var(--gray);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;

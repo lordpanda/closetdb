@@ -68,6 +68,47 @@ class SupabaseDB:
             print(f"Error fetching items: {e}")
             return []
     
+    def get_items_by_category(self, category):
+        try:
+            # URL encode the category parameter properly
+            import urllib.parse
+            encoded_category = urllib.parse.quote(category)
+            url = f"{self.url}/rest/v1/closet_items?select=*&category=eq.{encoded_category}&order=created_at.desc"
+            print(f"Requesting URL: {url}")
+            print(f"Looking for category: '{category}'")
+            response = requests.get(url, headers=self.headers)
+            
+            if response.status_code == 200:
+                items = response.json()
+                print(f"Found {len(items)} items for category '{category}'")
+                
+                # Log first few items for debugging
+                if items:
+                    print(f"First item keys: {list(items[0].keys())}")
+                    print(f"First item category: {items[0].get('category')}")
+                    print(f"First item size: {items[0].get('size')}")
+                    print(f"First item compositions: {items[0].get('compositions')}")
+                    if len(items) > 1:
+                        print(f"Second item category: {items[1].get('category')}")
+                    
+                    # Verify filtering worked correctly
+                    wrong_categories = [item for item in items if item.get('category') != category]
+                    if wrong_categories:
+                        print(f"⚠️ WARNING: Found {len(wrong_categories)} items with wrong category!")
+                        for wrong_item in wrong_categories[:3]:
+                            print(f"   Wrong item: {wrong_item.get('item_id')} has category '{wrong_item.get('category')}' but expected '{category}'")
+                    else:
+                        print(f"✅ All {len(items)} items have correct category '{category}'")
+                
+                return items
+            else:
+                print(f"Error fetching items by category: {response.status_code} - {response.text}")
+                return []
+                
+        except Exception as e:
+            print(f"Error fetching items by category: {e}")
+            return []
+    
     def get_item_by_id(self, item_id):
         try:
             url = f"{self.url}/rest/v1/closet_items?select=*&item_id=eq.{item_id}"
@@ -178,7 +219,8 @@ class SupabaseDB:
                         print(f"Including compositions in cleaned data: {v}")
                     # 리스트나 딕셔너리는 별도 처리
                     elif isinstance(v, (list, dict)):
-                        if v:  # 빈 리스트나 딕셔너리가 아닌 경우만
+                        # images와 compositions는 빈 배열/객체도 유효한 업데이트로 처리
+                        if k in ['images', 'compositions'] or v:
                             cleaned_data[k] = v
                     else:
                         cleaned_data[k] = v

@@ -1,0 +1,50 @@
+/* Skirt Midi Measurement Positioning */
+
+/* Waist measurement position for midi skirt */
+.view_measurement .waist.skirt_midi {
+    top: 15%;
+    left: 50%;
+}
+
+/* Hip measurement position for midi skirt */
+.view_measurement .hip.skirt_midi {
+    top: 35%;
+    left: 50%;
+}
+
+/* Length measurement position for midi skirt */
+.view_measurement .length.skirt_midi {
+    top: 55%;
+    left: 65%;
+}
+
+/* Hem width measurement position for midi skirt */
+.view_measurement .hemWidth.skirt_midi {
+    top: 75%;
+    left: 50%;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .view_measurement .waist.skirt_midi,
+    .view_measurement .hip.skirt_midi,
+    .view_measurement .hemWidth.skirt_midi {
+        left: 48%;
+    }
+    
+    .view_measurement .length.skirt_midi {
+        left: 60%;
+    }
+}
+
+@media (max-width: 480px) {
+    .view_measurement .waist.skirt_midi,
+    .view_measurement .hip.skirt_midi,
+    .view_measurement .hemWidth.skirt_midi {
+        left: 45%;
+    }
+    
+    .view_measurement .length.skirt_midi {
+        left: 55%;
+    }
+}

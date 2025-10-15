@@ -259,6 +259,88 @@
     left: 60%;
 }
 
+/* Long Sleeve Long Dress 전용 위치 설정 */
+.view_measurement .chest.long_sleeve_long_dress {
+    top: 20%;
+    left: 50%;
+}
+
+.view_measurement .shoulder.long_sleeve_long_dress {
+    top: 8%;
+    left: 50%;
+}
+
+.view_measurement .sleeve.long_sleeve_long_dress {
+    top: 39%;
+    left: 85%;
+}
+
+.view_measurement .sleeveOpening.long_sleeve_long_dress {
+    top: 65%;
+    left: 85%;
+}
+
+.view_measurement .armhole.long_sleeve_long_dress {
+    top: 15%;
+    left: 24%;
+}
+
+.view_measurement .waist.long_sleeve_long_dress {
+    top: 33%;
+    left: 50%;
+}
+
+.view_measurement .length.long_sleeve_long_dress {
+    top: 75%;
+    left: 62%;
+}
+
+.view_measurement .hemWidth.long_sleeve_long_dress {
+    top: 85%;
+    left: 46%;
+}
+
+/* Long Sleeve Midi Dress 전용 위치 설정 */
+.view_measurement .chest.long_sleeve_midi_dress {
+    top: 20%;
+    left: 50%;
+}
+
+.view_measurement .shoulder.long_sleeve_midi_dress {
+    top: 8%;
+    left: 50%;
+}
+
+.view_measurement .sleeve.long_sleeve_midi_dress {
+    top: 39%;
+    left: 85%;
+}
+
+.view_measurement .sleeveOpening.long_sleeve_midi_dress {
+    top: 65%;
+    left: 85%;
+}
+
+.view_measurement .armhole.long_sleeve_midi_dress {
+    top: 15%;
+    left: 24%;
+}
+
+.view_measurement .waist.long_sleeve_midi_dress {
+    top: 33%;
+    left: 50%;
+}
+
+.view_measurement .length.long_sleeve_midi_dress {
+    top: 60%;
+    left: 62%;
+}
+
+.view_measurement .hemWidth.long_sleeve_midi_dress {
+    top: 70%;
+    left: 46%;
+}
+
 /* Skirt Mini measurement positions */
 .view_measurement .waist.skirt_mini {
     top: 15%;
@@ -288,11 +370,67 @@
 }
 .view_measurement .length.skirt_long {
     top: 65%;
-    left: 65%;
+    left: 62%;
 }
 .view_measurement .hemWidth.skirt_long {
     top: 85%;
     left: 50%;
+}
+
+/* Pants Short measurement positions */
+.view_measurement .waist.pants_short {
+    top: 15%;
+    left: 50%;
+}
+.view_measurement .hip.pants_short {
+    top: 30%;
+    left: 50%;
+}
+.view_measurement .rise.pants_short {
+    top: 25%;
+    left: 70%;
+}
+.view_measurement .thigh.pants_short {
+    top: 45%;
+    left: 30%;
+}
+.view_measurement .legOpening.pants_short {
+    top: 85%;
+    left: 30%;
+}
+.view_measurement .length.pants_short {
+    top: 60%;
+    left: 70%;
+}
+
+/* Pants Long measurement positions */
+.view_measurement .waist.pants_long {
+    top: 12%;
+    left: 50%;
+}
+.view_measurement .hip.pants_long {
+    top: 25%;
+    left: 50%;
+}
+.view_measurement .rise.pants_long {
+    top: 20%;
+    left: 70%;
+}
+.view_measurement .inseam.pants_long {
+    top: 50%;
+    left: 75%;
+}
+.view_measurement .thigh.pants_long {
+    top: 35%;
+    left: 25%;
+}
+.view_measurement .legOpening.pants_long {
+    top: 90%;
+    left: 25%;
+}
+.view_measurement .length.pants_long {
+    top: 65%;
+    left: 70%;
 }
 
 .measurement_base {
@@ -501,9 +639,9 @@
 }
 
 /* Brand and Size styling */
-.item_brand {
-    font-family: 'GmarketSansBold', 'GmarketSans', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight: 700;
+.intro .main.item_brand {
+    font-family: 'GmarketSansBold', 'GmarketSans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-weight: 700 !important;
 }
 
 .item_size {

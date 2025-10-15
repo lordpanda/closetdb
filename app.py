@@ -130,21 +130,76 @@ def login_page():
 
 @app.route('/all.html')  # New route for all.html
 def view_all():
-    # Add logic here to retrieve and pass data to the all.html template if needed
-    return render_template('all.html')
+    """Handle filtered item view"""
+    try:
+        logging.info("View all items request with potential filters")
+        
+        # Get filter parameters from request
+        category = request.args.get('category')
+        compositions = request.args.get('compositions')
+        sizes = request.args.get('sizes')
+        
+        # Get measurement filters
+        measurements = {}
+        for key in request.args:
+            if key.endswith('_min') or key.endswith('_max'):
+                measurement_name = key.replace('_min', '').replace('_max', '')
+                if measurement_name not in measurements:
+                    measurements[measurement_name] = {}
+                
+                if key.endswith('_min'):
+                    measurements[measurement_name]['min'] = float(request.args.get(key))
+                else:
+                    measurements[measurement_name]['max'] = float(request.args.get(key))
+        
+        filters = {
+            'category': category,
+            'compositions': compositions.split(',') if compositions else [],
+            'sizes': sizes.split(',') if sizes else [],
+            'measurements': measurements
+        }
+        
+        logging.info(f"Applied filters: {filters}")
+        
+        if db is None:
+            logging.error("DB object is None")
+            return render_template('all.html', items=[], error='Database not initialized')
+        
+        # Apply filters to get filtered items
+        if any([category, compositions, sizes, measurements]):
+            items = db.get_filtered_items(filters)
+            logging.info(f"Retrieved {len(items)} filtered items")
+        else:
+            items = db.get_all_items()
+            logging.info(f"Retrieved {len(items)} unfiltered items")
+        
+        return render_template('all.html', items=items, filters=filters)
+        
+    except Exception as e:
+        logging.error(f"Error in view_all: {e}")
+        return render_template('all.html', items=[], error=str(e))
 
 @app.route('/api/items')
 def get_items():
     try:
-        logging.info("API request for all items")
+        # Get filter parameters
+        category = request.args.get('category')
+        
+        logging.info(f"API request for items with category filter: {category}")
         print(f"DB object type: {type(db)}")
         
         if db is None:
             logging.error("DB object is None")
             return jsonify({'items': [], 'error': 'Database not initialized'}), 500
-            
-        items = db.get_all_items()
-        logging.info(f"Retrieved {len(items)} items from database")
+        
+        # Get items with optional category filter
+        if category:
+            items = db.get_items_by_category(category)
+            logging.info(f"Retrieved {len(items)} items for category '{category}'")
+        else:
+            items = db.get_all_items()
+            logging.info(f"Retrieved {len(items)} items from database")
+        
         print(f"Retrieved {len(items)} items from database")
         
         # 첫 번째 아이템 로깅 (있다면)

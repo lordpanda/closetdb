@@ -653,29 +653,7 @@ input:checked + .toggle_slider {
     margin-bottom: 60px;
 }
 
-.submit_button .button {
-    width: 200px;
-    /*height: 58px;*/
-    text-align: center;
-    border: none;
-    font-size: 1.2em;
-    line-height: 58px;
-    border-radius: 30px;
-    transition: 0.5s;
-    font-family: 'Sequel85';
-    margin-top: 30px;
-    padding-bottom: 4px;
-    color: white;
-    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% auto;
-    cursor: pointer;
-}
-
-.submit_button .button:hover {
-    background-position: right center;
-    color: #fff;
-    text-decoration: none;
-}
+/* Main button style now defined in style.css - no need to duplicate here */
 .generate_script {
     width: 200px;
     height: 60px;
