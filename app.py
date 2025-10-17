@@ -34,6 +34,10 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
 
+# Force HTTPS for production
+if os.getenv('FLASK_ENV') == 'production':
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
+
 # Logging Configuration
 log_level = logging.DEBUG if os.getenv('FLASK_DEBUG') == 'True' else logging.INFO
 logging.basicConfig(
