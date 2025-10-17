@@ -267,6 +267,7 @@ def image_proxy(filename):
         logging.error(f"Image proxy error: {e}")
         return "Proxy error", 500
 
+
 @app.route('/api/filter', methods=['POST'])
 def api_filter_items():
     try:
@@ -543,6 +544,7 @@ def add_item():
         year = data.get('year')
         season = data.get('season')
         purchaseYear = data.get('purchaseYear')
+        tags = data.get('tags')
 
         item = {'itemID': itemID}
 
@@ -577,6 +579,8 @@ def add_item():
             item['season'] = season
         if purchaseYear:
             item['purchaseYear'] = purchaseYear
+        if tags:
+            item['tags'] = tags
         
 
         # Call the function to add the item to Supabase
@@ -910,6 +914,15 @@ def update_item():
             updated_item['season'] = data.get('season')
         if data.get('purchaseYear'):
             updated_item['purchase_year'] = data.get('purchaseYear')  # 데이터베이스 컬럼명
+        # Tags 처리 (상세 디버깅 포함)
+        tags_value = data.get('tags')
+        logging.info(f"🏷️ Tags raw value: '{tags_value}' (type: {type(tags_value)})")
+        logging.info(f"🏷️ Tags exists in form: {'tags' in data}")
+        logging.info(f"🏷️ All form keys containing 'tag': {[k for k in data.keys() if 'tag' in k.lower()]}")
+        
+        if tags_value is not None:
+            updated_item['tags'] = tags_value
+            logging.info(f"✅ Tags will be updated to: '{tags_value}'")
             
         # 삭제된 이미지 처리
         deleted_images_json = request.form.get('deleted_images')

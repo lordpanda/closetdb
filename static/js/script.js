@@ -1285,6 +1285,11 @@ function initEditPage() {
 // 편집 폼에 기존 데이터 채우기
 function populateEditForm(item) {
     console.log('📝 Populating edit form with item data:', item);
+    console.log('🏷️ Item tags debug:', {
+        tags: item.tags,
+        type: typeof item.tags,
+        stringified: JSON.stringify(item.tags)
+    });
     
     // 삭제된 이미지 배열 초기화
     window.deletedImageUrls = [];
@@ -1344,6 +1349,13 @@ function populateEditForm(item) {
                 if (subcategoryRadio) {
                     subcategoryRadio.checked = true;
                     console.log('✅ Subcategory set:', item.subcategory);
+                    
+                    // 서브카테고리 설정 후 measurement 필드 업데이트
+                    setTimeout(() => {
+                        const categoryKey = buildCategoryKey(item.category, item.subcategory, item.subcategory2);
+                        console.log('🔧 Updating measurements for categoryKey:', categoryKey);
+                        displayMeasurementInput(categoryKey);
+                    }, 100);
                 } else {
                     console.log('❌ Subcategory radio not found for:', item.subcategory);
                     // 모든 서브카테고리 라디오 버튼 확인
@@ -1365,6 +1377,13 @@ function populateEditForm(item) {
             if (subcategory2Radio) {
                 subcategory2Radio.checked = true;
                 console.log('✅ Subcategory2 set:', item.subcategory2);
+                
+                // 서브카테고리2 설정 후 measurement 필드 업데이트
+                setTimeout(() => {
+                    const categoryKey = buildCategoryKey(item.category, item.subcategory, item.subcategory2);
+                    console.log('🔧 Updating measurements for categoryKey:', categoryKey);
+                    displayMeasurementInput(categoryKey);
+                }, 100);
             } else {
                 console.log('❌ Subcategory2 radio not found for:', item.subcategory2);
             }
@@ -1400,7 +1419,7 @@ function populateEditForm(item) {
         }, 100);
     }
     
-    // 측정 데이터 입력
+    // 측정 데이터 입력 (서브카테고리 설정 후에 실행)
     if (item.measurements) {
         let measurements = item.measurements;
         if (typeof measurements === 'string') {
@@ -1411,15 +1430,19 @@ function populateEditForm(item) {
             }
         }
         
+        // 서브카테고리 설정 완료 후 measurement 데이터 복원
         setTimeout(() => {
+            console.log('🔧 Restoring measurement data:', measurements);
             const measurementInputs = document.querySelectorAll('.measurement_input');
+            console.log('🔧 Found measurement inputs:', measurementInputs.length);
             measurementInputs.forEach(input => {
                 const label = input.parentElement.querySelector('.part');
                 if (label && measurements[label.textContent]) {
                     input.value = measurements[label.textContent];
+                    console.log(`✅ Restored ${label.textContent}: ${measurements[label.textContent]}`);
                 }
             });
-        }, 500);
+        }, 800); // 서브카테고리 설정과 measurement 필드 재생성 후에 실행
     }
     
     // 소재 정보 입력
@@ -1490,6 +1513,34 @@ function populateEditForm(item) {
     if (item.purchase_year) {
         const purchaseYearInput = document.querySelectorAll('.season_input')[1];
         if (purchaseYearInput) purchaseYearInput.value = item.purchase_year;
+    }
+    
+    // Tags 데이터 채우기 (다른 필드 설정 후에 실행)
+    console.log('🏷️ Checking if item has tags:', !!item.tags, 'Value:', item.tags);
+    if (item.tags) {
+        setTimeout(() => {
+            console.log('🏷️ Restoring tags:', item.tags);
+            const tagsArray = item.tags.split(', ').map(tag => tag.trim());
+            console.log('🏷️ Parsed tags array:', tagsArray);
+            
+            // 기존 체크된 태그들 초기화
+            const allTagCheckboxes = document.querySelectorAll('input[name="tags"]');
+            allTagCheckboxes.forEach(checkbox => checkbox.checked = false);
+            
+            tagsArray.forEach(tag => {
+                const checkbox = document.querySelector(`input[name="tags"][value="${tag}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    console.log(`✅ Checked tag: ${tag}`);
+                } else {
+                    console.log(`❌ Tag checkbox not found for: ${tag}`);
+                    const availableValues = Array.from(allTagCheckboxes).map(cb => cb.value);
+                    console.log(`🏷️ Available checkbox values:`, availableValues);
+                }
+            });
+        }, 900); // measurement 복원 후에 실행
+    } else {
+        console.log('🏷️ No tags found in item data');
     }
     
     // 기존 이미지 표시 (미리보기로)
@@ -1918,6 +1969,17 @@ function collectEditFormData() {
     if (year) formData.append('year', year);
     if (season) formData.append('season', season);
     if (purchaseYear) formData.append('purchaseYear', purchaseYear);
+    
+    // Tags 데이터 수집
+    const selectedTags = [];
+    const tagCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
+    tagCheckboxes.forEach(checkbox => {
+        selectedTags.push(checkbox.value);
+    });
+    if (selectedTags.length > 0) {
+        formData.append('tags', selectedTags.join(', '));
+        console.log('🏷️ Adding tags to FormData:', selectedTags.join(', '));
+    }
     
     // 삭제된 이미지 정보 추가
     if (window.deletedImageUrls && window.deletedImageUrls.length > 0) {
@@ -2647,6 +2709,24 @@ function resetFilterOptions() {
 }
 
 
+// 카테고리, 서브카테고리, 서브카테고리2를 조합해서 measurement 키 생성
+function buildCategoryKey(category, subcategory, subcategory2) {
+    console.log('🔧 Building category key with:', { category, subcategory, subcategory2 });
+    
+    if (category === 'pants' && subcategory) {
+        return `pants_${subcategory}`;
+    } else if (category === 'skirt' && subcategory) {
+        return `skirt_${subcategory}`;
+    } else if (category === 'dress' && subcategory && subcategory2) {
+        return `${subcategory}_${subcategory2}_dress`;
+    } else if (category === 'dress' && subcategory) {
+        // 서브카테고리2가 없는 경우 기본 dress
+        return 'dress';
+    } else {
+        return category;
+    }
+}
+
 // script.js displayMeasurementInput 로직을 공통 함수로 분리
 function getMeasurementsByCategory(category) {
     if (category == "top" || category == "outer") {
@@ -2661,6 +2741,15 @@ function getMeasurementsByCategory(category) {
         return ["waist", "hip", "rise", "inseam", "thigh", "legOpening", "length"];
     } else if (category == "skirt") {
         return ["waist", "hip", "length", "hem width"];
+    } else if (category == "skirt_mini") {
+        return ["waist", "hip", "length", "hem width"];
+    } else if (category == "skirt_midi") {
+        return ["waist", "hip", "length", "hem width"];
+    } else if (category == "skirt_long") {
+        return ["waist", "hip", "length", "hem width"];
+    } else if (category.includes("dress")) {
+        // 모든 dress 변형 (short_sleeve_mini_dress, long_sleeve_long_dress 등)
+        return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width"];
     } else if (category == "shoes") {
         return ["heel"];
     } else if (category == "jewerly" || category == ".etc" || category == "etc." || category == "etc") {
@@ -3798,7 +3887,7 @@ function displayMeasurementInput(selectedCategory) {
     for (var i = 0; i < accordingSizes.length; i++) {
         const item = document.createElement('div');
         item.className = "label_with_input";
-        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input"></div>`;
+        item.innerHTML = `<div class="part">`+accordingSizes[i]+`</div> <input type="number" id="measurementInput`+i+`" class="measurement_input" autocomplete="off"></div>`;
         grid.appendChild(item);
         
         // Edit 페이지에서 기존 데이터 복원
@@ -3837,7 +3926,7 @@ function displayCompositionInput() {
     for (var i = 0; i < compositionList.length; i++) {
         const item = document.createElement('div');
         item.className = "label_with_input";
-        item.innerHTML = `<div class="part">${compositionList[i]}</div><input type="text" id="compositionInput${i}" class="composition_input">`;
+        item.innerHTML = `<div class="part">${compositionList[i]}</div><input type="text" id="compositionInput${i}" class="composition_input" autocomplete="off">`;
         basicGrid.appendChild(item);
         console.log(`🧪 Added composition input for: ${compositionList[i]}`);
     }
@@ -3888,15 +3977,15 @@ function addCompositionSet(setName = '') {
         window.compositionSets = [];
         
         // 기존 데이터로 첫 번째 세트 생성 (이름 있음)
-        createCompositionSet(0, '겉감', existingValues);
+        createCompositionSet(0, 'shell', existingValues);
         
         // 새로운 세트 추가 (이름 있음)
-        createCompositionSet(1, setName || '안감');
+        createCompositionSet(1, setName || 'lining');
         return; // 여기서 함수 종료
     } else {
         // 이미 다중 세트 모드인 경우 새 세트만 추가
         const setIndex = window.compositionSets.length;
-        createCompositionSet(setIndex, setName || `Set ${setIndex + 1}`);
+        createCompositionSet(setIndex, setName || `shell ${setIndex + 1}`);
         return; // 여기서 함수 종료
     }
 }
@@ -3926,6 +4015,7 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
                    class="composition_set_name" 
                    placeholder="Set name (e.g., 겉감, 안감)" 
                    value="${setName}"
+                   autocomplete="off"
                    onchange="updateCompositionSetName(${setIndex}, this.value)">
             ${setIndex > 0 ? `<button type="button" class="remove_composition_set_btn" onclick="removeCompositionSet(${setIndex})">×</button>` : ''}
         </div>
@@ -3950,6 +4040,7 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
                    id="compositionInput_${setIndex}_${i}" 
                    class="composition_input"
                    value="${existingValue}"
+                   autocomplete="off"
                    onchange="updateCompositionValue(${setIndex}, '${material}', this.value)">
         `;
         grid.appendChild(item);
@@ -4585,6 +4676,16 @@ function submitForm(event) {
     if (season) formData.append('season', season);
     if (purchaseYear) formData.append('purchaseYear', purchaseYear);
     
+    // Tags 데이터 수집
+    const selectedTags = [];
+    const tagCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
+    tagCheckboxes.forEach(checkbox => {
+        selectedTags.push(checkbox.value);
+    });
+    if (selectedTags.length > 0) {
+        formData.append('tags', selectedTags.join(', '));
+        console.log('🏷️ Adding tags to FormData:', selectedTags.join(', '));
+    }
     
     // FormData 내용 디버깅
     console.log('FormData contents:');
@@ -4934,10 +5035,84 @@ function updateCompositionDisplay(item) {
                         compositionContainer.appendChild(compDiv);
                     }
                 });
-            } else {
-                // 기존 객체 형태 호환성 유지 (percentage 표시)
-                Object.entries(compositions).forEach(([material, percentage]) => {
-                    if (material && percentage) {
+            } else if (typeof compositions === 'object') {
+                // Multi-set composition인지 확인 (값이 객체인 경우)
+                const hasNestedObjects = Object.values(compositions).some(value => 
+                    typeof value === 'object' && value !== null && !Array.isArray(value)
+                );
+                
+                if (hasNestedObjects) {
+                    // Multi-set composition 처리
+                    console.log('🧪 Processing multi-set composition:', compositions);
+                    
+                    // Custom ordering: shell (any shell*) first, then lining, then others alphabetically
+                    console.log('🔧 Original composition sets order:', Object.keys(compositions));
+                    const sortedSets = Object.entries(compositions).sort(([a], [b]) => {
+                        const aLower = a.toLowerCase();
+                        const bLower = b.toLowerCase();
+                        
+                        const aIsShell = aLower.startsWith('shell');
+                        const bIsShell = bLower.startsWith('shell');
+                        const aIsLining = aLower === 'lining';
+                        const bIsLining = bLower === 'lining';
+                        
+                        // Shell variants come first
+                        if (aIsShell && !bIsShell) return -1;
+                        if (!aIsShell && bIsShell) return 1;
+                        
+                        // Both are shell variants - alphabetical order
+                        if (aIsShell && bIsShell) return a.localeCompare(b);
+                        
+                        // Lining comes after shell but before others
+                        if (aIsLining && !bIsLining && !bIsShell) return -1;
+                        if (!aIsLining && !aIsShell && bIsLining) return 1;
+                        
+                        // Neither shell nor lining - alphabetical
+                        return a.localeCompare(b);
+                    });
+                    console.log('🔧 Sorted composition sets order:', sortedSets.map(([name]) => name));
+                    
+                    sortedSets.forEach(([setName, setCompositions]) => {
+                        if (setName && setCompositions && typeof setCompositions === 'object') {
+                            // 세트 이름 표시 (setName이 비어있지 않은 경우에만)
+                            if (setName.trim() !== '') {
+                                const setHeaderDiv = document.createElement('div');
+                                setHeaderDiv.className = 'composition_set_header';
+                                setHeaderDiv.textContent = setName;
+                                compositionContainer.appendChild(setHeaderDiv);
+                            }
+                            
+                            // 세트 내의 각 소재를 퍼센트 순으로 정렬 (큰 것부터)
+                            const sortedEntries = Object.entries(setCompositions)
+                                .filter(([material, percentage]) => material && percentage)
+                                .sort(([, a], [, b]) => parseFloat(b) - parseFloat(a));
+                            
+                            sortedEntries.forEach(([material, percentage]) => {
+                                const compDiv = document.createElement('div');
+                                compDiv.className = 'label_with_value';
+                                
+                                const labelDiv = document.createElement('div');
+                                labelDiv.className = 'comp_label';
+                                labelDiv.textContent = material;
+                                
+                                const valueDiv = document.createElement('div');
+                                valueDiv.className = 'comp_value';
+                                valueDiv.textContent = `${percentage}%`;
+                                
+                                compDiv.appendChild(labelDiv);
+                                compDiv.appendChild(valueDiv);
+                                compositionContainer.appendChild(compDiv);
+                            });
+                        }
+                    });
+                } else {
+                    // 기존 단일 객체 형태 호환성 유지 (percentage 표시, 퍼센트 순 정렬)
+                    console.log('🧪 Processing single-set composition:', compositions);
+                    const sortedEntries = Object.entries(compositions)
+                        .filter(([material, percentage]) => material && percentage)
+                        .sort(([, a], [, b]) => parseFloat(b) - parseFloat(a));
+                    
+                    sortedEntries.forEach(([material, percentage]) => {
                         const compDiv = document.createElement('div');
                         compDiv.className = 'label_with_value';
                         
@@ -4952,8 +5127,8 @@ function updateCompositionDisplay(item) {
                         compDiv.appendChild(labelDiv);
                         compDiv.appendChild(valueDiv);
                         compositionContainer.appendChild(compDiv);
-                    }
-                });
+                    });
+                }
             }
             
             console.log('Updated composition display:', compositions);
@@ -4971,14 +5146,32 @@ function updateSeasonAndPurchaseDisplay(item) {
     const compositionContainer = document.querySelector('.view_composition');
     if (!compositionContainer) return;
     
-    // 기존 season과 purchase year 정보 제거
+    // 기존 season과 purchase year 정보와 구분선 제거
     const existingDetails = compositionContainer.querySelectorAll('.detail_section');
     existingDetails.forEach(detail => detail.remove());
+    const existingDividers = compositionContainer.querySelectorAll('.composition_season_divider');
+    existingDividers.forEach(divider => divider.remove());
     
-    // Composition과 Season 사이 구분선 추가
-    const dividerLine = document.createElement('div');
-    dividerLine.className = 'composition_season_divider';
-    compositionContainer.appendChild(dividerLine);
+    // Composition이나 사이즈가 있는지 확인
+    const hasComposition = item.compositions && (
+        (Array.isArray(item.compositions) && item.compositions.length > 0 && item.compositions.some(comp => comp && comp.trim() !== '')) ||
+        (typeof item.compositions === 'object' && Object.keys(item.compositions).length > 0) ||
+        (typeof item.compositions === 'string' && item.compositions.trim() !== '' && item.compositions !== '[]' && item.compositions !== '{}')
+    );
+    
+    const hasSize = (item.size_region && item.size && item.size.toString().trim() !== '' && item.size !== 'null') || 
+                   (item.size_etc && item.size_etc.toString().trim() !== '');
+    
+    // Season, Purchase year, Tags 중 하나라도 있고, Composition이나 Size가 있을 때만 구분선 추가
+    const hasSeasonInfo = (item.season && item.season.toString().trim() !== '') ||
+                         (item.purchase_year && item.purchase_year.toString().trim() !== '') ||
+                         (item.tags && item.tags.toString().trim() !== '');
+    
+    if ((hasComposition || hasSize) && hasSeasonInfo) {
+        const dividerLine = document.createElement('div');
+        dividerLine.className = 'composition_season_divider';
+        compositionContainer.appendChild(dividerLine);
+    }
     
     // Season 표시 (composition 아래 40px)
     if (item.season && item.season.toString().trim() !== '') {
@@ -5015,6 +5208,32 @@ function updateSeasonAndPurchaseDisplay(item) {
         purchaseContainer.appendChild(purchaseLabel);
         purchaseContainer.appendChild(purchaseYear);
         compositionContainer.appendChild(purchaseContainer);
+    }
+    
+    // Tags 표시 (purchase year 아래 10px)
+    if (item.tags && item.tags.toString().trim() !== '') {
+        const tagsContainer = document.createElement('div');
+        const hasPurchaseYearAbove = item.purchase_year && item.purchase_year.toString().trim() !== '';
+        const hasSeasonAbove = item.season && item.season.toString().trim() !== '';
+        
+        // purchase year가 있으면 10px, 없고 season만 있으면 10px, 둘 다 없으면 40px
+        if (hasPurchaseYearAbove || hasSeasonAbove) {
+            tagsContainer.className = 'detail_section close_spacing';
+        } else {
+            tagsContainer.className = 'detail_section';
+        }
+        
+        const tagsLabel = document.createElement('div');
+        tagsLabel.className = 'detail_label';
+        tagsLabel.textContent = 'tags';
+        
+        const tagsValue = document.createElement('div');
+        tagsValue.className = 'detail_value';
+        tagsValue.textContent = item.tags;
+        
+        tagsContainer.appendChild(tagsLabel);
+        tagsContainer.appendChild(tagsValue);
+        compositionContainer.appendChild(tagsContainer);
     }
 }
 
@@ -6053,10 +6272,76 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add page에서 copy & paste, drag & drop 기능 초기화
     if (window.location.pathname.includes('add.html')) {
         setupImageModeToggle(); // 이미지 모드 토글 설정 추가
+        loadTagsForPage('add'); // 동적 태그 로드
+    }
+    
+    // Edit page에서 태그 로드
+    if (window.location.pathname.includes('edit.html')) {
+        loadTagsForPage('edit'); // 동적 태그 로드
         setupImagePasteAndDrop();
         loadExistingBrandsForAutocomplete();
     }
 });
+
+// 동적으로 태그 로드하는 함수 (db.js의 tagsList 사용)
+function loadTagsForPage(pageType) {
+    try {
+        // db.js에서 정의된 tagsList 사용
+        if (typeof tagsList !== 'undefined' && tagsList.length > 0) {
+            generateTagCheckboxes(tagsList, pageType);
+            console.log(`✅ Loaded ${tagsList.length} tags from db.js`);
+        } else {
+            console.warn('tagsList not found in db.js, using fallback');
+            // 백업용 기본 태그들
+            const fallbackTags = [
+                {value: 'occasion wear', label: 'Occasion wear'},
+                {value: 'activewear', label: 'Activewear'},
+                {value: 'basic', label: 'Basic'},
+                {value: 'evening wear', label: 'Evening wear'}
+            ];
+            generateTagCheckboxes(fallbackTags, pageType);
+        }
+    } catch (error) {
+        console.error('Error loading tags:', error);
+        // 에러 시 기본 태그 사용
+        const fallbackTags = [
+            {value: 'occasion wear', label: 'Occasion wear'},
+            {value: 'activewear', label: 'Activewear'},
+            {value: 'basic', label: 'Basic'},
+            {value: 'evening wear', label: 'Evening wear'}
+        ];
+        generateTagCheckboxes(fallbackTags, pageType);
+    }
+}
+
+// 태그 체크박스들을 동적으로 생성
+function generateTagCheckboxes(tags, pageType) {
+    const container = document.querySelector('.grid_container_tags');
+    if (!container) {
+        console.warn('Tags container not found');
+        return;
+    }
+    
+    // 기존 태그들 제거
+    container.innerHTML = '';
+    
+    tags.forEach((tag, index) => {
+        const tagItem = document.createElement('div');
+        tagItem.className = 'tag_item';
+        
+        const suffix = pageType === 'edit' ? '_edit' : '';
+        const tagId = `tag_${tag.value.replace(/\s+/g, '_')}${suffix}`;
+        
+        tagItem.innerHTML = `
+            <input type="checkbox" id="${tagId}" name="tags" value="${tag.value}">
+            <label for="${tagId}">${tag.label}</label>
+        `;
+        
+        container.appendChild(tagItem);
+    });
+    
+    console.log(`✅ Generated ${tags.length} tag checkboxes for ${pageType} page`);
+}
 
 // 기존 저장된 브랜드들을 가져와서 자동완성 리스트에 추가
 function loadExistingBrandsForAutocomplete() {

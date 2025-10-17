@@ -1,0 +1,59 @@
+location: East US
+resourceGroup: closetdb-rg
+properties:
+  environmentId: /subscriptions/{subscription-id}/resourceGroups/closetdb-rg/providers/Microsoft.App/managedEnvironments/closetdb-env
+  configuration:
+    ingress:
+      external: true
+      targetPort: 8000
+      transport: http
+      allowInsecure: false
+    secrets:
+    - name: supabase-url
+      value: ""  # Will be set during deployment
+    - name: supabase-key
+      value: ""  # Will be set during deployment
+    - name: r2-access-key-id
+      value: ""  # Will be set during deployment
+    - name: r2-secret-access-key
+      value: ""  # Will be set during deployment
+    - name: r2-endpoint-url
+      value: ""  # Will be set during deployment
+    - name: r2-bucket-name
+      value: ""  # Will be set during deployment
+    - name: flask-secret-key
+      value: ""  # Will be set during deployment
+  template:
+    containers:
+    - image: closetdb:latest  # Will be updated with actual registry URL
+      name: closetdb
+      resources:
+        cpu: 0.25
+        memory: 0.5Gi
+      env:
+      - name: SUPABASE_URL
+        secretRef: supabase-url
+      - name: SUPABASE_KEY
+        secretRef: supabase-key
+      - name: R2_ACCESS_KEY_ID
+        secretRef: r2-access-key-id
+      - name: R2_SECRET_ACCESS_KEY
+        secretRef: r2-secret-access-key
+      - name: R2_ENDPOINT_URL
+        secretRef: r2-endpoint-url
+      - name: R2_BUCKET_NAME
+        secretRef: r2-bucket-name
+      - name: FLASK_SECRET_KEY
+        secretRef: flask-secret-key
+      - name: FLASK_ENV
+        value: "production"
+      - name: FLASK_DEBUG
+        value: "False"
+    scale:
+      minReplicas: 0
+      maxReplicas: 3
+      rules:
+      - name: http-scaler
+        http:
+          metadata:
+            concurrentRequests: "10"

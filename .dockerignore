@@ -1,0 +1,56 @@
+# Version control
+.git
+.gitignore
+
+# Virtual environment
+venv/
+env/
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Development files
+.vscode/
+.idea/
+*.log
+
+# Test files
+test_*.py
+*_test.py
+tests/
+
+# Local database
+*.db
+*.sqlite
+
+# Node modules (if any)
+node_modules/
+
+# DynamoDB local
+dynamodb_local_latest/
+
+# Documentation
+README.md
+SECURITY.md
+SESSION_SUMMARY.md
+*.md
+
+# Scripts and utilities
+check_*.py
+fix_*.py
+simple_*.py
+cleanup_*.py
+
+# Temporary files
+tmp/
+temp/
+tmpfile
+
+# Example files
+*.example
+filter*.png

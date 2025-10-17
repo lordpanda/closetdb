@@ -34,7 +34,8 @@ class SupabaseDB:
                 'compositions': item.get('compositions'),
                 'year': item.get('year'),
                 'season': item.get('season'),
-                'purchase_year': item.get('purchaseYear')
+                'purchase_year': item.get('purchaseYear'),
+                'tags': item.get('tags')
             }
             
             # None 값 제거 (Supabase에서 NULL로 처리됨)

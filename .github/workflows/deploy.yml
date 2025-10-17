@@ -1,0 +1,56 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: pandajoe/closetdb
+  RESOURCE_GROUP: closetdb
+  CONTAINER_APP_NAME: closetdb
+  CONTAINER_APP_ENV: closetdb-env
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t ${{ env.IMAGE_NAME }}:latest -t ${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker push ${{ env.IMAGE_NAME }}:latest
+        docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Deploy to Azure Container Apps
+      run: |
+        az containerapp update \
+          --name ${{ env.CONTAINER_APP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --set-env-vars \
+            SUPABASE_URL=secretref:supabase-url \
+            SUPABASE_KEY=secretref:supabase-key \
+            R2_ACCESS_KEY_ID=secretref:r2-access-key-id \
+            R2_SECRET_ACCESS_KEY=secretref:r2-secret-access-key \
+            R2_ENDPOINT_URL=secretref:r2-endpoint-url \
+            R2_BUCKET_NAME=secretref:r2-bucket-name \
+            FLASK_SECRET_KEY=secretref:flask-secret-key \
+            GOOGLE_CLIENT_ID=secretref:google-client-id \
+            GOOGLE_CLIENT_SECRET=secretref:google-client-secret \
+            FLASK_ENV=production \
+            FLASK_DEBUG=False
