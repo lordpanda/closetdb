@@ -6273,6 +6273,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('add.html')) {
         setupImageModeToggle(); // 이미지 모드 토글 설정 추가
         loadTagsForPage('add'); // 동적 태그 로드
+        loadExistingBrandsForAutocomplete(); // 브랜드 자동완성 로드
     }
     
     // Edit page에서 태그 로드
