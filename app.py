@@ -294,7 +294,7 @@ def login():
 def google_login():
     try:
         logging.info("Google login route accessed")
-        redirect_uri = url_for('google_callback', _external=True)
+        redirect_uri = url_for('google_callback', _external=True, _scheme='https')
         logging.info(f"Redirect URI: {redirect_uri}")
         return google.authorize_redirect(redirect_uri)
     except Exception as e:
