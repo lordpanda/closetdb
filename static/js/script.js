@@ -306,7 +306,7 @@ function displayRecentlyAdded() {
         .then(data => {
                                     if (data.items && data.items.length > 0) {
                 // 최대 8개까지만 표시
-                const maxItems = Math.min(data.items.length, 8);
+                const maxItems = Math.min(data.items.length, 12);
                 
                 for (let index = 0; index < maxItems; index++) {
                     const item = data.items[index];

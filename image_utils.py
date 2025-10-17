@@ -15,6 +15,15 @@ class ImageProcessor:
             # 썸네일 생성 (비율 유지)
             img.thumbnail(max_size, Image.Resampling.LANCZOS)
             
+            # RGBA 모드를 RGB로 변환 (JPEG 호환성)
+            if img.mode in ('RGBA', 'LA', 'P'):
+                # 흰색 배경으로 RGBA -> RGB 변환
+                rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                rgb_img.paste(img, mask=img.split()[-1] if img.mode in ('RGBA', 'LA') else None)
+                img = rgb_img
+            
             # 메모리 버퍼에 저장 (WebP 형식으로 더 작은 파일 크기)
             buffer = io.BytesIO()
             
