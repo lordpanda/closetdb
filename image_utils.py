@@ -55,6 +55,15 @@ class ImageProcessor:
                 # 섹션 자르기
                 section = img.crop((left, 0, right, height))
                 
+                # RGBA 모드를 RGB로 변환 (JPEG 호환성)
+                if section.mode in ('RGBA', 'LA', 'P'):
+                    # 흰색 배경으로 RGBA -> RGB 변환
+                    rgb_section = Image.new('RGB', section.size, (255, 255, 255))
+                    if section.mode == 'P':
+                        section = section.convert('RGBA')
+                    rgb_section.paste(section, mask=section.split()[-1] if section.mode in ('RGBA', 'LA') else None)
+                    section = rgb_section
+                
                 # 메모리 버퍼에 저장
                 buffer = io.BytesIO()
                 section.save(buffer, format='JPEG', quality=90)

@@ -714,13 +714,23 @@ def update_item():
             return jsonify({'error': 'Item not found'}), 404
         
         # 이미지 처리 (새 이미지가 있는 경우에만)
-        image_urls = existing_item.get('images', [])
-        thumbnail_url = existing_item.get('thumbnail_url')
+        image_urls = []  # 새로 업로드된 이미지만 저장
+        thumbnail_url = None  # 새로 생성된 썸네일만 저장
         
         image_mode = request.form.get('image_mode')
         logging.info(f"Image mode received: '{image_mode}'")
+        logging.info(f"Request files keys: {list(request.files.keys())}")
+        logging.info(f"Request form keys: {list(request.form.keys())}")
+        
+        # 각 파일 상세 정보
+        for key, file in request.files.items():
+            if file and file.filename:
+                logging.info(f"📁 File '{key}': {file.filename}")
+            else:
+                logging.info(f"📁 File '{key}': No filename or empty")
         
         if image_mode:  # 새 이미지가 업로드된 경우
+            logging.info(f"🚀 Starting image processing for mode: {image_mode}")
             logging.info(f"Processing new images in {image_mode} mode")
             if image_mode == 'stitched':
                 stitched_file = request.files.get('stitched_image')
@@ -739,7 +749,9 @@ def update_item():
                         sections = ImageProcessor.split_stitched_image(stitched_file, section_count)
                         logging.info(f"Image split into {len(sections)} sections")
                         
-                        file_objects = ImageProcessor.create_file_objects(sections, item_id)
+                        # 새로운 타임스탬프로 파일명 생성 (기존 파일과 충돌 방지)
+                        new_timestamp = int(time.time() * 1000)
+                        file_objects = ImageProcessor.create_file_objects(sections, new_timestamp)
                         logging.info(f"Created {len(file_objects)} file objects")
                         
                         # 첫 번째 섹션으로 썸네일 생성 및 업로드
@@ -752,7 +764,7 @@ def update_item():
                             # 첫 번째 섹션 (썸네일 포함)
                             logging.info(f"📤 Uploading first section (with thumbnail): {file_objects[0].filename}")
                             first_file = file_objects[0]
-                            result = r2.upload_with_thumbnail(first_file, item_id, 0)
+                            result = r2.upload_with_thumbnail(first_file, new_timestamp, 0)
                             
                             if result['original_url']:
                                 new_image_urls.append(result['original_url'])
@@ -763,6 +775,7 @@ def update_item():
                             else:
                                 upload_failures.append("section_0: Upload failed")
                                 logging.error(f"❌ First section upload failed")
+                                logging.error(f"❌ Upload result: {result}")
                             
                             # 나머지 섹션들 개별 업로드 (상세 로깅)
                             remaining_sections = file_objects[1:]
@@ -798,8 +811,12 @@ def update_item():
                                 image_urls = new_image_urls
                                 thumbnail_url = new_thumbnail_url
                                 logging.info(f"✅ Updated image URLs: {image_urls}")
+                                logging.info(f"✅ Total uploaded images: {len(new_image_urls)}")
                             else:
                                 logging.error("❌ No stitched images were uploaded successfully")
+                                logging.error(f"❌ Upload failures: {upload_failures}")
+                                # image_urls를 빈 리스트로 설정하지 않고 기존 값 유지
+                                image_urls = []
                                 
                     except Exception as e:
                         logging.error(f"❌ Error processing stitched image for update: {e}")
@@ -850,6 +867,9 @@ def update_item():
                         logging.error(f"❌ Error processing individual images for update: {e}")
                         import traceback
                         traceback.print_exc()
+        else:
+            logging.info("ℹ️ No image_mode provided or no images uploaded")
+            logging.info(f"ℹ️ image_mode value: '{image_mode}'")
 
         # 폼 데이터 처리
         data = request.form.to_dict()
@@ -928,40 +948,46 @@ def update_item():
             updated_item['tags'] = tags_value
             logging.info(f"✅ Tags will be updated to: '{tags_value}'")
             
-        # 삭제된 이미지 처리
+        # 이미지 처리 로직 단순화 (디버깅용)
+        logging.info(f"🔍 BEFORE processing - image_urls: {image_urls}")
+        logging.info(f"🔍 BEFORE processing - existing images: {existing_item.get('images', [])}")
+        
         deleted_images_json = request.form.get('deleted_images')
+        logging.info(f"🔍 deleted_images_json: {deleted_images_json}")
+        
+        # 1. 삭제 처리 (R2에서만, DB는 나중에)
+        deleted_urls_from_r2 = []
         if deleted_images_json:
             try:
                 deleted_image_urls = json.loads(deleted_images_json)
                 logging.info(f"🗑️ Processing deleted images: {deleted_image_urls}")
                 
-                # R2에서 삭제된 이미지들 삭제
                 for url in deleted_image_urls:
                     try:
-                        # URL에서 파일명 추출
                         filename = url.split('/')[-1]
                         r2_deleted = r2.delete_image(filename)
+                        if r2_deleted:
+                            deleted_urls_from_r2.append(url)
                         logging.info(f"🗑️ Deleted from R2: {filename} - Success: {r2_deleted}")
                     except Exception as e:
                         logging.error(f"Error deleting image from R2: {e}")
-                
-                # 기존 images 배열에서 삭제된 이미지들 제거
-                if existing_item.get('images'):
-                    remaining_images = [img for img in existing_item['images'] if img not in deleted_image_urls]
-                    if image_urls:
-                        # 새 이미지가 있으면 새 이미지로 교체
-                        updated_item['images'] = image_urls
-                    else:
-                        # 새 이미지가 없으면 남은 기존 이미지들 유지
-                        updated_item['images'] = remaining_images
-                    logging.info(f"🗑️ Updated images after deletion: {updated_item.get('images', [])}")
-                
+                        
             except Exception as e:
                 logging.error(f"Error processing deleted images: {e}")
+        
+        # 2. 최종 이미지 배열 결정
+        if image_urls:
+            # 새 이미지가 있으면 새 이미지만 사용 (완전 교체)
+            final_images = image_urls
+            logging.info(f"🔄 Using NEW images only: {final_images}")
         else:
-            # 삭제된 이미지가 없고 새 이미지가 있는 경우
-            if image_urls:
-                updated_item['images'] = image_urls
+            # 새 이미지가 없으면 기존 이미지에서 삭제된 것만 제거
+            existing_images = existing_item.get('images', [])
+            final_images = [img for img in existing_images if img not in deleted_urls_from_r2]
+            logging.info(f"📝 Using EXISTING images minus deleted: {final_images}")
+        
+        updated_item['images'] = final_images
+        logging.info(f"📝 FINAL images array to save to DB: {final_images}")
         
         # 썸네일 URL 업데이트
         if thumbnail_url:

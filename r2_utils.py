@@ -175,14 +175,30 @@ class CloudflareR2:
             else:
                 print(f"Failed to upload original: {original_filename}")
             
-            # 파일 포인터를 처음으로 되돌리기
-            if hasattr(file, 'seek'):
-                file.seek(0)
-            elif hasattr(file, 'stream') and hasattr(file.stream, 'seek'):
+            # 썸네일 생성을 위해 독립적인 파일 스트림 생성
+            import io
+            
+            # 파일 데이터를 메모리에 복사
+            if hasattr(file, 'stream'):
                 file.stream.seek(0)
+                file_data = file.stream.read()
+                file.stream.seek(0)
+            else:
+                file.seek(0)
+                file_data = file.read()
+                file.seek(0)
+            
+            # 썸네일용 독립 스트림 생성
+            thumbnail_stream = io.BytesIO(file_data)
+            thumbnail_file_for_creation = type('FileObject', (), {
+                'filename': file.filename,
+                'stream': thumbnail_stream,
+                'read': thumbnail_stream.read,
+                'seek': thumbnail_stream.seek
+            })()
             
             # 썸네일 생성 및 업로드
-            thumbnail_buffer = ImageProcessor.create_thumbnail(file)
+            thumbnail_buffer = ImageProcessor.create_thumbnail(thumbnail_file_for_creation)
             if thumbnail_buffer:
                 # 썸네일은 WebP 또는 JPEG로 저장되므로 확장자 통일
                 base_filename = os.path.splitext(file.filename)[0]
