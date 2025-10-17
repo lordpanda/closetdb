@@ -4871,10 +4871,9 @@ function loadItemDetails() {
                         };
                         
                         if (fixedImages && fixedImages.length > 0 && fixedImages[0].fixed) {
-                            // 프록시를 통해 URL 테스트
-                            const proxyTestUrl = `/proxy_image?url=${encodeURIComponent(fixedImages[0].fixed)}`;
-                            console.log('🔗 Testing via proxy URL:', proxyTestUrl);
-                            testImg.src = proxyTestUrl;
+                            // 직접 URL 사용 (프록시 우회)
+                            console.log('🔗 Testing direct URL:', fixedImages[0].fixed);
+                            testImg.src = fixedImages[0].fixed;
                         } else {
                             console.log('❌ No fixed images available for testing');
                             urlTestComplete = true;
@@ -5829,29 +5828,28 @@ function stitchImagesBack(imageUrls, container) {
     imageUrls.forEach((url, index) => {
         console.log(`Loading image ${index + 1}/${imageUrls.length}:`, url);
         
-        // CORS 문제 해결을 위해 바로 프록시 사용
-        const proxyUrl = `/proxy_image?url=${encodeURIComponent(url)}`;
-        console.log(`Using proxy URL:`, proxyUrl);
+        // 직접 URL 사용 (프록시 우회)
+        console.log(`Using direct URL:`, url);
         
         const img = new Image();
         img.crossOrigin = 'anonymous';
         
         img.onload = function() {
-            console.log(`Image ${index + 1} loaded successfully via proxy, size: ${img.width}x${img.height}`);
+            console.log(`Image ${index + 1} loaded successfully directly, size: ${img.width}x${img.height}`);
             loadedImages[index] = img;
             loadedCount++;
             
             // 모든 이미지가 로드되면 합치기
             if (loadedCount === imageUrls.length) {
-                console.log('All images loaded via proxy, combining now...');
+                console.log('All images loaded directly, combining now...');
                 combineImages(loadedImages, canvas, ctx, container);
             }
         };
         img.onerror = function(error) {
-            console.error('Failed to load image via proxy:', proxyUrl, error);
+            console.error('Failed to load image directly:', url, error);
             loadedCount++; // Count failed loads to prevent hanging
             
-            // 프록시로도 실패한 경우 원본 URL로 fallback 이미지 표시
+            // 직접 로드 실패한 경우 fallback 이미지 표시
             if (index === 0) {
                 console.log('Using fallback original image display for first image');
                 const fallbackImg = document.createElement('img');
@@ -5872,7 +5870,7 @@ function stitchImagesBack(imageUrls, container) {
             }
         };
         
-        img.src = proxyUrl;
+        img.src = url;
     });
 }
 
