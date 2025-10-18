@@ -520,43 +520,40 @@ def add_item():
                 logging.warning("No individual images found or all files have empty filenames")
                 thumbnail_url = None
 
-        # 폼 데이터 처리 (multipart/form-data)
-        data = request.form.to_dict()
-        
-        # 전체 form 데이터 디버깅
+        # 폼 데이터 처리 - request.form 직접 사용으로 변경
         logging.info(f"📋 Raw form data keys: {list(request.form.keys())}")
         logging.info(f"📋 Raw form data: {dict(request.form)}")
-        logging.info(f"📋 Parsed data keys: {list(data.keys())}")
         
-        category = data.get('category')
-        subcategory = data.get('subcategory')
-        subcategory2 = data.get('subcategory2')
-        brand = data.get('brand')
-        name = data.get('name')
-        sizeRegion = data.get('sizeRegion')
-        size = data.get('size')
-        sizeEtc = data.get('sizeEtc')
+        # request.form에서 직접 데이터 추출 (to_dict() 사용하지 않음)
+        category = request.form.get('category')
+        subcategory = request.form.get('subcategory')
+        subcategory2 = request.form.get('subcategory2')
+        brand = request.form.get('brand')
+        name = request.form.get('name')
+        sizeRegion = request.form.get('sizeRegion')
+        size = request.form.get('size')
+        sizeEtc = request.form.get('sizeEtc')
         
         # JSON 데이터 파싱
-        measurements = data.get('measurements')
+        measurements = request.form.get('measurements')
         if measurements:
             try:
                 measurements = json.loads(measurements)
             except:
                 measurements = None
                 
-        compositions = data.get('compositions') 
+        compositions = request.form.get('compositions') 
         if compositions:
             try:
                 compositions = json.loads(compositions)
             except:
                 compositions = None
         
-        year = data.get('year')
-        season = data.get('season')
-        purchaseYear = data.get('purchaseYear')
-        tags = data.get('tags')
-        color = data.get('color')
+        year = request.form.get('year')
+        season = request.form.get('season')
+        purchaseYear = request.form.get('purchaseYear')
+        tags = request.form.get('tags')
+        color = request.form.get('color')
         
         # Color 디버깅 로깅 추가
         logging.info(f"🔍 All form keys in /add_item: {list(request.form.keys())}")
