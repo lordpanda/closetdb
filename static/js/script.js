@@ -5431,11 +5431,21 @@ function submitForm(event) {
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data);
+        console.log('itemID in response:', data.itemID);
         // 검색 캐시 클리어 (새 아이템이 추가되었으므로)
         clearSearchCache();
-        alert('Item added successfully!');
-        // view all로 리다이렉트
-        window.location.href = '/all.html';
+        // 아이템 페이지로 리다이렉트
+        if (data.itemID) {
+            console.log('Redirecting to item page with ID:', data.itemID);
+            // 히스토리를 조작하여 back 버튼으로 add 페이지 대신 index로 가게 함
+            history.replaceState(null, '', '/index.html');
+            window.location.href = `/item.html?id=supabase_${data.itemID}`;
+        } else {
+            console.log('No itemID found, redirecting to all.html');
+            // fallback to all.html if no itemID
+            history.replaceState(null, '', '/index.html');
+            window.location.href = '/all.html';
+        }
     })
     .catch(error => {
         console.error('Error:', error);

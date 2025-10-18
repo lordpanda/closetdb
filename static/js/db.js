@@ -4,7 +4,7 @@ const categoryList = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewer
 const subCategoryList = ["mini", "midi", "long", "short sleeve", "long sleeve", "short", "long", "bag", "socks", "belt", "hat", "etc"];
 const sizeRegionList = ["WW", "US", "EU", "FR", "IT", "DE", "UK", "KR", "JP", "Kids", "Ring", "etc"];
 const compositionList = ["cotton", "silk", "wool", "cashmere", "leather", "viscose", "polyesther","polyurethane", "polyamide", 
-"elastane", "lyocell", "acryl", "acetate", "tri-acetate", "spandex",  "metallic", "brass", "rubber", "sterling silver", "gold 14K", "gold 18K"];
+"elastane", "nylon", "lyocell", "acryl", "acetate", "tri-acetate", "cupro", "spandex",  "metallic", "brass", "rubber", "sterling silver", "gold 14K", "gold 18K"];
 const tagsList = [
     {value: "occasion wear", label: "occasion wear"},
     {value: "activewear", label: "activewear"}, 

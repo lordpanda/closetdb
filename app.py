@@ -438,6 +438,7 @@ def add_item():
     try:
         # Use the current time in milliseconds as the itemID
         itemID = int(time.time() * 1000)
+        logging.info(f"🚀 Starting add_item with itemID: {itemID}")
 
         # 이미지 모드 확인
         image_mode = request.form.get('image_mode', 'stitched')
@@ -628,11 +629,16 @@ def add_item():
         
 
         # Call the function to add the item to Supabase
+        logging.info(f"🔍 Calling db.add_item with itemID: {itemID}")
         response = db.add_item(item)
-        return jsonify({'message': response}), 200
+        logging.info(f"🔍 db.add_item returned: {response}")
+        logging.info(f"🔍 About to return response with itemID: {itemID}")
+        return jsonify({'message': response, 'itemID': itemID}), 200
         
     except Exception as e:
-        app.logger.error(f"Error adding item: {e}")
+        app.logger.error(f"❌ Error adding item: {e}")
+        import traceback
+        app.logger.error(f"❌ Full traceback: {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/proxy_image')
