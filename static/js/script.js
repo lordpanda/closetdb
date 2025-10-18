@@ -274,10 +274,15 @@ function checkLoginAndRedirect(targetUrl) {
     }
 }
 
+// 전역 변수로 페이지네이션 상태 관리
+let currentOffset = 0;
+let allItems = [];
+let isLoading = false;
+
 function displayRecentlyAdded() {
     var grid = document.querySelector(".grid_container"); 
     
-    // Supabase에서 새로 추가된 아이템들 먼저 가져오기 (위쪽에 배치)
+    // Supabase에서 모든 아이템들 가져오기
     console.log('Fetching recently added items from /api/items');
     fetch('/api/items')
         .then(response => {
@@ -285,64 +290,22 @@ function displayRecentlyAdded() {
             return response.json();
         })
         .then(data => {
-                                    if (data.items && data.items.length > 0) {
-                // 최대 12개까지만 표시
-                const maxItems = Math.min(data.items.length, 12);
+            if (data.items && data.items.length > 0) {
+                allItems = data.items; // 전체 아이템 저장
+                currentOffset = 0; // 초기화
+                
+                // 첫 16개 표시
+                const maxItems = Math.min(data.items.length, 16);
                 
                 for (let index = 0; index < maxItems; index++) {
                     const item = data.items[index];
-                    const gridItem = document.createElement('div');
-                    gridItem.className = 'grid_item clickable';
-                    
-                    const img = document.createElement('img');
-                    img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
-                    
-                    // 썸네일이 있으면 썸네일 사용, 없으면 원본 이미지, 그것도 없으면 기본 이미지
-                    if (item.thumbnail_url) {
-                        img.src = item.thumbnail_url;
-                        console.log('Loading thumbnail:', item.thumbnail_url); // 디버깅용
-                    } else if (item.images && item.images.length > 0) {
-                        img.src = item.images[0];
-                        console.log('Loading original image:', item.images[0]); // 디버깅용
-                    } else {
-                        // 기본 이미지 (short sleeve top measurement)
-                        img.src = "/static/src/img/measurement/measurement_top.svg";
-                        img.classList.add('image_placeholder');
-                        console.log('No images found for item:', item); // 디버깅용
-                    }
-                    
-                    img.onerror = function() {
-                        // 이미지 로드 실패시 기본 이미지
-                        console.log('Image load failed:', this.src); // 디버깅용
-                        this.src = "/static/src/img/measurement/measurement_top.svg";
-                        this.classList.add('image_placeholder');
-                    };
-                    
-                    gridItem.appendChild(img);
-                    
-                    gridItem.addEventListener('click', function() {
-                        location.href = './item.html?id=supabase_' + item.item_id;
-                    });
-                    
-                    grid.appendChild(gridItem);
+                    createAndAppendGridItem(item, grid);
                 }
                 
-                // Supabase 데이터가 8개보다 적으면 더미 데이터로 채우기
-                const remainingSlots = 8 - maxItems;
-                for (let i = 0; i < remainingSlots; i++) {
-                    const item = document.createElement('div');
-                    item.className = 'grid_item clickable';
-                    
-                    const img = document.createElement('img');
-                    img.src = "/static/src/db/" + i + ".jpg";
-                    item.appendChild(img);
-                    
-                    item.addEventListener('click', function() {
-                        location.href = './item.html?id=' + i;
-                    });
-                    
-                    grid.appendChild(item);
-                }
+                currentOffset = maxItems; // 현재 로드된 아이템 수 업데이트
+                
+                // Load More 버튼 표시/숨김 관리
+                updateLoadMoreButton();
             }
         })
         .catch(error => {
@@ -365,6 +328,92 @@ function displayRecentlyAdded() {
                 grid.appendChild(item);
             }
         });
+}
+
+// Grid item 생성 및 추가 헬퍼 함수
+function createAndAppendGridItem(item, grid) {
+    const gridItem = document.createElement('div');
+    gridItem.className = 'grid_item clickable';
+    
+    const img = document.createElement('img');
+    img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
+    
+    // 썸네일이 있으면 썸네일 사용, 없으면 원본 이미지, 그것도 없으면 기본 이미지
+    if (item.thumbnail_url) {
+        img.src = item.thumbnail_url;
+        console.log('Loading thumbnail:', item.thumbnail_url); // 디버깅용
+    } else if (item.images && item.images.length > 0) {
+        img.src = item.images[0];
+        console.log('Loading original image:', item.images[0]); // 디버깅용
+    } else {
+        // 기본 이미지 (short sleeve top measurement)
+        img.src = "/static/src/img/measurement/measurement_top.svg";
+        img.classList.add('image_placeholder');
+        console.log('No images found for item:', item); // 디버깅용
+    }
+    
+    img.onerror = function() {
+        // 이미지 로드 실패시 기본 이미지
+        console.log('Image load failed:', this.src); // 디버깅용
+        this.src = "/static/src/img/measurement/measurement_top.svg";
+        this.classList.add('image_placeholder');
+    };
+    
+    gridItem.appendChild(img);
+    
+    gridItem.addEventListener('click', function() {
+        location.href = './item.html?id=supabase_' + item.item_id;
+    });
+    
+    grid.appendChild(gridItem);
+}
+
+// Load More 버튼 상태 업데이트
+function updateLoadMoreButton() {
+    const loadMoreBtn = document.getElementById('load_more_btn');
+    if (!loadMoreBtn) return;
+    
+    if (currentOffset >= allItems.length) {
+        loadMoreBtn.style.display = 'none';
+    } else {
+        loadMoreBtn.style.display = 'inline-block';
+        loadMoreBtn.textContent = 'Load More';
+    }
+}
+
+// Load More 버튼 클릭 핸들러
+function loadMoreItems() {
+    if (isLoading || currentOffset >= allItems.length) return;
+    
+    isLoading = true;
+    const loadMoreBtn = document.getElementById('load_more_btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.textContent = 'Loading...';
+        loadMoreBtn.disabled = true;
+    }
+    
+    const grid = document.querySelector('.grid_container');
+    const nextBatch = allItems.slice(currentOffset, currentOffset + 12);
+    
+    console.log(`Loading ${nextBatch.length} more items (offset: ${currentOffset})`);
+    
+    // 약간의 딜레이로 로딩 상태 표시
+    setTimeout(() => {
+        nextBatch.forEach(item => {
+            createAndAppendGridItem(item, grid);
+        });
+        
+        currentOffset += nextBatch.length;
+        isLoading = false;
+        
+        if (loadMoreBtn) {
+            loadMoreBtn.disabled = false;
+        }
+        
+        updateLoadMoreButton();
+        
+        console.log(`Loaded ${nextBatch.length} items. Total loaded: ${currentOffset}/${allItems.length}`);
+    }, 300);
 }
 
 // all.html에서 사용할 모든 아이템 표시 함수
@@ -951,7 +1000,7 @@ function displaySearchResultsForAll(items, query) {
         gridItem.className = 'grid_item';
         
         const link = document.createElement('a');
-        link.href = `/item.html?id=${item.item_id}`;
+        link.href = `/item.html?id=supabase_${item.item_id}`;
         
         const img = document.createElement('img');
         
@@ -1244,7 +1293,7 @@ function displaySearchResults(items, query) {
         gridItem.className = 'grid_item';
         
         const link = document.createElement('a');
-        link.href = `/item.html?id=${item.item_id}`;
+        link.href = `/item.html?id=supabase_${item.item_id}`;
         
         const img = document.createElement('img');
         
@@ -3441,7 +3490,7 @@ function createGridItem(item) {
     gridItem.addEventListener('click', () => {
         const itemId = item.item_id || item.id;
         if (itemId) {
-            window.location.href = `/item.html?id=${itemId}`;
+            window.location.href = `/item.html?id=supabase_${itemId}`;
         } else {
             console.error('No item ID found for item:', item);
         }
@@ -4809,7 +4858,7 @@ function submitForm(event) {
     const hasSize = (sizeRegion && sizeRegion !== 'Select') && (size && size.trim() !== '');
     const hasComposition = window.usingMultiSets 
         ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
-        : (compositions.length > 0 || (typeof compositions === 'object' && Object.keys(compositions).length > 0));
+        : ((Array.isArray(compositions) && compositions.length > 0) || (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0));
     
     if (!hasBrand && !hasSize && !hasComposition) {
         missingFields.push('브랜드, 사이즈, 소재 중 최소 하나');
@@ -4829,10 +4878,30 @@ function submitForm(event) {
     if (size && size.trim() !== '') formData.append('size', size);
     if (sizeEtc && sizeEtc.trim() !== '') formData.append('sizeEtc', sizeEtc);
     if (Object.keys(measurements).length > 0) formData.append('measurements', JSON.stringify(measurements));
-    if (window.usingMultiSets) {
-        if (Object.keys(compositions).length > 0) formData.append('compositions', JSON.stringify(compositions));
+    // Composition 데이터 추가 (Edit 페이지와 동일한 로직 사용)
+    const hasCompositionData = window.usingMultiSets 
+        ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
+        : ((Array.isArray(compositions) && compositions.length > 0) || (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0));
+    console.log('🧪 Has composition data (Add page):', hasCompositionData);
+    
+    if (hasCompositionData) {
+        const compositionJson = JSON.stringify(compositions);
+        console.log('✅ Adding composition data to FormData (Add page):', compositionJson);
+        formData.append('compositions', compositionJson);
+        console.log('🔍 FormData compositions value:', formData.get('compositions'));
     } else {
-        if (compositions.length > 0) formData.append('compositions', JSON.stringify(compositions));
+        console.log('❌ No composition data to add - compositions is empty or null');
+        console.log('🔍 Compositions value details:', {
+            isArray: Array.isArray(compositions),
+            isObject: typeof compositions === 'object',
+            isNull: compositions === null,
+            isUndefined: compositions === undefined,
+            keys: compositions ? Object.keys(compositions) : 'N/A'
+        });
+        
+        // Add 모드에서도 빈 composition 전송 (일관성을 위해)
+        console.log('🔧 Adding empty compositions for add mode');
+        formData.append('compositions', JSON.stringify({}));
     }
     if (year) formData.append('year', year);
     if (season) formData.append('season', season);
