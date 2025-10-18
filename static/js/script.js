@@ -3087,6 +3087,12 @@ function buildCategoryKey(category, subcategory, subcategory2) {
     } else if (category === 'dress' && subcategory) {
         // 서브카테고리2가 없는 경우 기본 dress
         return 'dress';
+    } else if (category === 'outer' && subcategory && subcategory2) {
+        // outer의 sleeve + length 조합 (예: "short sleeve_short_outer")
+        return `${subcategory}_${subcategory2}_outer`;
+    } else if (category === 'outer' && subcategory) {
+        // 서브카테고리2가 없는 경우 기본 outer
+        return 'outer';
     } else {
         return category;
     }
@@ -4011,6 +4017,14 @@ function displayFilterSubCategory(cat) {
             const item = document.createElement('div');
             item.className = "grid_sub_category";
             item.innerHTML = `<input type="radio" name="sub_category_input_2" class="category_image" id="sub_category_list_`+i+`" value="` + subCategoryList[i] + `" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            grid.appendChild(item);
+        }
+    } if (cat == "outer") {
+        // outer에 길이 추가 (short, long만 사용 - 인덱스 5, 6)
+        for (var i = 5; i < 7; i++) {
+            const item = document.createElement('div');
+            item.className = "grid_sub_category";
+            item.innerHTML = `<input type="radio" name="sub_category_input_2" class="category_image" id="sub_category_list_outer_`+i+`" value="` + subCategoryList[i] + `" /><label for="sub_category_list_outer_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
     } else if (cat == "skirt") {
