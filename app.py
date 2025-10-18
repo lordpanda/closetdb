@@ -523,6 +523,11 @@ def add_item():
         # 폼 데이터 처리 (multipart/form-data)
         data = request.form.to_dict()
         
+        # 전체 form 데이터 디버깅
+        logging.info(f"📋 Raw form data keys: {list(request.form.keys())}")
+        logging.info(f"📋 Raw form data: {dict(request.form)}")
+        logging.info(f"📋 Parsed data keys: {list(data.keys())}")
+        
         category = data.get('category')
         subcategory = data.get('subcategory')
         subcategory2 = data.get('subcategory2')
