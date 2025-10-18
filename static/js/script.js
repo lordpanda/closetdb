@@ -2209,12 +2209,24 @@ function collectEditFormData() {
     let sizeEtc = '';
     
     if (sizeRegion === 'etc') {
-        const sizeEtcInput = document.getElementById('size_etc_input');
-        sizeEtc = sizeEtcInput ? sizeEtcInput.value.trim() : '';
-        size = sizeEtc;
+        // etc region 선택 시 라디오 버튼 먼저 확인, 없으면 텍스트 입력창 확인
+        const sizeInput = document.querySelector('input[name="size_key"]:checked');
+        if (sizeInput) {
+            // 라디오 버튼(1, 2) 선택된 경우
+            size = sizeInput.value;
+            console.log('🔍 [EDIT SIZE] etc region radio button selected:', size);
+        } else {
+            // 텍스트 입력창 값 사용
+            const sizeEtcInput = document.getElementById('size_etc_input');
+            sizeEtc = sizeEtcInput ? sizeEtcInput.value.trim() : '';
+            size = sizeEtc;
+            console.log('🔍 [EDIT SIZE] etc region text input used:', size);
+        }
     } else {
+        // 일반 region들의 사이즈 버튼에서 선택
         const sizeInput = document.querySelector('input[name="size_key"]:checked');
         size = sizeInput ? sizeInput.value : '';
+        console.log('🔍 [EDIT SIZE] regular region selected:', size);
     }
     
     // 측정 데이터
@@ -5058,14 +5070,24 @@ function submitForm(event) {
     let sizeEtc = '';
     
     if (sizeRegion === 'etc') {
-        // etc region 선택 시 텍스트 입력창의 값을 사용
-        const sizeEtcInput = document.getElementById('size_etc_input');
-        sizeEtc = sizeEtcInput ? sizeEtcInput.value.trim() : '';
-        size = sizeEtc; // etc 입력값을 size로 사용
+        // etc region 선택 시 라디오 버튼 먼저 확인, 없으면 텍스트 입력창 확인
+        const sizeInput = document.querySelector('input[name="size_key"]:checked');
+        if (sizeInput) {
+            // 라디오 버튼(1, 2) 선택된 경우
+            size = sizeInput.value;
+            console.log('🔍 [SIZE] etc region radio button selected:', size);
+        } else {
+            // 텍스트 입력창 값 사용
+            const sizeEtcInput = document.getElementById('size_etc_input');
+            sizeEtc = sizeEtcInput ? sizeEtcInput.value.trim() : '';
+            size = sizeEtc;
+            console.log('🔍 [SIZE] etc region text input used:', size);
+        }
     } else {
         // 일반 region들의 사이즈 버튼에서 선택
         const sizeInput = document.querySelector('input[name="size_key"]:checked');
         size = sizeInput ? sizeInput.value : '';
+        console.log('🔍 [SIZE] regular region selected:', size);
     }
     
     // 측정 데이터 (measurement)
