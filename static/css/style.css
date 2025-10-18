@@ -94,6 +94,41 @@
     src: url('./fonts/ostrich-sans-black.woff');
 }
 
+/* Main Button Style - Gradient Button */
+.main_button {
+    width: 200px;
+    text-align: center;
+    border: none;
+    font-size: 1.2em;
+    line-height: 58px;
+    border-radius: 30px;
+    transition: 0.5s;
+    font-family: 'Sequel85';
+    margin-top: 30px;
+    padding-bottom: 4px;
+    color: white;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    background-size: 200% auto;
+    cursor: pointer;
+}
+
+.main_button:hover {
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
+}
+
+/* Load More Section */
+.load_more_section {
+    text-align: center;
+    margin: 60px 0 80px 0;
+    padding: 20px;
+}
+
+.load_more_section .main_button {
+    min-width: 200px;
+}
+
 /* Carousel styles - used across multiple pages */
 .horizontal_carousel {
     display: flex;
@@ -268,50 +303,18 @@
 
 /* Main button style - shared across all pages */
 .button {
+    /* Use main_button class for consistent styling */
     width: 200px;
-    text-align: center;
-    border: none;
-    font-size: 1.2em;
-    line-height: 58px;
-    border-radius: 30px;
-    transition: 0.5s;
-    font-family: 'Sequel85';
-    margin-top: 30px;
-    padding-bottom: 4px;
-    color: white;
-    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% auto;
-    cursor: pointer;
-}
-
-.button:hover {
-    background-position: right center;
-    color: #fff;
-    text-decoration: none;
 }
 
 /* Filter panel button - specific styling without full width */
 .filter_panel_button {
+    /* Use main_button class for consistent styling */
     width: 160px;
-    text-align: center;
-    border: none;
     font-size: 1em;
     line-height: 50px;
     border-radius: 25px;
-    transition: 0.5s;
-    font-family: 'Sequel85';
     margin-top: 0;
-    padding-bottom: 4px;
-    color: white;
-    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% auto;
-    cursor: pointer;
-}
-
-.filter_panel_button:hover {
-    background-position: right center;
-    color: #fff;
-    text-decoration: none;
 }
 
 /* Filter content styles */
@@ -973,7 +976,7 @@ h1 {
     font-size: 1.7rem;
     font-weight: 400;
     line-height: 1.5;
-    letter-spacing: 1;
+    color: var(--black);
     /* color: #313131; */
     background-color: rgba(141, 141, 141, 0.15);
     /* background-color: rgb(256,256,256,0.7); */

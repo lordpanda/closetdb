@@ -587,26 +587,7 @@
 }
 
 .edit_button {
-    width: 200px;
-    text-align: center;
-    border: none;
-    font-size: 1.2em;
-    line-height: 58px;
-    border-radius: 30px;
-    transition: 0.5s;
-    font-family: 'Sequel85';
-    margin-top: 30px;
-    padding-bottom: 4px;
-    color: white;
-    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-    background-size: 200% auto;
-    cursor: pointer;
-}
-
-.edit_button:hover {
-    background-position: right center;
-    color: #fff;
-    text-decoration: none;
+    /* Use main_button class for consistent styling */
 }
 
 /* Season/Purchase 공통 스타일 */

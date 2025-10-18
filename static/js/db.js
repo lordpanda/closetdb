@@ -27,7 +27,7 @@ const colorList = [
     {value: "FFC0CB", label: "pink"},
     {value: "F5F2E8", label: "cream"},
     {value: "D2BF9E", label: "beige"},
-    {value: "A52A2A", label: "brown"},
+    {value: "7D4700", label: "brown"},
     {value: "008080", label: "teal"},
     {value: "C0C0C0", label: "silver"},
     {value: "FFD700", label: "gold"},
