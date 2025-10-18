@@ -12,6 +12,28 @@ const tagsList = [
 ];
 var brandList = ["APIECE APART", "Burberry", "Derek Lam 10 Crosby", "HAUSOFPBK", "Juun.J", "KIMHEKIM", "Maison Margiela", "MM6", "MSGM", 
 "Opening Ceremony", "Palm Angels", "Sandro", "Stella McCartney", "Tibi", "Tory Burch", "Versace", "ZARA"];
+const colorList = [
+    {value: "000000", label: "black"},
+    {value: "FFFFFF", label: "white"},
+    {value: "808080", label: "gray"},
+    {value: "FF0000", label: "red"},
+    {value: "FFA500", label: "orange"},
+    {value: "FFEA00", label: "yellow"},
+    {value: "00AE14", label: "green"},
+    {value: "0015FF", label: "blue"},
+    {value: "00CCFF", label: "skyblue"},
+    {value: "000080", label: "navy"},
+    {value: "570090", label: "purple"},
+    {value: "FFC0CB", label: "pink"},
+    {value: "F5F2E8", label: "cream"},
+    {value: "D2BF9E", label: "beige"},
+    {value: "A52A2A", label: "brown"},
+    {value: "008080", label: "teal"},
+    {value: "C0C0C0", label: "silver"},
+    {value: "FFD700", label: "gold"},
+    {value: "stripe", label: "stripe"},
+    {value: "multi", label: "multi"}
+];
 
 const measurementPerCategory = [];
 

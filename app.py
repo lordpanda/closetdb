@@ -551,6 +551,7 @@ def add_item():
         season = data.get('season')
         purchaseYear = data.get('purchaseYear')
         tags = data.get('tags')
+        color = data.get('color')
 
         item = {'itemID': itemID}
 
@@ -587,6 +588,8 @@ def add_item():
             item['purchaseYear'] = purchaseYear
         if tags:
             item['tags'] = tags
+        if color:
+            item['color'] = color
         
 
         # Call the function to add the item to Supabase
@@ -946,9 +949,19 @@ def update_item():
         logging.info(f"🏷️ Tags exists in form: {'tags' in data}")
         logging.info(f"🏷️ All form keys containing 'tag': {[k for k in data.keys() if 'tag' in k.lower()]}")
         
+        # Color 처리 (디버깅 강화)
+        color_value = data.get('color')
+        logging.info(f"🔍 All form keys: {list(data.keys())}")
+        logging.info(f"🔍 Form data contains 'color': {'color' in data}")
+        logging.info(f"🎨 Color raw value: '{color_value}' (type: {type(color_value)})")
+        
         if tags_value is not None:
             updated_item['tags'] = tags_value
             logging.info(f"✅ Tags will be updated to: '{tags_value}'")
+            
+        if color_value is not None:
+            updated_item['color'] = color_value
+            logging.info(f"✅ Color will be updated to: '{color_value}'")
             
         # 이미지 처리 로직 단순화 (디버깅용)
         logging.info(f"🔍 BEFORE processing - image_urls: {image_urls}")
@@ -994,6 +1007,43 @@ def update_item():
         # 썸네일 URL 업데이트
         if thumbnail_url:
             updated_item['thumbnail_url'] = thumbnail_url
+        
+        # 폼 데이터 처리 (color, tags 등) - 디버깅 강화
+        logging.info(f"🔍 All form keys in /update_item: {list(request.form.keys())}")
+        logging.info(f"🔍 Color in form: {'color' in request.form}")
+        logging.info(f"🔍 Color raw value: '{request.form.get('color')}'")
+        
+        if request.form.get('color'):
+            updated_item['color'] = request.form.get('color')
+            logging.info(f"🎨 Color will be updated to: '{request.form.get('color')}'")
+        else:
+            logging.info(f"❌ No color data found in form")
+        
+        if request.form.get('tags'):
+            updated_item['tags'] = request.form.get('tags')
+            logging.info(f"🏷️ Tags will be updated to: '{request.form.get('tags')}'")
+            
+        # 다른 필드들도 처리 (컬럼명 매핑 포함)
+        field_mapping = {
+            'sizeRegion': 'size_region',
+            'sizeEtc': 'size_etc', 
+            'purchaseYear': 'purchase_year'
+        }
+        
+        for field in ['category', 'subcategory', 'subcategory2', 'brand', 'size', 'sizeRegion', 'sizeEtc', 'year', 'season', 'purchaseYear']:
+            if request.form.get(field):
+                # 컬럼명 매핑 적용
+                db_field = field_mapping.get(field, field)
+                updated_item[db_field] = request.form.get(field)
+                logging.info(f"✅ {field} -> {db_field}: '{request.form.get(field)}'")
+        
+        # compositions 처리
+        if request.form.get('compositions'):
+            try:
+                updated_item['compositions'] = json.loads(request.form.get('compositions'))
+                logging.info(f"🧪 Compositions will be updated")
+            except:
+                logging.warning(f"⚠️ Failed to parse compositions")
         
         # Supabase 업데이트
         logging.info(f"📝 Final updated_item data: {updated_item}")

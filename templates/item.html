@@ -1,6 +1,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <script src="{{ url_for('static', filename='js/db.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/item.css') }}">
@@ -32,9 +33,14 @@
                 <div class="view_measurement" id="measurement_container">
                     <!-- 카테고리별 measurement가 동적으로 생성됩니다 -->
                 </div>
-                <div class="view_composition">
-                    <div class="view_size hidden">US 0</div>
-                    <!-- 더미 데이터는 JavaScript로 실제 데이터로 교체됨 -->
+                <div class="view_composition_and_color">
+                    <div class="view_composition">
+                        <div class="view_size hidden">US 0</div>
+                        <!-- 더미 데이터는 JavaScript로 실제 데이터로 교체됨 -->
+                    </div>
+                    <div class="view_color" id="color_container">
+                        <!-- Color boxes will be dynamically generated here -->
+                    </div>
                 </div>
             </div>
         </div>

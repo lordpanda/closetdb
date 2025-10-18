@@ -78,6 +78,14 @@
     src: url('./fonts/Sequel100Black-45.ttf');
 }
 @font-face {
+    font-family: 'Sequel55';
+    src: url('./fonts/Sequel100Black-55.ttf');
+}
+@font-face {
+    font-family: 'Sequel65';
+    src: url('./fonts/Sequel100Black-65.ttf');
+}
+@font-face {
     font-family: 'OstrichRegular';
     src: url('./fonts/ostrich-sans-regular.woff');
 }

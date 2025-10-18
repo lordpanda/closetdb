@@ -49,25 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function initializeAWS(token) {
-    AWS.config.update({
-        region: 'ap-northeast-2',
-        credentials: new AWS.CognitoIdentityCredentials({
-            IdentityPoolId: 'ap-northeast-2:840a26ac-eef9-4685-8f2a-b7b6f51a4d9d',
-            Logins: {
-                'cognito-idp.ap-northeast-2.amazonaws.com/ap-northeast-2_s5QgJ1Czf': token
-            }
-        })
-    });
-
-    AWS.config.credentials.get(function(err) {
-        if (err) {
-            console.log("Error retrieving credentials:", err);
-            return;
-        }
-        console.log("Cognito Identity Id:", AWS.config.credentials.identityId);
-    });
-}
 
 /* login */
 document.addEventListener('DOMContentLoaded', function() {
@@ -305,7 +286,7 @@ function displayRecentlyAdded() {
         })
         .then(data => {
                                     if (data.items && data.items.length > 0) {
-                // 최대 8개까지만 표시
+                // 최대 12개까지만 표시
                 const maxItems = Math.min(data.items.length, 12);
                 
                 for (let index = 0; index < maxItems; index++) {
@@ -891,11 +872,14 @@ function performSearchForAll(query) {
                     searchTerms.forEach(term => {
                         const measurementMatch = checkMeasurementCondition(term, item);
                         const compositionMatch = checkCompositionSearch(term, item);
+                        const colorMatch = checkColorSearch(term, item);
                         
                         if (measurementMatch !== null) {
                             measurementTerms.push({term, match: measurementMatch});
                         } else if (compositionMatch !== null) {
                             compositionTerms.push({term, match: compositionMatch});
+                        } else if (colorMatch !== null) {
+                            compositionTerms.push({term, match: colorMatch}); // color도 composition처럼 처리
                         } else {
                             generalTerms.push(term);
                         }
@@ -1011,11 +995,14 @@ function performSearch(query) {
                     searchTerms.forEach(term => {
                         const measurementMatch = checkMeasurementCondition(term, item);
                         const compositionMatch = checkCompositionSearch(term, item);
+                        const colorMatch = checkColorSearch(term, item);
                         
                         if (measurementMatch !== null) {
                             measurementTerms.push({term, match: measurementMatch});
                         } else if (compositionMatch !== null) {
                             compositionTerms.push({term, match: compositionMatch});
+                        } else if (colorMatch !== null) {
+                            compositionTerms.push({term, match: colorMatch}); // color도 composition처럼 처리
                         } else {
                             generalTerms.push(term);
                         }
@@ -1185,6 +1172,49 @@ function checkCompositionSearch(term, item) {
     
     // composition 검색이지만 매치되지 않음
     console.log(`❌ No composition match found for "${term}"`);
+    return false;
+}
+
+// Color 검색 함수 (black, red, blue 등)
+function checkColorSearch(term, item) {
+    // db.js의 원본 colorList 사용
+    if (typeof colorList === 'undefined') {
+        console.log('⚠️ colorList not available, skipping color search');
+        return null;
+    }
+    
+    // 검색어가 color가 아니면 null 반환 (일반 텍스트 검색으로 처리)
+    const isColorTerm = colorList.some(color => 
+        term.toLowerCase().includes(color.label.toLowerCase()) || color.label.toLowerCase().includes(term.toLowerCase())
+    );
+    
+    if (!isColorTerm) {
+        return null; // color 검색이 아님
+    }
+    
+    console.log(`🎨 Checking color search for: "${term}"`);
+    
+    // color 필드가 없으면 false 반환 (color 검색이지만 데이터 없음)
+    if (!item.color) {
+        console.log(`❌ No color data for item`);
+        return false;
+    }
+    
+    console.log(`🎨 Item color:`, item.color);
+    
+    // color 필드에서 검색 (쉼표로 구분된 색상들)
+    const itemColors = item.color.split(',').map(color => color.trim().toLowerCase());
+    const hasColorMatch = itemColors.some(itemColor => 
+        itemColor.includes(term.toLowerCase()) || term.toLowerCase().includes(itemColor)
+    );
+    
+    if (hasColorMatch) {
+        console.log(`✅ Found color match: "${term}" in ${item.color}`);
+        return true;
+    }
+    
+    // color 검색이지만 매치되지 않음
+    console.log(`❌ No color match found for "${term}"`);
     return false;
 }
 
@@ -1543,6 +1573,29 @@ function populateEditForm(item) {
         console.log('🏷️ No tags found in item data');
     }
     
+    // Color 데이터 채우기 (멀티 셀렉트)
+    console.log('🎨 Checking if item has color:', !!item.color, 'Value:', item.color);
+    if (item.color) {
+        setTimeout(() => {
+            console.log('🎨 Restoring colors:', item.color);
+            // 쉼표로 구분된 색상들을 분리
+            const colorArray = item.color.split(',').map(color => color.trim());
+            console.log('🎨 Parsed color array:', colorArray);
+            
+            colorArray.forEach(color => {
+                const colorOption = document.querySelector(`.color_option[data-color="${color}"]`);
+                if (colorOption) {
+                    colorOption.classList.add('selected');
+                    console.log('✅ Color restored:', color);
+                } else {
+                    console.log('❌ Color option not found for:', color);
+                }
+            });
+        }, 500); // color 필드가 생성된 후에 실행
+    } else {
+        console.log('ℹ️ No color found in item data');
+    }
+    
     // 기존 이미지 표시 (미리보기로)
     if (item.images && item.images.length > 0) {
         displayExistingImages(item.images);
@@ -1719,6 +1772,12 @@ function submitEditForm(event) {
         headers['Authorization'] = `Bearer ${token}`;
     }
     
+    // FormData 전체 내용 디버깅
+    console.log('🔍 Complete FormData contents before sending:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`  ${key}: ${value}`);
+    }
+    
     fetch('/update_item', {
         method: 'POST',
         body: formData,
@@ -1748,7 +1807,6 @@ function submitEditForm(event) {
             return;
         }
         
-        alert('아이템이 성공적으로 업데이트되었습니다!');
         // 아이템 상세 페이지로 돌아가기 (supabase_ 접두사 추가)
         const redirectId = itemId.toString().startsWith('supabase_') ? itemId : `supabase_${itemId}`;
         window.location.href = `/item.html?id=${redirectId}`;
@@ -1774,12 +1832,17 @@ function collectEditFormData() {
     
     if (mode === 'stitched') {
         const stitchedFile = document.querySelector('.file_uploader_stitched').files[0];
+        console.log('🖼️ Edit: Checking stitched file:', stitchedFile);
+        console.log('🖼️ Edit: File name:', stitchedFile ? stitchedFile.name : 'No file');
         if (stitchedFile) {
             formData.append('stitched_image', stitchedFile);
             const sectionCount = document.querySelector('input[name="section_count"]:checked').value;
             formData.append('section_count', sectionCount);
             formData.append('image_mode', mode);
             hasNewImages = true;
+            console.log('✅ Edit: Added stitched file to FormData:', stitchedFile.name);
+        } else {
+            console.log('❌ Edit: No stitched file selected');
         }
     } else {
         if (window.individualFiles && window.individualFiles.length > 0) {
@@ -1979,6 +2042,23 @@ function collectEditFormData() {
     if (selectedTags.length > 0) {
         formData.append('tags', selectedTags.join(', '));
         console.log('🏷️ Adding tags to FormData:', selectedTags.join(', '));
+    }
+    
+    // Color 데이터 수집 (멀티 셀렉트) - 디버깅 강화
+    const selectedColors = document.querySelectorAll('.color_option.selected');
+    console.log('🔍 Found selected color elements:', selectedColors.length);
+    selectedColors.forEach((el, i) => {
+        console.log(`🔍 Selected color ${i}:`, el.getAttribute('data-color'));
+    });
+    
+    if (selectedColors.length > 0) {
+        const colorLabels = Array.from(selectedColors).map(option => option.getAttribute('data-color'));
+        const colorString = colorLabels.join(', ');
+        formData.append('color', colorString);
+        console.log('🎨 Adding colors to FormData:', colorString);
+        console.log('🔍 FormData color check:', formData.get('color'));
+    } else {
+        console.log('ℹ️ No colors selected');
     }
     
     // 삭제된 이미지 정보 추가
@@ -3900,6 +3980,93 @@ function displayMeasurementInput(selectedCategory) {
     }
 }
 
+function displayColorInput() {
+    console.log('🎨 displayColorInput called');
+    const container = document.getElementById('color_selection_container');
+    
+    if (!container) {
+        console.error('❌ Color selection container not found');
+        return;
+    }
+    
+    // colorList가 정의되지 않은 경우 기본값 사용
+    if (typeof colorList === 'undefined') {
+        console.log('⚠️ colorList not defined, using default colors');
+        window.colorList = [
+            {value: "000000", label: "black"},
+            {value: "FFFFFF", label: "white"},
+            {value: "808080", label: "gray"}
+        ];
+    }
+    
+    console.log('🎨 Color list length:', colorList.length);
+    
+    // 동적으로 CSS 클래스 생성
+    generateColorCSS();
+    
+    // 색상 선택 그리드 생성
+    const colorGrid = document.createElement('div');
+    colorGrid.className = 'color_grid';
+    colorGrid.innerHTML = colorList.map(color => `
+        <div class="color_option" data-color="${color.label}" onclick="selectColor('${color.label}')">
+            <div class="color_circle color_${color.label}" title="${color.label}"></div>
+            <span class="color_label">${color.label}</span>
+        </div>
+    `).join('');
+    
+    container.appendChild(colorGrid);
+    console.log('✅ Color selection grid created');
+}
+
+function generateColorCSS() {
+    // 기존 color CSS 제거
+    const existingStyle = document.getElementById('dynamic-color-styles');
+    if (existingStyle) {
+        existingStyle.remove();
+    }
+    
+    // 새로운 style 태그 생성
+    const style = document.createElement('style');
+    style.id = 'dynamic-color-styles';
+    
+    // colorList에서 CSS 클래스 생성
+    const cssRules = colorList.map(color => {
+        if (color.label === 'stripe') {
+            return `.color_${color.label} { background: repeating-linear-gradient(45deg, #000 0px, #000 10px, #fff 10px, #fff 20px); }`;
+        } else if (color.label === 'multi') {
+            return `.color_${color.label} { background: linear-gradient(45deg, #ffff00 10%, #78DFF1 30%, #6877E0 50%, #F178B6 80%, #ED4447 100%); }`;
+        } else {
+            return `.color_${color.label} { background-color: #${color.value}; }`;
+        }
+    }).join('\n');
+    
+    style.textContent = cssRules;
+    document.head.appendChild(style);
+    
+    console.log('✅ Dynamic color CSS generated for', colorList.length, 'colors');
+}
+
+function selectColor(colorLabel) {
+    console.log('🎨 Color clicked:', colorLabel);
+    
+    const selectedOption = document.querySelector(`.color_option[data-color="${colorLabel}"]`);
+    if (selectedOption) {
+        // Toggle 방식: 선택/해제
+        if (selectedOption.classList.contains('selected')) {
+            selectedOption.classList.remove('selected');
+            console.log('❌ Color deselected:', colorLabel);
+        } else {
+            selectedOption.classList.add('selected');
+            console.log('✅ Color selected:', colorLabel);
+        }
+        
+        // 현재 선택된 모든 색상 표시
+        const allSelected = document.querySelectorAll('.color_option.selected');
+        const selectedColors = Array.from(allSelected).map(option => option.getAttribute('data-color'));
+        console.log('🎨 Currently selected colors:', selectedColors);
+    }
+}
+
 function displayCompositionInput() {
     console.log('🧪 displayCompositionInput called');
     var grid = document.querySelector(".composition_sets_container");
@@ -4462,11 +4629,6 @@ function setupEventListeners() {
         submitButton.addEventListener('click', submitForm);
     }
 }
-// S3 객체 생성
-// var s3 = new AWS.S3({
-//     apiVersion: '2006-03-01',
-//     params: {Bucket: 'closetdb'}
-// });
 
 
 function submitForm(event) {
@@ -4667,30 +4829,10 @@ function submitForm(event) {
     if (size && size.trim() !== '') formData.append('size', size);
     if (sizeEtc && sizeEtc.trim() !== '') formData.append('sizeEtc', sizeEtc);
     if (Object.keys(measurements).length > 0) formData.append('measurements', JSON.stringify(measurements));
-    // Composition 데이터 추가 (Edit 페이지와 동일한 로직 사용)
-    const hasCompositionData = window.usingMultiSets 
-        ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
-        : ((Array.isArray(compositions) && compositions.length > 0) || (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0));
-    console.log('🧪 Has composition data (Add page):', hasCompositionData);
-    
-    if (hasCompositionData) {
-        const compositionJson = JSON.stringify(compositions);
-        console.log('✅ Adding composition data to FormData (Add page):', compositionJson);
-        formData.append('compositions', compositionJson);
-        console.log('🔍 FormData compositions value:', formData.get('compositions'));
+    if (window.usingMultiSets) {
+        if (Object.keys(compositions).length > 0) formData.append('compositions', JSON.stringify(compositions));
     } else {
-        console.log('❌ No composition data to add - compositions is empty or null');
-        console.log('🔍 Compositions value details:', {
-            isArray: Array.isArray(compositions),
-            isObject: typeof compositions === 'object',
-            isNull: compositions === null,
-            isUndefined: compositions === undefined,
-            keys: compositions ? Object.keys(compositions) : 'N/A'
-        });
-        
-        // Add 모드에서도 빈 composition 전송 (일관성을 위해)
-        console.log('🔧 Adding empty compositions for add mode');
-        formData.append('compositions', JSON.stringify({}));
+        if (compositions.length > 0) formData.append('compositions', JSON.stringify(compositions));
     }
     if (year) formData.append('year', year);
     if (season) formData.append('season', season);
@@ -4705,6 +4847,23 @@ function submitForm(event) {
     if (selectedTags.length > 0) {
         formData.append('tags', selectedTags.join(', '));
         console.log('🏷️ Adding tags to FormData:', selectedTags.join(', '));
+    }
+    
+    // Color 데이터 수집 (멀티 셀렉트) - 디버깅 강화
+    const selectedColors = document.querySelectorAll('.color_option.selected');
+    console.log('🔍 Found selected color elements:', selectedColors.length);
+    selectedColors.forEach((el, i) => {
+        console.log(`🔍 Selected color ${i}:`, el.getAttribute('data-color'));
+    });
+    
+    if (selectedColors.length > 0) {
+        const colorLabels = Array.from(selectedColors).map(option => option.getAttribute('data-color'));
+        const colorString = colorLabels.join(', ');
+        formData.append('color', colorString);
+        console.log('🎨 Adding colors to FormData:', colorString);
+        console.log('🔍 FormData color check:', formData.get('color'));
+    } else {
+        console.log('ℹ️ No colors selected');
     }
     
     // FormData 내용 디버깅
@@ -4742,46 +4901,6 @@ function submitForm(event) {
 }
 
 // 이미지 파일 업로드 로직
-function uploadFiles(files) {
-    const uploads = Array.from(files).map(file => {
-        const fileName = `${Date.now()}_${file.name}`;
-        const upload = new AWS.S3.ManagedUpload({
-            params: {
-                Bucket: 'closetdb', // replace with your bucket name
-                Key: fileName,
-                Body: file,
-                ACL: 'public-read'
-            }
-        });
-        return upload.promise();
-    });
-
-    return Promise.all(uploads);
-}
-
-// 데이터 저장 로직
-function saveFormDataToDynamoDB(imageUrls) {
-    const db = new AWS.DynamoDB.DocumentClient();
-    const formData = collectFormData();
-    formData.imageURLs = imageUrls; // Add the URLs of uploaded images
-
-    const params = {
-        TableName: 'closet',
-        Item: formData
-    };
-
-    return new Promise((resolve, reject) => {
-        db.put(params, function(err, data) {
-            if (err) {
-                console.error('Error saving data to DynamoDB:', err);
-                reject(err);
-            } else {
-                console.log('Data saved to DynamoDB successfully');
-                resolve();
-            }
-        });
-    });
-}
 
 // 폼 데이터 수집 로직
 function collectFormData() {
@@ -5158,6 +5277,72 @@ function updateCompositionDisplay(item) {
     
     // Season과 Purchase year 정보 추가 (composition 아래)
     updateSeasonAndPurchaseDisplay(item);
+    
+    // Color 정보 표시 (season/purchase year 전에 삽입)
+    updateColorDisplay(item);
+}
+
+// Color 표시 함수
+function updateColorDisplay(item) {
+    const compositionContainer = document.querySelector('.view_composition');
+    if (!compositionContainer) return;
+    
+    // 기존 color 제거
+    const existingColors = compositionContainer.querySelectorAll('.color_boxes_container');
+    existingColors.forEach(color => color.remove());
+    
+    if (item.color && item.color.trim() !== '') {
+        // Color boxes container 생성 (헤더 없이)
+        const colorBoxesContainer = document.createElement('div');
+        colorBoxesContainer.className = 'color_boxes_container';
+        colorBoxesContainer.style.marginTop = '15px';
+        
+        // Color 문자열을 쉼표로 분리
+        const colors = item.color.split(',').map(c => c.trim()).filter(c => c !== '');
+        
+        colors.forEach(colorName => {
+            const colorBox = document.createElement('div');
+            colorBox.className = 'color_box';
+            
+            // 특별한 패턴 색상 처리
+            if (colorName === 'stripe') {
+                colorBox.classList.add('stripe');
+            } else if (colorName === 'multi') {
+                colorBox.classList.add('multi');
+            } else {
+                // colorList에서 해당 색상 찾기
+                const colorData = colorList.find(c => c.label === colorName);
+                if (colorData && colorData.value) {
+                    colorBox.style.backgroundColor = `#${colorData.value}`;
+                } else {
+                    // 색상을 찾을 수 없으면 기본 회색
+                    colorBox.style.backgroundColor = '#ccc';
+                }
+            }
+            
+            colorBoxesContainer.appendChild(colorBox);
+        });
+        
+        // composition divider 이전에 color 삽입
+        const divider = compositionContainer.querySelector('.composition_season_divider');
+        if (divider) {
+            divider.insertAdjacentElement('beforebegin', colorBoxesContainer);
+        } else {
+            // divider가 없으면 composition container 끝에 추가
+            const lastComposition = compositionContainer.querySelector('.label_with_value:last-of-type');
+            if (lastComposition) {
+                lastComposition.insertAdjacentElement('afterend', colorBoxesContainer);
+            } else {
+                // composition이 없으면 size 다음에 삽입
+                const sizeElement = compositionContainer.querySelector('.view_size');
+                if (sizeElement) {
+                    sizeElement.insertAdjacentElement('afterend', colorBoxesContainer);
+                }
+            }
+        }
+        
+        console.log('✅ Color display updated:', colors);
+    }
 }
 
 // Season과 Purchase year 표시 함수
