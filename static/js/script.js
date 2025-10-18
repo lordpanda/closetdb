@@ -3301,11 +3301,12 @@ function getSizesByRegion(region) {
     } else if (region == "WW") {
         accordingSizes.push("One Size", "XXXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
-        accordingSizes.push(230, 235, 240);
+        accordingSizes.push(230, 235, 240, 44, 55);
     } else if (region == "Ring") {
         accordingSizes.push(48, 50, 52, 4, 5, 6, "KR 5", "KR 6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J", "IT5");
-    }
-    return accordingSizes;
+    } else if (region == "etc") {
+        accordingSizes.push(1, 2);
+    } return accordingSizes;
 }
 
 function initializeFilterSizes() {
@@ -4136,7 +4137,18 @@ function displaySizesByRegion(region) {
     grid.innerHTML = ``;
     
     if (region == "etc") {
-        // etc region 선택 시 텍스트 입력창만 표시
+        // etc region 선택 시 버튼들도 표시하고 텍스트 입력창도 함께 표시
+        accordingSizes = getSizesByRegion(region);
+        
+        // 사이즈 버튼들 생성
+        for (var i = 0; i < accordingSizes.length; i++) {
+            const item = document.createElement('div');
+            item.className = "size_key";
+            item.innerHTML = `<input type="radio" name="size_key" id="size_key_`+i+`" value="` + accordingSizes[i] + `"/><label for="size_key_`+i+`">`+accordingSizes[i]+`</label></input>`;
+            grid.appendChild(item);
+        }
+        
+        // 추가로 텍스트 입력창도 표시
         let etcInput = document.getElementById('size_etc_input');
         console.log('🔍 etc region selected, finding input:', etcInput);
         
@@ -4152,8 +4164,7 @@ function displaySizesByRegion(region) {
         
         etcInput.classList.add('size_etc_input_visible');
         grid.appendChild(etcInput);
-        etcInput.focus();
-        console.log('✅ etc input displayed and focused');
+        console.log('✅ etc buttons and input displayed');
         return;
     }
     
