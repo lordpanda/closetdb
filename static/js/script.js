@@ -973,9 +973,11 @@ function performSearchOptimized(query) {
                         item.season?.toLowerCase().includes(lowerTerm)
                     ];
                     
-                    // Region+Size 조합 검색 추가
-                    const regionSizeCombination = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
-                    matches.push(regionSizeCombination.includes(lowerTerm));
+                    // Region+Size 조합 검색 추가 (공백 있는 버전과 없는 버전 모두 확인)
+                    const regionSizeCombinationSpaced = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
+                    const regionSizeCombinationNoSpace = `${item.sizeRegion || ''}${item.size || ''}`.toLowerCase();
+                    matches.push(regionSizeCombinationSpaced.includes(lowerTerm));
+                    matches.push(regionSizeCombinationNoSpace.includes(lowerTerm));
                     
                     return matches.some(match => match);
                 });
@@ -1099,9 +1101,11 @@ function performSearchForAllOptimized(query) {
                         item.season?.toLowerCase().includes(lowerTerm)
                     ];
                     
-                    // Region+Size 조합 검색 추가
-                    const regionSizeCombination = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
-                    matches.push(regionSizeCombination.includes(lowerTerm));
+                    // Region+Size 조합 검색 추가 (공백 있는 버전과 없는 버전 모두 확인)
+                    const regionSizeCombinationSpaced = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
+                    const regionSizeCombinationNoSpace = `${item.sizeRegion || ''}${item.size || ''}`.toLowerCase();
+                    matches.push(regionSizeCombinationSpaced.includes(lowerTerm));
+                    matches.push(regionSizeCombinationNoSpace.includes(lowerTerm));
                     
                     return matches.some(match => match);
                 });
