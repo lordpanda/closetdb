@@ -841,63 +841,297 @@ function showFallbackCarousel() {
 }
 
 // 검색 기능 초기화
+// 검색 최적화를 위한 변수들
+let searchCache = null;
+let searchDebounceTimer = null;
+const SEARCH_DEBOUNCE_DELAY = 300; // 300ms 디바운싱
+
 function initializeSearch() {
     const searchInput = document.getElementById('form1');
     if (!searchInput) return;
     
-    console.log('🔍 Initializing search functionality');
+    console.log('🔍 Initializing search functionality with optimization');
     
-    // 검색 입력 이벤트 리스너
+    // 아이템 데이터 미리 로드
+    preloadSearchData();
+    
+    // 검색 입력 이벤트 리스너 (디바운싱 적용)
     searchInput.addEventListener('input', function(e) {
         const query = e.target.value.trim();
+        
+        // 기존 타이머 제거
+        if (searchDebounceTimer) {
+            clearTimeout(searchDebounceTimer);
+        }
+        
         if (query.length > 0) {
-            performSearch(query);
+            // 디바운싱 적용: 300ms 후에 검색 실행
+            searchDebounceTimer = setTimeout(() => {
+                performSearchOptimized(query);
+            }, SEARCH_DEBOUNCE_DELAY);
         } else {
-            // 검색어가 없으면 원래 아이템들 표시
+            // 검색어가 없으면 즉시 원래 아이템들 표시
             displayRecentlyAdded();
         }
     });
     
-    // Enter 키 이벤트
+    // Enter 키 이벤트 (즉시 실행)
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             const query = e.target.value.trim();
             if (query.length > 0) {
-                performSearch(query);
+                // Enter 키는 디바운싱 없이 즉시 실행
+                if (searchDebounceTimer) {
+                    clearTimeout(searchDebounceTimer);
+                }
+                performSearchOptimized(query);
             }
         }
     });
 }
 
-// All.html 페이지용 검색 초기화
+// 검색 데이터 미리 로드 (캐싱)
+function preloadSearchData() {
+    if (searchCache !== null) {
+        console.log('🚀 Search data already cached');
+        return Promise.resolve(searchCache);
+    }
+    
+    console.log('🔄 Preloading search data...');
+    return fetch('/api/items')
+        .then(response => response.json())
+        .then(data => {
+            if (data.items) {
+                searchCache = data.items;
+                console.log(`✅ Search data cached: ${searchCache.length} items`);
+                return searchCache;
+            }
+            return [];
+        })
+        .catch(error => {
+            console.error('❌ Failed to preload search data:', error);
+            return [];
+        });
+}
+
+// 최적화된 검색 함수 (캐시된 데이터 사용)
+function performSearchOptimized(query) {
+    console.log('🚀 Performing optimized search for:', query);
+    
+    // 캐시된 데이터가 있으면 즉시 검색, 없으면 로드
+    const searchPromise = searchCache ? Promise.resolve(searchCache) : preloadSearchData();
+    
+    searchPromise.then(items => {
+        if (items && items.length > 0) {
+            // 향상된 검색 필터링 (캐시된 데이터 사용)
+            const filteredItems = items.filter(item => {
+                const searchText = query.toLowerCase();
+                const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
+                
+                // 검색어를 타입별로 분류
+                const measurementTerms = [];
+                const compositionTerms = [];
+                const generalTerms = [];
+                
+                searchTerms.forEach(term => {
+                    const measurementMatch = checkMeasurementCondition(term, item);
+                    const compositionMatch = checkCompositionSearch(term, item);
+                    const colorMatch = checkColorSearch(term, item);
+                    
+                    if (measurementMatch !== null) {
+                        measurementTerms.push({term, match: measurementMatch});
+                    } else if (compositionMatch !== null) {
+                        compositionTerms.push({term, match: compositionMatch});
+                    } else if (colorMatch !== null) {
+                        compositionTerms.push({term, match: colorMatch}); // color도 composition처럼 처리
+                    } else {
+                        generalTerms.push(term);
+                    }
+                });
+                
+                // 모든 measurement 조건이 만족되어야 함
+                const measurementValid = measurementTerms.length === 0 || measurementTerms.every(m => m.match);
+                
+                // composition/color 조건 중 하나라도 만족하면 됨 (OR 조건)
+                const compositionValid = compositionTerms.length === 0 || compositionTerms.some(c => c.match);
+                
+                // 일반 검색어들이 모두 포함되어야 함 (AND 조건)
+                const generalValid = generalTerms.every(term => {
+                    const lowerTerm = term.toLowerCase();
+                    
+                    // 기본 필드 검색
+                    const matches = [
+                        item.category?.toLowerCase().includes(lowerTerm),
+                        item.subcategory?.toLowerCase().includes(lowerTerm),
+                        item.subcategory2?.toLowerCase().includes(lowerTerm),
+                        item.brand?.toLowerCase().includes(lowerTerm),
+                        item.size?.toLowerCase().includes(lowerTerm),
+                        item.sizeRegion?.toLowerCase().includes(lowerTerm),
+                        item.tags?.toLowerCase().includes(lowerTerm),
+                        item.color?.toLowerCase().includes(lowerTerm),
+                        item.season?.toLowerCase().includes(lowerTerm)
+                    ];
+                    
+                    // Region+Size 조합 검색 추가
+                    const regionSizeCombination = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
+                    matches.push(regionSizeCombination.includes(lowerTerm));
+                    
+                    return matches.some(match => match);
+                });
+                
+                return measurementValid && compositionValid && generalValid;
+            });
+            
+            console.log(`🎯 Search results: ${filteredItems.length} items found`);
+            displaySearchResults(filteredItems, query);
+        } else {
+            console.log('❌ No items available for search');
+            displaySearchResults([], query);
+        }
+    }).catch(error => {
+        console.error('❌ Search error:', error);
+        displaySearchResults([], query);
+    });
+}
+
+// All.html 페이지용 검색 초기화 (최적화 적용)
 function initializeSearchForAll() {
     const searchInput = document.getElementById('form1');
     if (!searchInput) return;
     
-    console.log('🔍 Initializing search functionality for all.html');
+    console.log('🔍 Initializing search functionality for all.html with optimization');
     
-    // 검색 입력 이벤트 리스너
+    // 아이템 데이터 미리 로드
+    preloadSearchData();
+    
+    // 검색 입력 이벤트 리스너 (디바운싱 적용)
     searchInput.addEventListener('input', function(e) {
         const query = e.target.value.trim();
+        
+        // 기존 타이머 제거
+        if (searchDebounceTimer) {
+            clearTimeout(searchDebounceTimer);
+        }
+        
         if (query.length > 0) {
-            performSearchForAll(query);
+            // 디바운싱 적용: 300ms 후에 검색 실행
+            searchDebounceTimer = setTimeout(() => {
+                performSearchForAllOptimized(query);
+            }, SEARCH_DEBOUNCE_DELAY);
         } else {
-            // 검색어가 없으면 모든 아이템 표시
+            // 검색어가 없으면 즉시 모든 아이템 표시
             displayAllItems();
         }
     });
     
-    // Enter 키 이벤트
+    // Enter 키 이벤트 (즉시 실행)
     searchInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
             const query = e.target.value.trim();
             if (query.length > 0) {
-                performSearchForAll(query);
+                // Enter 키는 디바운싱 없이 즉시 실행
+                if (searchDebounceTimer) {
+                    clearTimeout(searchDebounceTimer);
+                }
+                performSearchForAllOptimized(query);
             }
         }
     });
+}
+
+// All.html용 최적화된 검색 함수 (캐시된 데이터 사용)
+function performSearchForAllOptimized(query) {
+    console.log('🚀 Performing optimized search for all.html:', query);
+    
+    // 캐시된 데이터가 있으면 즉시 검색, 없으면 로드
+    const searchPromise = searchCache ? Promise.resolve(searchCache) : preloadSearchData();
+    
+    searchPromise.then(items => {
+        if (items && items.length > 0) {
+            // 향상된 검색 필터링 (캐시된 데이터 사용)
+            const filteredItems = items.filter(item => {
+                const searchText = query.toLowerCase();
+                const searchTerms = searchText.split(/\s+/).filter(term => term.length > 0);
+                
+                // 검색어를 타입별로 분류
+                const measurementTerms = [];
+                const compositionTerms = [];
+                const generalTerms = [];
+                
+                searchTerms.forEach(term => {
+                    const measurementMatch = checkMeasurementCondition(term, item);
+                    const compositionMatch = checkCompositionSearch(term, item);
+                    const colorMatch = checkColorSearch(term, item);
+                    
+                    if (measurementMatch !== null) {
+                        measurementTerms.push({term, match: measurementMatch});
+                    } else if (compositionMatch !== null) {
+                        compositionTerms.push({term, match: compositionMatch});
+                    } else if (colorMatch !== null) {
+                        compositionTerms.push({term, match: colorMatch}); // color도 composition처럼 처리
+                    } else {
+                        generalTerms.push(term);
+                    }
+                });
+                
+                // 모든 measurement 조건이 만족되어야 함
+                const measurementValid = measurementTerms.length === 0 || measurementTerms.every(m => m.match);
+                
+                // composition/color 조건 중 하나라도 만족하면 됨 (OR 조건)
+                const compositionValid = compositionTerms.length === 0 || compositionTerms.some(c => c.match);
+                
+                // 일반 검색어들이 모두 포함되어야 함 (AND 조건)
+                const generalValid = generalTerms.every(term => {
+                    const lowerTerm = term.toLowerCase();
+                    
+                    // 기본 필드 검색
+                    const matches = [
+                        item.category?.toLowerCase().includes(lowerTerm),
+                        item.subcategory?.toLowerCase().includes(lowerTerm),
+                        item.subcategory2?.toLowerCase().includes(lowerTerm),
+                        item.brand?.toLowerCase().includes(lowerTerm),
+                        item.size?.toLowerCase().includes(lowerTerm),
+                        item.sizeRegion?.toLowerCase().includes(lowerTerm),
+                        item.tags?.toLowerCase().includes(lowerTerm),
+                        item.color?.toLowerCase().includes(lowerTerm),
+                        item.season?.toLowerCase().includes(lowerTerm)
+                    ];
+                    
+                    // Region+Size 조합 검색 추가
+                    const regionSizeCombination = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
+                    matches.push(regionSizeCombination.includes(lowerTerm));
+                    
+                    return matches.some(match => match);
+                });
+                
+                return measurementValid && compositionValid && generalValid;
+            });
+            
+            console.log(`🎯 All.html search results: ${filteredItems.length} items found`);
+            displaySearchResultsForAll(filteredItems, query);
+        } else {
+            console.log('❌ No items available for search');
+            displaySearchResultsForAll([], query);
+        }
+    }).catch(error => {
+        console.error('❌ Search error:', error);
+        displaySearchResultsForAll([], query);
+    });
+}
+
+// 검색 캐시 초기화 함수 (새 아이템 추가 시 호출)
+function clearSearchCache() {
+    console.log('🗑️ Clearing search cache');
+    searchCache = null;
+}
+
+// 검색 캐시 강제 새로고침
+function refreshSearchCache() {
+    console.log('🔄 Refreshing search cache');
+    searchCache = null;
+    return preloadSearchData();
 }
 
 // All.html용 검색 수행 (다중 키워드 및 region+size 조합 포함)
@@ -1856,6 +2090,8 @@ function submitEditForm(event) {
             return;
         }
         
+        // 검색 캐시 클리어 (아이템이 업데이트되었으므로)
+        clearSearchCache();
         // 아이템 상세 페이지로 돌아가기 (supabase_ 접두사 추가)
         const redirectId = itemId.toString().startsWith('supabase_') ? itemId : `supabase_${itemId}`;
         window.location.href = `/item.html?id=${redirectId}`;
@@ -4959,6 +5195,8 @@ function submitForm(event) {
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data);
+        // 검색 캐시 클리어 (새 아이템이 추가되었으므로)
+        clearSearchCache();
         alert('Item added successfully!');
         // view all로 리다이렉트
         window.location.href = '/all.html';
