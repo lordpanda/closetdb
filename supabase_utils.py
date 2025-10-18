@@ -35,11 +35,17 @@ class SupabaseDB:
                 'year': item.get('year'),
                 'season': item.get('season'),
                 'purchase_year': item.get('purchaseYear'),
-                'tags': item.get('tags')
+                'tags': item.get('tags'),
+                'color': item.get('color')
             }
             
             # None 값 제거 (Supabase에서 NULL로 처리됨)
             data = {k: v for k, v in data.items() if v is not None and v != ''}
+            
+            # Color 디버깅 로깅
+            print(f"🔍 [SUPABASE] Color in original item: {item.get('color')}")
+            print(f"🔍 [SUPABASE] Color in filtered data: {data.get('color')}")
+            print(f"🔍 [SUPABASE] Data keys being sent: {list(data.keys())}")
             
             # REST API 호출
             url = f"{self.url}/rest/v1/closet_items"
