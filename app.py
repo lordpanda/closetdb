@@ -298,7 +298,9 @@ def login():
 def google_login():
     try:
         logging.info("Google login route accessed")
-        redirect_uri = url_for('google_callback', _external=True, _scheme='https')
+        # Azure에서는 HTTPS, 로컬에서는 HTTP 사용
+        scheme = 'https' if os.getenv('FLASK_ENV') == 'production' else 'http'
+        redirect_uri = url_for('google_callback', _external=True, _scheme=scheme)
         logging.info(f"Redirect URI: {redirect_uri}")
         return google.authorize_redirect(redirect_uri)
     except Exception as e:

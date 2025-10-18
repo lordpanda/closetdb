@@ -472,7 +472,7 @@
     margin-bottom: 10px;
 }
 .comp_label {
-    font-family: 'Sequel85', sans-serif;
+    font-family: 'Sequel75', sans-serif;
     display: inline;
     margin-right: 8px;
     text-transform: capitalize;
@@ -624,8 +624,8 @@
 }
 
 .detail_value {
-    font-family: 'Sequel75';
-    font-size: 1.2em;
+    font-family: 'Sequel45';
+    font-size: 1.1em;
     color: var(--black);
     margin-bottom: 20px;
 }
@@ -641,7 +641,7 @@
 /* Composition set header */
 .composition_set_header {
     font-size: 1.2em;
-    margin-top: 15px;
+    margin-top: 20px;
     margin-bottom: 0px;
     font-family: 'LeferiPointOblique', sans-serif;
     color: var(--black);

@@ -4667,10 +4667,30 @@ function submitForm(event) {
     if (size && size.trim() !== '') formData.append('size', size);
     if (sizeEtc && sizeEtc.trim() !== '') formData.append('sizeEtc', sizeEtc);
     if (Object.keys(measurements).length > 0) formData.append('measurements', JSON.stringify(measurements));
-    if (window.usingMultiSets) {
-        if (Object.keys(compositions).length > 0) formData.append('compositions', JSON.stringify(compositions));
+    // Composition 데이터 추가 (Edit 페이지와 동일한 로직 사용)
+    const hasCompositionData = window.usingMultiSets 
+        ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
+        : ((Array.isArray(compositions) && compositions.length > 0) || (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0));
+    console.log('🧪 Has composition data (Add page):', hasCompositionData);
+    
+    if (hasCompositionData) {
+        const compositionJson = JSON.stringify(compositions);
+        console.log('✅ Adding composition data to FormData (Add page):', compositionJson);
+        formData.append('compositions', compositionJson);
+        console.log('🔍 FormData compositions value:', formData.get('compositions'));
     } else {
-        if (compositions.length > 0) formData.append('compositions', JSON.stringify(compositions));
+        console.log('❌ No composition data to add - compositions is empty or null');
+        console.log('🔍 Compositions value details:', {
+            isArray: Array.isArray(compositions),
+            isObject: typeof compositions === 'object',
+            isNull: compositions === null,
+            isUndefined: compositions === undefined,
+            keys: compositions ? Object.keys(compositions) : 'N/A'
+        });
+        
+        // Add 모드에서도 빈 composition 전송 (일관성을 위해)
+        console.log('🔧 Adding empty compositions for add mode');
+        formData.append('compositions', JSON.stringify({}));
     }
     if (year) formData.append('year', year);
     if (season) formData.append('season', season);
