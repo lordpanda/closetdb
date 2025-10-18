@@ -5169,20 +5169,29 @@ function submitForm(event) {
     }
     
     // Color 데이터 수집 (멀티 셀렉트) - 디버깅 강화
+    console.log('🎨 [ADD] Starting color data collection...');
+    const colorContainer = document.getElementById('color_selection_container');
+    console.log('🎨 [ADD] Color container found:', !!colorContainer);
+    console.log('🎨 [ADD] Color container HTML:', colorContainer ? colorContainer.innerHTML.substring(0, 200) + '...' : 'N/A');
+    
     const selectedColors = document.querySelectorAll('.color_option.selected');
-    console.log('🔍 Found selected color elements:', selectedColors.length);
-    selectedColors.forEach((el, i) => {
-        console.log(`🔍 Selected color ${i}:`, el.getAttribute('data-color'));
-    });
+    console.log('🎨 [ADD] Found selected color elements:', selectedColors.length);
     
     if (selectedColors.length > 0) {
+        selectedColors.forEach((el, i) => {
+            console.log(`🎨 [ADD] Selected color ${i}:`, el.getAttribute('data-color'));
+            console.log(`🎨 [ADD] Element ${i} classes:`, el.className);
+        });
+        
         const colorLabels = Array.from(selectedColors).map(option => option.getAttribute('data-color'));
         const colorString = colorLabels.join(', ');
         formData.append('color', colorString);
-        console.log('🎨 Adding colors to FormData:', colorString);
-        console.log('🔍 FormData color check:', formData.get('color'));
+        console.log('🎨 [ADD] Adding colors to FormData:', colorString);
+        console.log('🎨 [ADD] FormData color check:', formData.get('color'));
     } else {
-        console.log('ℹ️ No colors selected');
+        console.log('🎨 [ADD] No colors selected');
+        console.log('🎨 [ADD] All color options:', document.querySelectorAll('.color_option').length);
+        console.log('🎨 [ADD] Color options with selected class:', document.querySelectorAll('.color_option.selected').length);
     }
     
     // FormData 내용 디버깅

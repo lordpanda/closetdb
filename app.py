@@ -552,6 +552,12 @@ def add_item():
         purchaseYear = data.get('purchaseYear')
         tags = data.get('tags')
         color = data.get('color')
+        
+        # Color 디버깅 로깅 추가
+        logging.info(f"🔍 All form keys in /add_item: {list(request.form.keys())}")
+        logging.info(f"🔍 Color in form: {'color' in request.form}")
+        logging.info(f"🔍 Color raw value: '{color}'")
+        logging.info(f"🔍 Color exists and not empty: {bool(color and color.strip())}")
 
         item = {'itemID': itemID}
 
@@ -590,6 +596,9 @@ def add_item():
             item['tags'] = tags
         if color:
             item['color'] = color
+            logging.info(f"🎨 Color will be added to item: '{color}'")
+        else:
+            logging.info(f"❌ No color data to add to item")
         
 
         # Call the function to add the item to Supabase
