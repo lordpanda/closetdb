@@ -1791,17 +1791,55 @@ function populateEditForm(item) {
                 });
             } else if (typeof compositions === 'object' && compositions !== null) {
                 console.log('🧪 Populating object-type compositions:', compositions);
-                // 객체 형태 (퍼센테이지)
-                compositionInputs.forEach(input => {
-                    const label = input.parentElement.querySelector('.part');
-                    if (label) {
-                        const material = label.textContent.trim();
-                        if (compositions[material]) {
-                            input.value = compositions[material];
-                            console.log(`✅ Set ${material} to ${compositions[material]}%`);
+                
+                // multi-set composition인지 확인 (첫 번째 값이 객체인지 체크)
+                const firstKey = Object.keys(compositions)[0];
+                const isMultiSet = firstKey && typeof compositions[firstKey] === 'object';
+                
+                if (isMultiSet) {
+                    console.log('🧪 Detected multi-set compositions, loading composition sets...');
+                    
+                    // Multi-set composition 로딩
+                    window.compositionSets = [];
+                    window.usingMultiSets = true;
+                    
+                    Object.keys(compositions).forEach((setName, index) => {
+                        const setCompositions = compositions[setName];
+                        console.log(`🧪 Loading composition set "${setName}":`, setCompositions);
+                        
+                        window.compositionSets.push({
+                            name: setName,
+                            compositions: setCompositions
+                        });
+                    });
+                    
+                    // composition UI 재생성
+                    setTimeout(() => {
+                        const container = document.getElementById('composition_sets_container');
+                        if (container) {
+                            container.innerHTML = '';
+                            
+                            window.compositionSets.forEach((set, index) => {
+                                createCompositionSet(index, set.name, set.compositions);
+                            });
+                            
+                            console.log('✅ Multi-set compositions restored');
                         }
-                    }
-                });
+                    }, 100);
+                    
+                } else {
+                    // 단일 객체 형태 (퍼센테이지)
+                    compositionInputs.forEach(input => {
+                        const label = input.parentElement.querySelector('.part');
+                        if (label) {
+                            const material = label.textContent.trim();
+                            if (compositions[material]) {
+                                input.value = compositions[material];
+                                console.log(`✅ Set ${material} to ${compositions[material]}%`);
+                            }
+                        }
+                    });
+                }
             } else {
                 console.log('❌ Invalid compositions format:', typeof compositions, compositions);
             }
@@ -4405,8 +4443,9 @@ function displayCompositionInput() {
 }
 
 // + 버튼 클릭시 다중 세트 모드로 전환
-function addCompositionSet(setName = '') {
+function addCompositionSet(setName = '', preloadedData = null) {
     console.log('🧪 Adding new composition set - transitioning to multi-set mode');
+    console.log('🧪 SetName:', setName, 'PreloadedData:', preloadedData);
     
     // compositionList 확인
     if (typeof compositionList === 'undefined') {
