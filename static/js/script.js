@@ -18,19 +18,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     // 토큰이 있으면 저장
                     if (data.token) {
                         console.log('Saving token:', data.token);
-                        sessionStorage.setItem('userToken', data.token);
+                        localStorage.setItem('userToken', data.token);
                     } else {
                         console.log('No token in response, creating dummy token');
-                        sessionStorage.setItem('userToken', 'logged_in_' + Date.now());
+                        localStorage.setItem('userToken', 'logged_in_' + Date.now());
                     }
                     
                     // 로그인 전에 저장된 목표 URL이 있으면 그곳으로, 없으면 메인으로
-                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+                    const redirectUrl = localStorage.getItem('redirectAfterLogin');
                     console.log('Checking for saved redirect URL:', redirectUrl);
                     
                     if (redirectUrl) {
                         console.log("Redirecting to saved URL:", redirectUrl);
-                        sessionStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
+                        localStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
                         window.location.href = redirectUrl;
                     } else {
                         console.log("No saved URL, redirecting to main page");
@@ -78,15 +78,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.token) {
                     console.log("Login successful! Received token: ", data.token);
 
-                    sessionStorage.setItem('userToken', data.token);  // Store token
+                    localStorage.setItem('userToken', data.token);  // Store token
 
                     // 로그인 전에 저장된 목표 URL이 있으면 그곳으로, 없으면 메인으로
-                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+                    const redirectUrl = localStorage.getItem('redirectAfterLogin');
                     console.log('Checking for saved redirect URL:', redirectUrl);
                     
                     if (redirectUrl) {
                         console.log("Redirecting to saved URL:", redirectUrl);
-                        sessionStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
+                        localStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
                         window.location.href = redirectUrl;
                     } else {
                         console.log("No saved URL, redirecting to main page");
@@ -149,8 +149,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (isProtectedPage) {
         console.log('Protected page detected, checking login status...');
-        const token = sessionStorage.getItem('userToken');
+        const token = localStorage.getItem('userToken');
         console.log('Token check:', token ? 'EXISTS' : 'NOT_EXISTS');
+        console.log('Actual token value:', token);
         
         if (!token || (!token.startsWith('authenticated_') && !token.startsWith('google_auth_') && !token.startsWith('logged_in_'))) {
             console.log('❌ Not logged in on protected page, redirecting to landing');
@@ -216,13 +217,13 @@ function initiateGoogleLogin() {
     console.log('Starting Google OAuth login');
     
     // 현재 저장된 리다이렉트 URL 확인
-    const savedRedirectUrl = sessionStorage.getItem('redirectAfterLogin');
+    const savedRedirectUrl = localStorage.getItem('redirectAfterLogin');
     console.log('Current saved redirect URL:', savedRedirectUrl);
     
     // 목표 URL이 없으면 기본값 설정
     if (!savedRedirectUrl) {
         console.log('Setting default redirect URL to /add.html');
-        sessionStorage.setItem('redirectAfterLogin', '/add.html');
+        localStorage.setItem('redirectAfterLogin', '/add.html');
     }
     
     // 구글 OAuth로 리다이렉트 (절대 경로 사용)
@@ -232,13 +233,13 @@ function initiateGoogleLogin() {
 
 // 토큰 상태 디버깅 함수
 function debugTokenStatus() {
-    const token = sessionStorage.getItem('userToken');
-    const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
+    const token = localStorage.getItem('userToken');
+    const redirectUrl = localStorage.getItem('redirectAfterLogin');
     console.log('=== TOKEN DEBUG ===');
     console.log('Token exists:', !!token);
     console.log('Token value:', token);
     console.log('Redirect URL:', redirectUrl);
-    console.log('SessionStorage contents:', sessionStorage);
+    console.log('LocalStorage contents:', localStorage);
     console.log('==================');
 }
 
@@ -247,7 +248,7 @@ function checkLoginAndRedirect(targetUrl) {
     debugTokenStatus();
     
     // 세션에서 토큰 확인
-    const token = sessionStorage.getItem('userToken');
+    const token = localStorage.getItem('userToken');
     
     console.log('Checking login status for URL:', targetUrl);
     console.log('Token found:', token ? 'YES' : 'NO');
@@ -262,14 +263,14 @@ function checkLoginAndRedirect(targetUrl) {
             window.location.href = targetUrl;
         } else {
             console.log('Invalid token format, clearing and redirecting to login');
-            sessionStorage.removeItem('userToken');
-            sessionStorage.setItem('redirectAfterLogin', targetUrl);
+            localStorage.removeItem('userToken');
+            localStorage.setItem('redirectAfterLogin', targetUrl);
             window.location.href = '/login.html';
         }
     } else {
         // 토큰이 없으면 목표 URL을 저장하고 로그인 페이지로 이동
         console.log('No token found, saving target URL and redirecting to login');
-        sessionStorage.setItem('redirectAfterLogin', targetUrl);
+        localStorage.setItem('redirectAfterLogin', targetUrl);
         window.location.href = '/login.html';
     }
 }
@@ -281,6 +282,12 @@ let isLoading = false;
 
 function displayRecentlyAdded() {
     var grid = document.querySelector(".grid_container"); 
+    
+    // Load More 버튼 다시 보이기 (초기 상태로 돌아갈 때)
+    const loadMoreBtn = document.getElementById('load_more_btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = 'block';
+    }
     
     // Supabase에서 모든 아이템들 가져오기
     console.log('Fetching recently added items from /api/items');
@@ -335,6 +342,13 @@ function createAndAppendGridItem(item, grid) {
     const gridItem = document.createElement('div');
     gridItem.className = 'grid_item clickable';
     
+    // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
+    const link = document.createElement('a');
+    link.href = './item.html?id=supabase_' + item.item_id;
+    link.style.display = 'block';
+    link.style.textDecoration = 'none';
+    link.style.color = 'inherit';
+    
     const img = document.createElement('img');
     img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
     
@@ -359,12 +373,8 @@ function createAndAppendGridItem(item, grid) {
         this.classList.add('image_placeholder');
     };
     
-    gridItem.appendChild(img);
-    
-    gridItem.addEventListener('click', function() {
-        location.href = './item.html?id=supabase_' + item.item_id;
-    });
-    
+    link.appendChild(img);
+    gridItem.appendChild(link);
     grid.appendChild(gridItem);
 }
 
@@ -433,6 +443,13 @@ function displayAllItems() {
                     const gridItem = document.createElement('div');
                     gridItem.className = 'grid_item clickable';
                     
+                    // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
+                    const link = document.createElement('a');
+                    link.href = './item.html?id=supabase_' + item.item_id;
+                    link.style.display = 'block';
+                    link.style.textDecoration = 'none';
+                    link.style.color = 'inherit';
+                    
                     const img = document.createElement('img');
                     img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
                     
@@ -457,11 +474,8 @@ function displayAllItems() {
                         this.classList.add('image_placeholder');
                     };
                     
-                    gridItem.appendChild(img);
-                    
-                    gridItem.addEventListener('click', function() {
-                        location.href = './item.html?id=supabase_' + item.item_id;
-                    });
+                    link.appendChild(img);
+                    gridItem.appendChild(link);
                     
                     grid.appendChild(gridItem);
                 });
@@ -472,16 +486,19 @@ function displayAllItems() {
             var numberOfItems = 8;
             for (let i = 0; i < numberOfItems; i++) {
                 const item = document.createElement('div');
-                item.className = 'grid_item';
-                item.className += ' clickable';
+                item.className = 'grid_item clickable';
+                
+                // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
+                const link = document.createElement('a');
+                link.href = './item.html?id=' + i;
+                link.style.display = 'block';
+                link.style.textDecoration = 'none';
+                link.style.color = 'inherit';
                 
                 const img = document.createElement('img');
                 img.src = "/static/src/db/" + i + ".jpg";
-                item.appendChild(img);
-                
-                item.addEventListener('click', function() {
-                    location.href = './item.html?id=' + i;
-                });
+                link.appendChild(img);
+                item.appendChild(link);
                 
                 grid.appendChild(item);
             }
@@ -922,6 +939,19 @@ function performSearchOptimized(query) {
     // 캐시된 데이터가 있으면 즉시 검색, 없으면 로드
     const searchPromise = searchCache ? Promise.resolve(searchCache) : preloadSearchData();
     
+    // UK/DE 검색 디버깅
+    if ((query.toLowerCase().includes('uk') || query.toLowerCase().includes('de')) && searchCache && Array.isArray(searchCache)) {
+        const searchRegion = query.toLowerCase().includes('uk') ? 'uk' : 'de';
+        const regionItems = searchCache.filter(item => (item.sizeRegion || item.size_region)?.toLowerCase() === searchRegion);
+        console.log(`🔍 ${searchRegion.toUpperCase()} 사이즈 아이템들:`, regionItems.length, regionItems.slice(0, 3).map(item => ({
+            id: item.item_id,
+            size_region: item.size_region,
+            sizeRegion: item.sizeRegion,
+            brand: item.brand,
+            category: item.category
+        })));
+    }
+    
     searchPromise.then(items => {
         if (items && items.length > 0) {
             // 향상된 검색 필터링 (캐시된 데이터 사용)
@@ -967,15 +997,32 @@ function performSearchOptimized(query) {
                         item.subcategory2?.toLowerCase().includes(lowerTerm),
                         item.brand?.toLowerCase().includes(lowerTerm),
                         item.size?.toLowerCase().includes(lowerTerm),
-                        item.sizeRegion?.toLowerCase().includes(lowerTerm),
+                        (item.sizeRegion || item.size_region)?.toLowerCase().includes(lowerTerm),
                         item.tags?.toLowerCase().includes(lowerTerm),
                         item.color?.toLowerCase().includes(lowerTerm),
-                        item.season?.toLowerCase().includes(lowerTerm)
+                        // Season 처리는 별도로 진행
                     ];
                     
+                    // Season 특별 처리: "all" season은 모든 검색에 포함, "!all"로 제외 가능
+                    const seasonMatch = (() => {
+                        const itemSeason = item.season?.toLowerCase() || '';
+                        // "!all" 검색의 경우: "all"이 아닌 season만 매치
+                        if (lowerTerm === '!all') {
+                            return itemSeason !== 'all' && itemSeason !== '';
+                        }
+                        // "all" season은 항상 매치 (단, "!all" 검색이 아닌 경우)
+                        if (itemSeason === 'all') {
+                            return true;
+                        }
+                        // 일반 season 매치
+                        return itemSeason.includes(lowerTerm);
+                    })();
+                    
+                    matches.push(seasonMatch);
+                    
                     // Region+Size 조합 검색 추가 (공백 있는 버전과 없는 버전 모두 확인)
-                    const regionSizeCombinationSpaced = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
-                    const regionSizeCombinationNoSpace = `${item.sizeRegion || ''}${item.size || ''}`.toLowerCase();
+                    const regionSizeCombinationSpaced = `${item.sizeRegion || item.size_region || ''} ${item.size || ''}`.toLowerCase();
+                    const regionSizeCombinationNoSpace = `${item.sizeRegion || item.size_region || ''}${item.size || ''}`.toLowerCase();
                     matches.push(regionSizeCombinationSpaced.includes(lowerTerm));
                     matches.push(regionSizeCombinationNoSpace.includes(lowerTerm));
                     
@@ -985,7 +1032,20 @@ function performSearchOptimized(query) {
                 return measurementValid && compositionValid && generalValid;
             });
             
-            console.log(`🎯 Search results: ${filteredItems.length} items found`);
+            console.log(`🎯 Search results: ${filteredItems.length} items found for query: "${query}"`);
+            
+            // UK/DE 검색 디버깅 - 매치된 결과
+            if (query.toLowerCase().includes('uk') || query.toLowerCase().includes('de')) {
+                const searchRegion = query.toLowerCase().includes('uk') ? 'UK' : 'DE';
+                console.log(`🎯 ${searchRegion} 매치된 아이템들:`, filteredItems.slice(0, 5).map(item => ({
+                    id: item.item_id,
+                    size_region: item.size_region,
+                    sizeRegion: item.sizeRegion,
+                    brand: item.brand,
+                    category: item.category,
+                    matchReason: `size_region: ${item.size_region}, brand: ${item.brand}, category: ${item.category}`
+                })));
+            }
             displaySearchResults(filteredItems, query);
         } else {
             console.log('❌ No items available for search');
@@ -1095,15 +1155,32 @@ function performSearchForAllOptimized(query) {
                         item.subcategory2?.toLowerCase().includes(lowerTerm),
                         item.brand?.toLowerCase().includes(lowerTerm),
                         item.size?.toLowerCase().includes(lowerTerm),
-                        item.sizeRegion?.toLowerCase().includes(lowerTerm),
+                        (item.sizeRegion || item.size_region)?.toLowerCase().includes(lowerTerm),
                         item.tags?.toLowerCase().includes(lowerTerm),
                         item.color?.toLowerCase().includes(lowerTerm),
-                        item.season?.toLowerCase().includes(lowerTerm)
+                        // Season 처리는 별도로 진행
                     ];
                     
+                    // Season 특별 처리: "all" season은 모든 검색에 포함, "!all"로 제외 가능
+                    const seasonMatch = (() => {
+                        const itemSeason = item.season?.toLowerCase() || '';
+                        // "!all" 검색의 경우: "all"이 아닌 season만 매치
+                        if (lowerTerm === '!all') {
+                            return itemSeason !== 'all' && itemSeason !== '';
+                        }
+                        // "all" season은 항상 매치 (단, "!all" 검색이 아닌 경우)
+                        if (itemSeason === 'all') {
+                            return true;
+                        }
+                        // 일반 season 매치
+                        return itemSeason.includes(lowerTerm);
+                    })();
+                    
+                    matches.push(seasonMatch);
+                    
                     // Region+Size 조합 검색 추가 (공백 있는 버전과 없는 버전 모두 확인)
-                    const regionSizeCombinationSpaced = `${item.sizeRegion || ''} ${item.size || ''}`.toLowerCase();
-                    const regionSizeCombinationNoSpace = `${item.sizeRegion || ''}${item.size || ''}`.toLowerCase();
+                    const regionSizeCombinationSpaced = `${item.sizeRegion || item.size_region || ''} ${item.size || ''}`.toLowerCase();
+                    const regionSizeCombinationNoSpace = `${item.sizeRegion || item.size_region || ''}${item.size || ''}`.toLowerCase();
                     matches.push(regionSizeCombinationSpaced.includes(lowerTerm));
                     matches.push(regionSizeCombinationNoSpace.includes(lowerTerm));
                     
@@ -1189,15 +1266,29 @@ function performSearchForAll(query) {
                             (item.subcategory && item.subcategory.toLowerCase().includes(term)) ||
                             (item.subcategory2 && item.subcategory2.toLowerCase().includes(term)) ||
                             (item.size && item.size.toLowerCase().includes(term)) ||
-                            (item.size_region && item.size_region.toLowerCase().includes(term)) ||
-                            (item.season && item.season.toLowerCase().includes(term))
+                            ((item.size_region || item.sizeRegion) && (item.size_region || item.sizeRegion).toLowerCase().includes(term))
                         );
                         
-                        // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
-                        const regionSizeMatch = item.size_region && item.size && 
-                            (item.size_region + item.size).toLowerCase().includes(term);
+                        // Season 특별 처리: "all" season은 모든 검색에 포함, "!all"로 제외 가능
+                        const seasonMatch = (() => {
+                            const itemSeason = item.season?.toLowerCase() || '';
+                            // "!all" 검색의 경우: "all"이 아닌 season만 매치
+                            if (term === '!all') {
+                                return itemSeason !== 'all' && itemSeason !== '';
+                            }
+                            // "all" season은 항상 매치 (단, "!all" 검색이 아닌 경우)
+                            if (itemSeason === 'all') {
+                                return true;
+                            }
+                            // 일반 season 매치
+                            return itemSeason.includes(term);
+                        })();
                         
-                        return fieldMatch || regionSizeMatch;
+                        // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
+                        const regionSizeMatch = (item.size_region || item.sizeRegion) && item.size && 
+                            ((item.size_region || item.sizeRegion) + item.size).toLowerCase().includes(term);
+                        
+                        return fieldMatch || seasonMatch || regionSizeMatch;
                     });
                     
                     return measurementResult && compositionResult && generalResult;
@@ -1229,7 +1320,18 @@ function displaySearchResultsForAll(items, query) {
     
     if (items.length === 0) {
         container.innerHTML = '<div class="no_items_message">No items found</div>';
+        // Load More 버튼 숨기기
+        const loadMoreBtn = document.getElementById('load_more_btn');
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = 'none';
+        }
         return;
+    }
+    
+    // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
+    const loadMoreBtn = document.getElementById('load_more_btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = 'none';
     }
     
     // 검색 결과 아이템들 표시
@@ -1312,15 +1414,29 @@ function performSearch(query) {
                             (item.subcategory && item.subcategory.toLowerCase().includes(term)) ||
                             (item.subcategory2 && item.subcategory2.toLowerCase().includes(term)) ||
                             (item.size && item.size.toLowerCase().includes(term)) ||
-                            (item.size_region && item.size_region.toLowerCase().includes(term)) ||
-                            (item.season && item.season.toLowerCase().includes(term))
+                            ((item.size_region || item.sizeRegion) && (item.size_region || item.sizeRegion).toLowerCase().includes(term))
                         );
                         
-                        // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
-                        const regionSizeMatch = item.size_region && item.size && 
-                            (item.size_region + item.size).toLowerCase().includes(term);
+                        // Season 특별 처리: "all" season은 모든 검색에 포함, "!all"로 제외 가능
+                        const seasonMatch = (() => {
+                            const itemSeason = item.season?.toLowerCase() || '';
+                            // "!all" 검색의 경우: "all"이 아닌 season만 매치
+                            if (term === '!all') {
+                                return itemSeason !== 'all' && itemSeason !== '';
+                            }
+                            // "all" season은 항상 매치 (단, "!all" 검색이 아닌 경우)
+                            if (itemSeason === 'all') {
+                                return true;
+                            }
+                            // 일반 season 매치
+                            return itemSeason.includes(term);
+                        })();
                         
-                        return fieldMatch || regionSizeMatch;
+                        // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
+                        const regionSizeMatch = (item.size_region || item.sizeRegion) && item.size && 
+                            ((item.size_region || item.sizeRegion) + item.size).toLowerCase().includes(term);
+                        
+                        return fieldMatch || seasonMatch || regionSizeMatch;
                     });
                     
                     return measurementResult && compositionResult && generalResult;
@@ -1402,6 +1518,16 @@ function checkCompositionSearch(term, item) {
     if (typeof compositionList === 'undefined') {
         console.log('⚠️ compositionList not available, skipping composition search');
         return null;
+    }
+    
+    // Size region 우선 처리: DE, UK, US, FR, IT 등은 composition 검색에서 제외
+    const sizeRegions = ['WW', 'US', 'EU', 'FR', 'IT', 'DE', 'UK', 'KR', 'JP', 'Kids', 'Ring', 'etc'];
+    const isRegionTerm = sizeRegions.some(region => 
+        term.toLowerCase() === region.toLowerCase()
+    );
+    
+    if (isRegionTerm) {
+        return null; // region 검색이므로 composition 검색에서 제외
     }
     
     // 검색어가 composition 재료가 아니면 null 반환 (일반 텍스트 검색으로 처리)
@@ -1522,7 +1648,18 @@ function displaySearchResults(items, query) {
     
     if (items.length === 0) {
         container.innerHTML = '<div class="no_items_message">No items found</div>';
+        // Load More 버튼 숨기기
+        const loadMoreBtn = document.getElementById('load_more_btn');
+        if (loadMoreBtn) {
+            loadMoreBtn.style.display = 'none';
+        }
         return;
+    }
+    
+    // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
+    const loadMoreBtn = document.getElementById('load_more_btn');
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display = 'none';
     }
     
     // 검색 결과 아이템들 표시
@@ -2090,7 +2227,7 @@ function submitEditForm(event) {
     formData.append('item_id', itemId);
     
     // 서버로 업데이트 요청
-    const token = sessionStorage.getItem('userToken');
+    const token = localStorage.getItem('userToken');
     
     const headers = {};
     if (token) {
@@ -5281,7 +5418,7 @@ function submitForm(event) {
     }
     
     // Flask 서버로 전송
-    const token = sessionStorage.getItem('userToken');
+    const token = localStorage.getItem('userToken');
     console.log('Using auth token for add_item:', token ? token.substring(0, 20) + '...' : 'none');
     
     fetch('/add_item', {

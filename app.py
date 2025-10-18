@@ -330,32 +330,28 @@ def google_callback():
             auth_token = f"google_auth_{int(time.time())}"
             logging.info(f"Google authentication successful for: {user_info['email']}")
             
-            # JavaScript로 토큰 설정하고 리다이렉트하는 HTML 렌더링
+            # JavaScript로 토큰 설정하고 즉시 리다이렉트
             return f"""
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Login Success</title>
+                <title>Redirecting...</title>
             </head>
             <body>
                 <script>
-                    console.log('🔐 Google login successful, setting token and redirecting');
-                    sessionStorage.setItem('userToken', '{auth_token}');
+                    // 토큰 저장
+                    localStorage.setItem('userToken', '{auth_token}');
                     
                     // 저장된 리다이렉트 URL 확인
-                    const redirectUrl = sessionStorage.getItem('redirectAfterLogin');
-                    console.log('🔍 Checking redirect URL:', redirectUrl);
+                    const redirectUrl = localStorage.getItem('redirectAfterLogin');
                     
                     if (redirectUrl) {{
-                        console.log('🎯 Redirecting to saved URL:', redirectUrl);
-                        sessionStorage.removeItem('redirectAfterLogin');
+                        localStorage.removeItem('redirectAfterLogin');
                         window.location.href = redirectUrl;
                     }} else {{
-                        console.log('🏠 No saved URL, redirecting to main page');
                         window.location.href = '/index.html';
                     }}
                 </script>
-                <p>Login successful! Redirecting...</p>
             </body>
             </html>
             """
@@ -366,7 +362,35 @@ def google_callback():
         logging.error(f"Google OAuth error: {str(e)}")
         import traceback
         traceback.print_exc()
-        return redirect('/login.html?error=oauth_failed')
+        
+        # 에러 정보를 더 자세히 표시하는 페이지
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>OAuth Error</title>
+            <style>
+                body {{ font-family: Arial; padding: 20px; background: #ffe6e6; }}
+                .error {{ background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border: 1px solid #ff0000; }}
+            </style>
+        </head>
+        <body>
+            <h2>🚨 OAuth Error</h2>
+            <div class="error">
+                <p><strong>Error:</strong> {str(e)}</p>
+                <p><strong>Type:</strong> {type(e).__name__}</p>
+            </div>
+            <p><a href="/login.html">Try Again</a> | <a href="/">Home</a></p>
+            <script>
+                console.error('OAuth Error:', '{str(e)}');
+                // 5초 후 로그인 페이지로 리다이렉트
+                setTimeout(() => {{
+                    window.location.href = '/login.html?error=oauth_failed';
+                }}, 5000);
+            </script>
+        </body>
+        </html>
+        """
 
 def require_auth(f):
     def decorated_function(*args, **kwargs):
