@@ -562,7 +562,7 @@ body:not(.filter-open) .grid_item {
     cursor: grabbing !important;
 }
 
-.size_region {
+.filter_panel .size_region {
     width: 80px;
     height: 60px;
     background-color: var(--lightgray);
@@ -578,7 +578,7 @@ body:not(.filter-open) .grid_item {
     line-height: 60px;
 }
 
-.size_region_dropdown {
+.filter_panel .size_region_dropdown {
     display: none;
     position: absolute;
     background-color: white;

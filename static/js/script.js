@@ -4684,7 +4684,10 @@ function displayFilterSubCategory(cat) {
 
 /* myFunction toggles between adding and removing the show class, which is used to hide and show the dropdown content */
 function show() {
-    document.querySelector(".size_region_dropdown").classList.toggle("show");
+    const dropdown = document.querySelector(".size_region_dropdown");
+    if (dropdown) {
+        dropdown.classList.toggle("show");
+    }
 }
 
 // Season dropdown 함수들
@@ -4707,11 +4710,16 @@ function displaySizeRegionDropdown() {
         item.innerHTML = sizeRegionList[i]+`</button>`;
         item.value = sizeRegionList[i];
         drop.appendChild(item);
-        item.addEventListener('click', function() {
-            displaySizesByRegion(this.value);}, false);
-        item.addEventListener('click', show);
-        item.addEventListener('click', function() {
-            selectedSizeRegion(this.value);}, false);
+        item.addEventListener('click', function(e) {
+            e.stopPropagation(); // 이벤트 버블링 방지
+            displaySizesByRegion(this.value);
+            selectedSizeRegion(this.value);
+            // dropdown 닫기
+            const dropdown = document.querySelector(".size_region_dropdown");
+            if (dropdown) {
+                dropdown.classList.remove("show");
+            }
+        }, false);
     }
 }
 

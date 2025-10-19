@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('send_static', filename='css/add.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
-    <title>Panda's DressRoom</title>
+    <title>closetDB</title>
 </head>
 
 <body>
@@ -93,12 +93,12 @@
                 <h1>size</h1>
             </div>
             <div class="grid_container_size">
-
-                <button class="size_region size_region_selected" onclick="show()">
-                    Select
-                </button>
-                
-                <div class="size_region_dropdown">
+                <div class="size_region_wrap">
+                    <button class="size_region size_region_selected" onclick="show()">
+                        Select
+                    </button>
+                    <div class="size_region_dropdown">
+                    </div>
                 </div>
                 <div class="size_key_container">
                     <script>displaySizesByRegion("");</script>
