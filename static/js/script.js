@@ -3103,34 +3103,6 @@ function extractSizes(items) {
     return sizeArray;
 }
 
-function getMockDataForCategory(category) {
-    // This would normally fetch from your database
-    // Returning mock data for demonstration
-    const mockData = {
-        'dress': {
-            measurements: ['length', 'chest', 'waist', 'hem width'],
-            compositions: ['cotton', 'silk', 'polyester'],
-            sizes: ['ww', 'us']
-        },
-        'top': {
-            measurements: ['chest', 'sleeve', 'shoulder'],
-            compositions: ['cotton', 'wool', 'viscose'],
-            sizes: ['ww', 'us', 'de']
-        },
-        'pants': {
-            measurements: ['waist', 'hip', 'inseam', 'leg opening'],
-            compositions: ['denim', 'cotton', 'polyester'],
-            sizes: ['ww', 'kr']
-        }
-    };
-    
-    return mockData[category] || {
-        measurements: ['length', 'chest', 'sleeve'],
-        compositions: ['cotton', 'silk', 'wool'],
-        sizes: ['ww', 'us', 'de']
-    };
-}
-
 function updateFilterSizes(selectedCategories) {
     console.log('📏 Updating filter sizes for categories:', selectedCategories);
     
@@ -3593,43 +3565,90 @@ function initializeFilterCompositions() {
         return;
     }
     
-    // db.js의 compositionList 직접 참조 - 새로 정의 금지
-    if (typeof compositionList === 'undefined' || !compositionList) {
-        console.error('❌ compositionList not found in db.js, using fallback');
-        // Fallback list
-        const compositionList = ["cotton", "silk", "wool", "cashmere", "leather", "viscose"];
-    } else {
-        console.log('✅ Found compositionList:', compositionList);
-    }
+    console.log('🧵 Initializing filter compositions from existing data');
     
-    const actualList = typeof compositionList !== 'undefined' && compositionList ? compositionList : 
-        ["cotton", "silk", "wool", "cashmere", "leather", "viscose"];
-    
-    // 기본 6개만 표시
-    const basicCompositions = actualList.slice(0, 6);
-    
-    const hasMore = actualList.length > 6;
-    
-    container.innerHTML = `
-        <div class="filter_composition_basic" id="new_filter_composition_basic">
-            ${basicCompositions.map(composition => `
-                <div class="tag_item">
-                    <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
-                    <label for="composition_${composition}">${composition}</label>
-                </div>
-            `).join('')}
-        </div>
-        <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
-            <!-- Will be populated when expanded -->
-        </div>
-        ${hasMore ? `
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleCompositionList()">
-                <span class="load_more_icon"></span>
-            </button>
-        </div>
-        ` : ''}
-    `;
+    // Fetch actual composition data from items
+    fetch('/api/items')
+    .then(response => response.json())
+    .then(data => {
+        const items = data.items || [];
+        
+        // Calculate composition frequency
+        const compositionFrequency = {};
+        items.forEach(item => {
+            if (item.compositions) {
+                if (Array.isArray(item.compositions)) {
+                    item.compositions.forEach(comp => {
+                        if (comp && comp.trim()) {
+                            const normalizedComp = comp.trim().toLowerCase();
+                            compositionFrequency[normalizedComp] = (compositionFrequency[normalizedComp] || 0) + 1;
+                        }
+                    });
+                } else if (typeof item.compositions === 'object' && item.compositions !== null) {
+                    Object.keys(item.compositions).forEach(setKey => {
+                        const setData = item.compositions[setKey];
+                        if (typeof setData === 'object' && setData !== null) {
+                            Object.keys(setData).forEach(material => {
+                                if (material && material.trim()) {
+                                    const normalizedMaterial = material.trim().toLowerCase();
+                                    compositionFrequency[normalizedMaterial] = (compositionFrequency[normalizedMaterial] || 0) + 1;
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+        
+        // Sort by frequency (descending) then alphabetically
+        const allCompositions = Object.keys(compositionFrequency)
+            .sort((a, b) => {
+                const freqDiff = compositionFrequency[b] - compositionFrequency[a];
+                return freqDiff !== 0 ? freqDiff : a.localeCompare(b);
+            });
+        
+        console.log('📊 Compositions by frequency:', allCompositions.map(comp => 
+            `${comp} (${compositionFrequency[comp]})`));
+        
+        // Show first 4 compositions by default
+        const basicCompositions = allCompositions.slice(0, 4);
+        const hasMore = allCompositions.length > 4;
+        
+        // Store all compositions for load more functionality
+        container.dataset.allCompositions = JSON.stringify(allCompositions);
+        
+        container.innerHTML = `
+            <div class="filter_composition_basic" id="new_filter_composition_basic">
+                ${basicCompositions.map(composition => `
+                    <div class="tag_item">
+                        <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
+                        <label for="composition_${composition}">${composition}</label>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
+                <!-- Will be populated when expanded -->
+            </div>
+            ${hasMore ? `
+            <div class="load_more_section">
+                <button class="load_more_button" onclick="toggleCompositionList()">
+                    <span class="load_more_icon"></span>
+                </button>
+            </div>
+            ` : ''}
+        `;
+    })
+    .catch(error => {
+        console.error('❌ Failed to fetch items for compositions:', error);
+        // Fallback to empty state or minimal compositions
+        container.innerHTML = `
+            <div class="filter_composition_basic" id="new_filter_composition_basic">
+                <!-- No compositions available -->
+            </div>
+            <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
+            </div>
+        `;
+    });
 }
 
 // Size region and size value mapping from script.js 원본 구현 사용
@@ -3667,64 +3686,150 @@ function initializeFilterSizes() {
         return;
     }
     
-    // 기본값: WW, US, DE 지역만 디폴트로 표시 (임의 사이즈 생성 금지)
-    const defaultRegions = ["WW", "US", "DE"];
+    console.log('📐 Initializing filter sizes from existing data');
     
-    // regions을 rows로 배치 (vertical layout) - region | sizes
-    let sizeRegionsHtml = '';
-    
-    defaultRegions.forEach(region => {
-        const regionSizes = getSizesByRegion(region);
+    // Fetch actual size data from items
+    fetch('/api/items')
+    .then(response => response.json())
+    .then(data => {
+        const items = data.items || [];
+        console.log('📊 Total items fetched:', items.length);
         
-        sizeRegionsHtml += `
-            <div class="grid_container_size">
-                <div class="size_region">${region}</div>
-                <div class="size_key_container">
-                    ${regionSizes.map(size => `
-                        <div class="tag_item">
-                            <input type="checkbox" id="size_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
-                            <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
-                        </div>
-                    `).join('')}
+        // Debug: Check first few items structure
+        if (items.length > 0) {
+            console.log('🔍 Sample item structure:', items[0]);
+            console.log('🔍 Available fields:', Object.keys(items[0]));
+        }
+        
+        // Group actual sizes by region
+        const sizesByRegion = {};
+        
+        items.forEach(item => {
+            // Check both possible field names for size region
+            const region = item.sizeRegion || item.size_region;
+            const size = item.size;
+            
+            console.log('🔍 Item size data:', { region, size, item_id: item.id });
+            
+            if (region && size) {
+                if (!sizesByRegion[region]) {
+                    sizesByRegion[region] = new Set();
+                }
+                sizesByRegion[region].add(size);
+            }
+        });
+        
+        // Convert Sets to Arrays and sort
+        Object.keys(sizesByRegion).forEach(region => {
+            sizesByRegion[region] = Array.from(sizesByRegion[region]).sort((a, b) => {
+                // Numeric sort for number sizes, alphabetic for text sizes
+                const aNum = parseFloat(a);
+                const bNum = parseFloat(b);
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return aNum - bNum;
+                }
+                return a.localeCompare(b);
+            });
+        });
+        
+        console.log('📊 Sizes by region from data:', sizesByRegion);
+        
+        // Only show regions that have actual data
+        const regionsWithData = Object.keys(sizesByRegion).filter(region => 
+            sizesByRegion[region].length > 0
+        );
+        
+        if (regionsWithData.length === 0) {
+            container.innerHTML = `
+                <div class="filter_size_basic" id="new_filter_size_basic">
+                    <div class="no_sizes_available">No sizes available</div>
                 </div>
+            `;
+            return;
+        }
+        
+        // Show first 3 regions by default
+        const basicRegions = regionsWithData.slice(0, 3);
+        const hasMoreRegions = regionsWithData.length > 3;
+        
+        // Store all regions data for load more
+        container.dataset.allSizeRegions = JSON.stringify(sizesByRegion);
+        
+        let sizeRegionsHtml = '';
+        basicRegions.forEach(region => {
+            const regionSizes = sizesByRegion[region];
+            
+            sizeRegionsHtml += `
+                <div class="grid_container_size">
+                    <div class="size_region">${region}</div>
+                    <div class="size_key_container">
+                        ${regionSizes.map(size => `
+                            <div class="tag_item">
+                                <input type="checkbox" id="size_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                                <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = `
+            <div class="filter_size_basic" id="new_filter_size_basic">
+                ${sizeRegionsHtml}
+            </div>
+            <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
+                <!-- Will be populated when expanded with more regions -->
+            </div>
+            ${hasMoreRegions ? `
+            <div class="load_more_section">
+                <button class="load_more_button" onclick="toggleSizeList()">
+                    <span class="load_more_icon"></span>
+                </button>
+            </div>
+            ` : ''}
+        `;
+    })
+    .catch(error => {
+        console.error('❌ Failed to fetch items for sizes:', error);
+        container.innerHTML = `
+            <div class="filter_size_basic" id="new_filter_size_basic">
+                <div class="no_sizes_available">Failed to load sizes</div>
             </div>
         `;
     });
-    
-    container.innerHTML = `
-        <div class="filter_size_basic" id="new_filter_size_basic">
-            ${sizeRegionsHtml}
-        </div>
-        <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
-            <!-- Will be populated when expanded with more regions -->
-        </div>
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleSizeList()">
-                <span class="load_more_icon"></span>
-            </button>
-        </div>
-    `;
 }
 
 function toggleSizeList() {
-    const expanded = document.getElementById('new_filter_size_expanded');
+    const container = document.getElementById('new_filter_size_container');
     const button = document.querySelector('#new_filter_size_container .load_more_button');
+    const basic = document.getElementById('new_filter_size_basic');
     
-    if (expanded.classList.contains('filter_expanded')) {
-        // Expand - show all sizes from db.js sizeRegionList (참조만, 새로 정의 금지)
-        let expandedRegionsHtml = '';
+    console.log('toggleSizeList called');
+    
+    if (!button.dataset.expanded || button.dataset.expanded === 'false') {
+        // Expand - append additional regions to basic container
+        const allSizeRegions = JSON.parse(container.dataset.allSizeRegions || '{}');
         
-        if (typeof sizeRegionList !== 'undefined' && sizeRegionList) {
-            // 이미 표시된 regions 제외하고 나머지 regions 표시
-            const defaultRegions = ["WW", "US", "DE"];
-            const expandedRegions = sizeRegionList.filter(region => !defaultRegions.includes(region));
-            
-            // Use row layout for expanded regions too (vertical)
-            expandedRegions.forEach(region => {
-                const regionSizes = getSizesByRegion(region);
-                
-                expandedRegionsHtml += `
-                    <div class="grid_container_size">
+        // Get already displayed regions
+        const displayedRegions = new Set();
+        const existingRegionElements = basic.querySelectorAll('.size_region');
+        existingRegionElements.forEach(el => {
+            displayedRegions.add(el.textContent.trim());
+        });
+        
+        // Find additional regions not yet displayed
+        const additionalRegions = Object.keys(allSizeRegions).filter(region => 
+            !displayedRegions.has(region) && allSizeRegions[region].length > 0
+        );
+        
+        console.log('Additional regions to append:', additionalRegions);
+        
+        if (additionalRegions.length > 0) {
+            const expandedHtml = additionalRegions.map(region => {
+                const regionSizes = allSizeRegions[region];
+                return `
+                    <div class="grid_container_size size_expanded_item">
                         <div class="size_region">${region}</div>
                         <div class="size_key_container">
                             ${regionSizes.map(size => `
@@ -3736,19 +3841,22 @@ function toggleSizeList() {
                         </div>
                     </div>
                 `;
-            });
+            }).join('');
+            
+            basic.insertAdjacentHTML('beforeend', expandedHtml);
         }
         
-        expanded.innerHTML = expandedRegionsHtml;
-        expanded.classList.remove('filter_expanded');
+        button.dataset.expanded = 'true';
         const icon = button.querySelector('.load_more_icon');
         if (icon) {
             icon.classList.add('collapsed');
         }
     } else {
-        // Collapse - hide expanded list
-        expanded.innerHTML = '';
-        expanded.classList.add('filter_expanded');
+        // Collapse - remove appended regions
+        const expandedItems = basic.querySelectorAll('.size_expanded_item');
+        expandedItems.forEach(item => item.remove());
+        
+        button.dataset.expanded = 'false';
         const icon = button.querySelector('.load_more_icon');
         if (icon) {
             icon.classList.remove('collapsed');
@@ -3758,89 +3866,78 @@ function toggleSizeList() {
 
 // Toggle functions for load more buttons
 function toggleMeasurementList() {
-    const expanded = document.getElementById('new_filter_measurement_expanded');
+    console.log('🔄 toggleMeasurementList called - start');
+    
     const button = document.querySelector('#new_filter_measurement_container .load_more_button');
+    const basic = document.getElementById('new_filter_measurement_basic');
     
-    console.log('toggleMeasurementList called');
-    console.log('expanded element:', expanded);
-    console.log('button element:', button);
+    console.log('🔍 Button element:', button);
+    console.log('🔍 Basic container:', basic);
     
-    if (expanded.classList.contains('filter_expanded')) {
-        // Expand - show additional measurements only (no duplicates)
+    if (!button || !basic) {
+        console.error('❌ Required elements not found');
+        return;
+    }
+    
+    if (!button.dataset.expanded || button.dataset.expanded === 'false') {
+        // Expand - append additional measurements to basic container
         
         // Get existing measurements to avoid duplicates
-        const basicContainer = document.getElementById('new_filter_measurement_basic');
         const existingMeasurements = new Set();
+        const existingLabels = basic.querySelectorAll('.filter_measurement_item label');
+        existingLabels.forEach(label => {
+            const measurementName = label.textContent.trim();
+            existingMeasurements.add(measurementName);
+        });
         
-        if (basicContainer) {
-            const existingLabels = basicContainer.querySelectorAll('.filter_measurement_item label');
-            existingLabels.forEach(label => {
-                const measurementName = label.textContent.trim();
-                existingMeasurements.add(measurementName);
-            });
-        }
-        
-        // Check if we have category-specific measurements from reconfigureMeasurements
-        let availableMeasurements = [];
-        if (window.currentCategoryMeasurements) {
-            // Use category-specific measurements if available
-            availableMeasurements = Object.keys(window.currentCategoryMeasurements);
-            console.log('Using category-specific measurements:', availableMeasurements);
-        } else {
-            // Fallback to all possible measurements
-            availableMeasurements = [
-                "chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", 
-                "hem width", "hip", "rise", "inseam", "thigh", "legOpening", "heel", 
-                "width", "height", "circumference"
-            ];
-            console.log('Using fallback measurements - no category selected');
-        }
-        
-        // Show measurements not already displayed
-        const additionalMeasurements = availableMeasurements.filter(m => !existingMeasurements.has(m));
-        
-        console.log('Existing measurements:', Array.from(existingMeasurements));
-        console.log('Additional measurements to show:', additionalMeasurements);
-        
-        if (additionalMeasurements.length > 0) {
-            expanded.innerHTML = additionalMeasurements.map(measurement => {
-                // Use actual measurement data if available from category
-                let minPlaceholder = "from";
-                let maxPlaceholder = "to";
-                
-                if (window.currentCategoryMeasurements && window.currentCategoryMeasurements[measurement]) {
-                    const data = window.currentCategoryMeasurements[measurement];
-                    minPlaceholder = data.min;
-                    maxPlaceholder = data.max;
-                }
-                
-                return `
-                    <div class="filter_measurement_item">
-                        <label class="measurement_label">${measurement}</label>
-                        <div class="filter_measurement_range">
-                            <input type="text" placeholder="${minPlaceholder}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
-                            <span>-</span>
-                            <input type="text" placeholder="${maxPlaceholder}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+        // Use global measurement data from items - reuse existing function
+        fetch('/api/items')
+        .then(response => response.json())
+        .then(data => {
+            const items = data.items || [];
+            const globalMeasurementData = extractMeasurements(items, null); // null = global mode
+            const allMeasurements = Object.keys(globalMeasurementData);
+            const additionalMeasurements = allMeasurements.filter(m => !existingMeasurements.has(m));
+            
+            console.log('📏 Additional measurements to append:', additionalMeasurements);
+            console.log('📊 Global measurement data:', globalMeasurementData);
+            
+            if (additionalMeasurements.length > 0) {
+                const expandedHtml = additionalMeasurements.map(measurement => {
+                    const measurementData = globalMeasurementData[measurement] || { min: 'from', max: 'to' };
+                    return `
+                        <div class="filter_measurement_item measurement_expanded_item">
+                            <label class="measurement_label">${measurement}</label>
+                            <div class="filter_measurement_range">
+                                <input type="text" placeholder="${measurementData.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" autocomplete="off" />
+                                <span>-</span>
+                                <input type="text" placeholder="${measurementData.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" autocomplete="off" />
+                            </div>
+                            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                                <span class="clear_icon"></span>
+                            </button>
                         </div>
-                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                            <span class="clear_icon"></span>
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        } else {
-            expanded.innerHTML = '<div class="no_additional_measurements">All measurements are already shown</div>';
-        }
-        
-        expanded.classList.remove('filter_expanded');
-        const icon = button.querySelector('.load_more_icon');
-        if (icon) {
-            icon.classList.add('collapsed');
-        }
+                    `;
+                }).join('');
+                
+                basic.insertAdjacentHTML('beforeend', expandedHtml);
+            }
+            
+            button.dataset.expanded = 'true';
+            const icon = button.querySelector('.load_more_icon');
+            if (icon) {
+                icon.classList.add('collapsed');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Failed to fetch items for measurements:', error);
+        });
     } else {
-        // Collapse - hide expanded list
-        expanded.innerHTML = '';
-        expanded.classList.add('filter_expanded');
+        // Collapse - remove appended items
+        const expandedItems = basic.querySelectorAll('.measurement_expanded_item');
+        expandedItems.forEach(item => item.remove());
+        
+        button.dataset.expanded = 'false';
         const icon = button.querySelector('.load_more_icon');
         if (icon) {
             icon.classList.remove('collapsed');
@@ -3849,39 +3946,47 @@ function toggleMeasurementList() {
 }
 
 function toggleCompositionList() {
-    const expanded = document.getElementById('new_filter_composition_expanded');
+    const container = document.getElementById('new_filter_composition_container');
     const button = document.querySelector('#new_filter_composition_container .load_more_button');
     const basic = document.getElementById('new_filter_composition_basic');
     
     console.log('toggleCompositionList called');
     
-    if (expanded.classList.contains('filter_expanded')) {
-        // Expand - show all compositions from db.js compositionList (직접 참조만, 새로 정의 금지)
-        if (typeof compositionList === 'undefined' || !compositionList) {
-            console.error('❌ compositionList not found in db.js');
+    if (!button.dataset.expanded || button.dataset.expanded === 'false') {
+        // Expand - append more compositions to basic container
+        const allCompositions = JSON.parse(container.dataset.allCompositions || '[]');
+        if (allCompositions.length === 0) {
+            console.error('❌ No composition data found');
             return;
         }
         
-        // 기본에 표시된 composition 제외하고 나머지만 expanded에 표시
+        // 기본에 표시된 composition 제외하고 나머지만 append (4개 이후)
         const basicCompositions = Array.from(basic.querySelectorAll('input[name="filter_compositions"]')).map(input => input.value);
-        const expandedCompositions = compositionList.filter(comp => !basicCompositions.includes(comp));
+        const expandedCompositions = allCompositions.filter(comp => !basicCompositions.includes(comp));
         
-        expanded.innerHTML = expandedCompositions.map(composition => `
-            <div class="tag_item">
+        console.log('🔄 Expanding compositions:', expandedCompositions);
+        
+        // Append to basic container instead of separate expanded container
+        const expandedHtml = expandedCompositions.map(composition => `
+            <div class="tag_item composition_expanded_item">
                 <input type="checkbox" id="composition_expanded_${composition}" name="filter_compositions" value="${composition}">
                 <label for="composition_expanded_${composition}">${composition}</label>
             </div>
         `).join('');
         
-        expanded.classList.remove('filter_expanded');
+        basic.insertAdjacentHTML('beforeend', expandedHtml);
+        
+        button.dataset.expanded = 'true';
         const icon = button.querySelector('.load_more_icon');
         if (icon) {
             icon.classList.add('collapsed');
         }
     } else {
-        // Collapse - hide expanded list
-        expanded.innerHTML = '';
-        expanded.classList.add('filter_expanded');
+        // Collapse - remove appended items
+        const expandedItems = basic.querySelectorAll('.composition_expanded_item');
+        expandedItems.forEach(item => item.remove());
+        
+        button.dataset.expanded = 'false';
         const icon = button.querySelector('.load_more_icon');
         if (icon) {
             icon.classList.remove('collapsed');

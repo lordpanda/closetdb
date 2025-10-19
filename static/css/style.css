@@ -356,13 +356,17 @@
 }
 
 
-.filter_composition_basic, .filter_composition_expanded {
+.filter_composition_basic {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
     flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 20px;
+}
+
+.filter_composition_expanded {
+    display: none; /* Not used anymore - items append to basic container */
 }
 
 
@@ -421,7 +425,7 @@ body:not(.filter-open) .grid_item {
 
 /* Filter panel layout classes */
 .filter_panel_content {
-    padding: 30px;
+    padding: 16px 30px;
 }
 
 .filter_panel_header {
@@ -621,11 +625,11 @@ body:not(.filter-open) .grid_item {
 
 .load_more_button {
     display: inline-block;
-    width: 50px;
-    height: 40px;
+    width: 70px;
+    height: 30px;
     border-radius: 20px;
     background-size: contain;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     background-repeat: no-repeat;
     background-position: center;
     align-items: center;
@@ -683,27 +687,18 @@ body:not(.filter-open) .grid_item {
     }
 }
 
-@media screen and (max-width: 1199px) and (min-width: 960px) {
-    .filter_panel {
-        width: 400px;
-        right: -400px;
-    }
-}
-
-@media screen and (max-width: 959px) and (min-width: 620px) {
-    .filter_panel {
-        width: 400px;
-        right: -400px;
-    }
-}
-
 @media screen and (max-width: 620px) {
     .filter_panel {
         width: 100vw;
         right: -100vw;
     }
+    .filter_panel_content {
+        padding: 20px;
+    }
+    .new_filter_category_grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
-
 
 .modal_image {
     max-width: 90%;
@@ -1004,16 +999,12 @@ h1 {
 .search_input {
     display: block;
     width: 100%;
-    padding: .375rem .75rem;
+    padding: .375rem 1.5rem;
     font-size: 1.7rem;
-    font-weight: 400;
+    font-family: 'Sequel45';
     line-height: 1.5;
     color: var(--black);
-    /* color: #313131; */
     background-color: rgba(141, 141, 141, 0.15);
-    /* background-color: rgb(256,256,256,0.7); */
-    /* background-clip: padding-box; */
-    /* border: 1px solid #ced4da; */
     border: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -1164,6 +1155,7 @@ h1 {
 @media screen and (max-width: 960px) {
     .grid_container {
         grid-template-rows: 1fr 1fr 1fr;
+        grid-gap: 1.2em;
     }
     .search {
         padding-top: 30px;
@@ -1175,11 +1167,17 @@ h1 {
     .intro span {
         font-size: 3em;
     }
+    .content {
+        padding: 20px;
+    }
+    .subheader {
+        padding: 10px 15px;
+    }
 }
 
 @media screen and (max-width: 620px) {
     .content {
-        padding: 20px;
+        padding: 10px 20px 20px 20px;
     }
     .grid_container {
         grid-template-columns: repeat(2, 1fr);
@@ -1234,10 +1232,10 @@ h1 {
       
     .hamburger{
         position: absolute;
-        top: 0;
-        right: 0;
+        top: 6px;
+        right: 6px;
         height: 40px;
-        width: 42px;
+        width: 40px;
         margin: 0;
         
         /* FOR DISPLAYING EVERY ELEMENT IN THE CENTER : */
@@ -1315,7 +1313,9 @@ h1 {
     .toggler:checked ~ .menu{
         width: 40%;
     }
-    
+    .header ul a {
+        font-size: 1em;
+    }
     
     /* STYLING THE LIST :  */
     
@@ -1334,6 +1334,9 @@ h1 {
     .menu > div > ul > li{
         list-style: none;
         padding: 0.5rem;
+    }
+    .menu li {
+        width: 100%;
     }
     
     /* WHEN THE TOGGLER IS CHECKED, CHANGE THE VISIBILITY TO VISIBLE :  */
@@ -1361,7 +1364,7 @@ h1 {
         padding: 10px;
     }
     .subheader h1 {
-        margin-bottom: 0.5em;
+        margin: 0.3em 0 0 0;
         font-size: 1.5em;
     }
     body:not(.filter-open) .grid_container {
