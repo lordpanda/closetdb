@@ -1173,6 +1173,9 @@ h1 {
     .subheader {
         padding: 10px 15px;
     }
+    .load_more_section {
+        margin: 0;
+    }
 }
 
 @media screen and (max-width: 620px) {
@@ -1350,6 +1353,7 @@ h1 {
     .toggler:checked ~ .menu > div > ul > li > a:hover{
         color: orange;
     }
+
 }
 
 
@@ -1361,7 +1365,7 @@ h1 {
         line-height: 46px;
     }
     .subheader {
-        padding: 10px;
+        padding: 10px 0 0 10px;
     }
     .subheader h1 {
         margin: 0.3em 0 0 0;

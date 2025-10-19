@@ -505,10 +505,10 @@ input:checked + .toggle_slider {
     display: flex;
     flex-wrap: wrap;
     flex: 1;
-    gap: 10px;
+    gap: 1.5em;
 }
 .size_key {
-    width: 90px;
+    min-width: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -786,7 +786,7 @@ input:checked + .toggle_slider {
         font-size: 1.5em;
     }
     #page_add .subheader {
-        padding: 20px 0 0 0;
+        padding: 20px 0 0 4px;
     }
     .add_image {
         width: 120px;
@@ -794,8 +794,8 @@ input:checked + .toggle_slider {
         border-radius: 20px;
     }
     .grid_container_category {
-        grid-template-columns: auto auto auto;
         grid-gap: 1em;
+        width: 100%;
     }
     .grid_container_sections {
         gap: 6px;
@@ -837,7 +837,6 @@ input:checked + .toggle_slider {
     .size_region_dropdown {
         position: absolute;
         font-size: 1em;
-        width: 50px;
         height: 40px;
         border-radius: 0 !important;
         background-color: white;
@@ -847,8 +846,11 @@ input:checked + .toggle_slider {
         border-radius: 0 !important;
     }
     .size_key {
-        width: 70px;
+        min-width: 40px;
         height: 40px;
+    }
+    .size_key_container {
+        gap: 1em;
     }
     .size_key_container label {
         padding: 0;
@@ -864,9 +866,10 @@ input:checked + .toggle_slider {
     }
     .color_grid {
         grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        padding: 0;
     }
     .grid_container_season {
-        grid-template-columns: auto auto;
+        grid-template-columns: 40% 60%;
     }
     
     .grid_container_tags {
@@ -887,6 +890,9 @@ input:checked + .toggle_slider {
     }
     .season_dropdown .size_region {
         font-size: 1em;
+        height: 3em;
+        padding: 0 14px;
+        line-height: normal;
     }
 }
 

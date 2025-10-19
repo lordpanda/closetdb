@@ -309,8 +309,8 @@ function displayRecentlyAdded() {
                 allItems = data.items; // 전체 아이템 저장
                 currentOffset = 0; // 초기화
                 
-                // 첫 16개 표시
-                const maxItems = Math.min(data.items.length, 16);
+                // 첫 24개 표시
+                const maxItems = Math.min(data.items.length, 24);
                 
                 for (let index = 0; index < maxItems; index++) {
                     const item = data.items[index];
