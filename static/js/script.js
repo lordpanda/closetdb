@@ -147,6 +147,13 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Current path:', currentPath);
     console.log('Is protected page:', isProtectedPage);
     
+    // 필터 페이지나 all 페이지에서 브라우저 뒤로가기로 온 경우 저장된 필터 상태 복원
+    if (currentPath.includes('/index.html') || currentPath.includes('/all.html') || currentPath.includes('/filter.html')) {
+        setTimeout(() => {
+            restoreFilterState();
+        }, 1500); // 페이지 로드 완료 후 복원
+    }
+    
     if (isProtectedPage) {
         console.log('Protected page detected, checking login status...');
         const token = localStorage.getItem('userToken');
@@ -286,7 +293,8 @@ function displayRecentlyAdded() {
     // Load More 버튼 다시 보이기 (초기 상태로 돌아갈 때)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
-        loadMoreBtn.style.display = 'block';
+        loadMoreBtn.classList.remove('hide');
+        loadMoreBtn.classList.add('show');
     }
     
     // Supabase에서 모든 아이템들 가져오기
@@ -345,9 +353,7 @@ function createAndAppendGridItem(item, grid) {
     // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
     const link = document.createElement('a');
     link.href = './item.html?id=supabase_' + item.item_id;
-    link.style.display = 'block';
-    link.style.textDecoration = 'none';
-    link.style.color = 'inherit';
+    link.className = 'grid_item_link';
     
     const img = document.createElement('img');
     img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
@@ -384,9 +390,11 @@ function updateLoadMoreButton() {
     if (!loadMoreBtn) return;
     
     if (currentOffset >= allItems.length) {
-        loadMoreBtn.style.display = 'none';
+        loadMoreBtn.classList.remove('show', 'inline-block');
+        loadMoreBtn.classList.add('hide');
     } else {
-        loadMoreBtn.style.display = 'inline-block';
+        loadMoreBtn.classList.remove('hide');
+        loadMoreBtn.classList.add('inline-block');
         loadMoreBtn.textContent = 'Load More';
     }
 }
@@ -446,9 +454,7 @@ function displayAllItems() {
                     // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
                     const link = document.createElement('a');
                     link.href = './item.html?id=supabase_' + item.item_id;
-                    link.style.display = 'block';
-                    link.style.textDecoration = 'none';
-                    link.style.color = 'inherit';
+                    link.className = 'grid_item_link';
                     
                     const img = document.createElement('img');
                     img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
@@ -491,9 +497,7 @@ function displayAllItems() {
                 // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
                 const link = document.createElement('a');
                 link.href = './item.html?id=' + i;
-                link.style.display = 'block';
-                link.style.textDecoration = 'none';
-                link.style.color = 'inherit';
+                link.className = 'grid_item_link';
                 
                 const img = document.createElement('img');
                 img.src = "/static/src/db/" + i + ".jpg";
@@ -598,7 +602,7 @@ function readStitchedImage() {
     const addButton = container.querySelector('.add_image');
     console.log('➕ Add button found:', !!addButton);
     if (addButton) {
-        addButton.style.display = 'none';
+        addButton.classList.add('hidden');
     }
     
     // 새로운 stitched 전용 미리보기 생성
@@ -629,18 +633,20 @@ function readStitchedImage() {
     const stitchedInfo = container.querySelector('.stitched_info');
     if (stitchedInfo) {
         stitchedInfo.style.display = 'block';
+        stitchedInfo.classList.remove('hidden');
     }
     
     // 클릭시 제거하고 + 버튼 다시 표시
     preview.addEventListener('click', () => {
         preview.remove();
         if (addButton) {
-            addButton.style.display = 'inline-block';
+            addButton.classList.remove('hidden');
         }
         // section 선택 UI 숨기기
         const stitchedInfo = container.querySelector('.stitched_info');
         if (stitchedInfo) {
             stitchedInfo.style.display = 'none';
+            stitchedInfo.classList.add('hidden');
         }
         const fileInput = document.querySelector('.file_uploader_stitched');
         if (fileInput) {
@@ -1323,7 +1329,8 @@ function displaySearchResultsForAll(items, query) {
         // Load More 버튼 숨기기
         const loadMoreBtn = document.getElementById('load_more_btn');
         if (loadMoreBtn) {
-            loadMoreBtn.style.display = 'none';
+            loadMoreBtn.classList.remove('show', 'inline-block');
+            loadMoreBtn.classList.add('hide');
         }
         return;
     }
@@ -1331,7 +1338,8 @@ function displaySearchResultsForAll(items, query) {
     // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
-        loadMoreBtn.style.display = 'none';
+        loadMoreBtn.classList.remove('show', 'inline-block');
+        loadMoreBtn.classList.add('hide');
     }
     
     // 검색 결과 아이템들 표시
@@ -1651,7 +1659,8 @@ function displaySearchResults(items, query) {
         // Load More 버튼 숨기기
         const loadMoreBtn = document.getElementById('load_more_btn');
         if (loadMoreBtn) {
-            loadMoreBtn.style.display = 'none';
+            loadMoreBtn.classList.remove('show', 'inline-block');
+            loadMoreBtn.classList.add('hide');
         }
         return;
     }
@@ -1659,7 +1668,8 @@ function displaySearchResults(items, query) {
     // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
-        loadMoreBtn.style.display = 'none';
+        loadMoreBtn.classList.remove('show', 'inline-block');
+        loadMoreBtn.classList.add('hide');
     }
     
     // 검색 결과 아이템들 표시
@@ -2752,6 +2762,9 @@ function openFilterPanel() {
     setTimeout(() => {
         filterPanel.classList.add('open');
         console.log('Panel classes:', filterPanel.className);
+        
+        // 필터 패널이 열린 후 저장된 필터 값들 복원
+        restoreFilterValues();
     }, 10);
 }
 
@@ -2789,28 +2802,34 @@ function createFilterPanel() {
                 <div class="new_filter_category_grid" id="new_filter_category_grid">
                 </div>
                 
-                <div class="subheader">
-                    <h1>measurement</h1>
-                </div>
-                <div class="new_filter_measurement_container" id="new_filter_measurement_container">
-                </div>
-                
-                <div class="subheader">
-                    <h1>composition</h1>
-                </div>
-                <div class="new_filter_composition_container" id="new_filter_composition_container">
+                <div class="filter_section" id="measurement_section">
+                    <div class="subheader">
+                        <h1>measurement</h1>
+                    </div>
+                    <div class="new_filter_measurement_container" id="new_filter_measurement_container">
+                    </div>
                 </div>
                 
-                <div class="subheader">
-                    <h1>size</h1>
+                <div class="filter_section" id="composition_section">
+                    <div class="subheader">
+                        <h1>composition</h1>
+                    </div>
+                    <div class="new_filter_composition_container" id="new_filter_composition_container">
+                    </div>
                 </div>
-                <div class="new_filter_size_container" id="new_filter_size_container">
+                
+                <div class="filter_section" id="size_section">
+                    <div class="subheader">
+                        <h1>size</h1>
+                    </div>
+                    <div class="new_filter_size_container" id="new_filter_size_container">
+                    </div>
                 </div>
             </div>
         </div>
         
         <div class="filter_panel_footer">
-            <button class="filter_panel_button" onclick="applyFilters()">Apply</button>
+            <button class="main_button" onclick="applyFilters()">Apply</button>
         </div>
     `;
     
@@ -2850,6 +2869,8 @@ function addCategoryEventListeners() {
             
             // Measurement 섹션 업데이트
             updateFilterMeasurements(selectedCategories);
+            // Size 섹션 업데이트
+            updateFilterSizes(selectedCategories);
         });
     });
 }
@@ -3082,6 +3103,58 @@ function getMockDataForCategory(category) {
     };
 }
 
+function updateFilterSizes(selectedCategories) {
+    console.log('📏 Updating filter sizes for categories:', selectedCategories);
+    
+    if (selectedCategories.length === 0) {
+        // No categories selected, show all sections and sizes
+        const sizeSection = document.getElementById('size_section');
+        if (sizeSection) {
+            sizeSection.style.display = 'block';
+        }
+        if (typeof allSizesByRegion !== 'undefined') {
+            reconfigureSizes(allSizesByRegion);
+        }
+        return;
+    }
+    
+    // Get sizes for selected categories from searchCache
+    let categorySizes = {};
+    if (typeof searchCache !== 'undefined' && Array.isArray(searchCache)) {
+        searchCache.forEach(item => {
+            if (selectedCategories.includes(item.category) && item.size) {
+                const region = item.sizeRegion || item.size_region || 'Other';
+                if (!categorySizes[region]) {
+                    categorySizes[region] = new Set();
+                }
+                categorySizes[region].add(item.size);
+            }
+        });
+        
+        // Convert Sets to Arrays
+        Object.keys(categorySizes).forEach(region => {
+            categorySizes[region] = Array.from(categorySizes[region]).sort();
+        });
+        
+        console.log('📏 Category sizes:', categorySizes);
+        
+        // Check if there are any sizes for the selected categories
+        const totalSizes = Object.values(categorySizes).reduce((total, regionSizes) => total + regionSizes.length, 0);
+        const sizeSection = document.getElementById('size_section');
+        
+        if (totalSizes === 0) {
+            if (sizeSection) {
+                sizeSection.style.display = 'none';
+            }
+        } else {
+            if (sizeSection) {
+                sizeSection.style.display = 'block';
+            }
+            reconfigureSizes(categorySizes);
+        }
+    }
+}
+
 function reconfigureFilterOptions(categoryData) {
     console.log('🔄 Reconfiguring filter options with data:', categoryData);
     
@@ -3105,13 +3178,31 @@ function reconfigureMeasurements(measurementData) {
     // Store measurement data globally for load more functionality
     window.currentCategoryMeasurements = measurementData;
     
+    // Reset any expanded state since we're showing new category measurements
+    const expandedContainer = document.getElementById('new_filter_measurement_expanded');
+    if (expandedContainer && !expandedContainer.classList.contains('filter_expanded')) {
+        // If it was expanded, collapse it for the new category
+        expandedContainer.classList.add('filter_expanded');
+        const button = document.querySelector('#new_filter_measurement_container .load_more_button');
+        if (button) {
+            button.classList.remove('load_more_collapsed');
+        }
+    }
+    
     const availableMeasurements = Object.keys(measurementData);
     console.log(`📏 Updating measurements with: ${availableMeasurements.join(', ')}`);
     
+    const measurementSection = document.getElementById('measurement_section');
     if (availableMeasurements.length === 0) {
-        container.innerHTML = '<div class="no_measurements">No measurements available for this category</div>';
+        if (measurementSection) {
+            measurementSection.style.display = 'none';
+        }
         window.currentCategoryMeasurements = null;
         return;
+    } else {
+        if (measurementSection) {
+            measurementSection.style.display = 'block';
+        }
     }
     
     // Show first 3 measurements by default
@@ -3124,42 +3215,44 @@ function reconfigureMeasurements(measurementData) {
                 const data = measurementData[measurement];
                 return `
                     <div class="filter_measurement_item">
-                        <label>${measurement} (${data.min}-${data.max})</label>
+                        <label class="measurement_label">${measurement}</label>
                         <div class="filter_measurement_range">
-                            <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                            <input type="text" placeholder="${data.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
                             <span>-</span>
-                            <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                                <span class="clear_icon"></span>
-                            </button>
+                            <input type="text" placeholder="${data.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
                         </div>
+                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                            <span class="clear_icon"></span>
+                        </button>
                     </div>
                 `;
             }).join('')}
-        </div>
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleMeasurementList()" style="display: ${expandedMeasurements.length > 0 ? 'block' : 'none'}">
-                <span class="load_more_icon"></span>
-            </button>
         </div>
         <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
             ${expandedMeasurements.map(measurement => {
                 const data = measurementData[measurement];
                 return `
                     <div class="filter_measurement_item">
-                        <label>${measurement} (${data.min}-${data.max})</label>
+                        <label class="measurement_label">${measurement}</label>
                         <div class="filter_measurement_range">
-                            <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                            <input type="text" placeholder="${data.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
                             <span>-</span>
-                            <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                                <span class="clear_icon"></span>
-                            </button>
+                            <input type="text" placeholder="${data.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
                         </div>
+                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                            <span class="clear_icon"></span>
+                        </button>
                     </div>
                 `;
             }).join('')}
         </div>
+        ${availableMeasurements.length > 3 ? `
+        <div class="load_more_section">
+            <button class="load_more_button" onclick="toggleMeasurementList()">
+                <span class="load_more_icon"></span>
+            </button>
+        </div>
+        ` : ''}
     `;
 }
 
@@ -3172,36 +3265,30 @@ function reconfigureCompositions(compositions) {
     
     console.log(`🧵 Updating compositions with: ${compositions.join(', ')}`);
     
+    const compositionSection = document.getElementById('composition_section');
     if (compositions.length === 0) {
-        container.innerHTML = '<div class="no_compositions">No compositions available for this category</div>';
+        if (compositionSection) {
+            compositionSection.style.display = 'none';
+        }
         return;
+    } else {
+        if (compositionSection) {
+            compositionSection.style.display = 'block';
+        }
     }
     
-    // Show first 6 compositions by default
-    const basicCompositions = compositions.slice(0, 6);
-    const expandedCompositions = compositions.slice(6);
-    
+    // 카테고리 기반 composition은 load more 없이 모두 표시
     container.innerHTML = `
         <div class="filter_composition_basic" id="new_filter_composition_basic">
-            ${basicCompositions.map(composition => `
+            ${compositions.map(composition => `
                 <div class="tag_item">
                     <input type="checkbox" id="composition_${composition}" name="filter_compositions" value="${composition}">
                     <label for="composition_${composition}">${composition}</label>
                 </div>
             `).join('')}
         </div>
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleCompositionList()" style="display: ${expandedCompositions.length > 0 ? 'block' : 'none'}">
-                <span class="load_more_icon"></span>
-            </button>
-        </div>
         <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
-            ${expandedCompositions.map(composition => `
-                <div class="tag_item">
-                    <input type="checkbox" id="composition_${composition}_expanded" name="filter_compositions" value="${composition}">
-                    <label for="composition_${composition}_expanded">${composition}</label>
-                </div>
-            `).join('')}
+            <!-- Hidden when category selected -->
         </div>
     `;
 }
@@ -3215,42 +3302,78 @@ function reconfigureSizes(sizes) {
     
     console.log(`📐 Reconfiguring sizes with actual data: ${sizes.join(', ')}`);
     
+    const sizeSection = document.getElementById('size_section');
     if (sizes.length === 0) {
-        console.log('⚠️ No sizes found in data, keeping default regions');
-        // Keep the default WW, US, DE regions if no actual sizes found
+        console.log('⚠️ No sizes found in data, hiding size section');
+        if (sizeSection) {
+            sizeSection.style.display = 'none';
+        }
         return;
+    } else {
+        if (sizeSection) {
+            sizeSection.style.display = 'block';
+        }
     }
     
-    // Show actual sizes from the data, not regions
-    const basicSizes = sizes.slice(0, 6);  // Show more actual sizes
-    const expandedSizes = sizes.slice(6);
+    // Use the same structure as initializeFilterSizes but with actual data
+    // Group sizes by region based on actual data
+    const sizesByRegion = {};
+    
+    // Extract region information from size data if available
+    sizes.forEach(size => {
+        // Try to determine region from size format
+        let region = 'WW'; // default
+        if (typeof size === 'number' || (typeof size === 'string' && /^\d+/.test(size))) {
+            if (size >= 30 && size <= 50) {
+                region = 'EU';
+            } else if (size >= 4 && size <= 20) {
+                region = 'US';
+            }
+        } else if (typeof size === 'string') {
+            if (/^(XXX?S|XS|S|M|L|XL|XXL|One Size)$/i.test(size)) {
+                region = 'WW';
+            }
+        }
+        
+        if (!sizesByRegion[region]) {
+            sizesByRegion[region] = [];
+        }
+        sizesByRegion[region].push(size);
+    });
+    
+    // Build HTML with regions as rows (vertical layout) - region | sizes
+    const defaultRegions = Object.keys(sizesByRegion).slice(0, 3);
+    const expandedRegions = Object.keys(sizesByRegion).slice(3);
+    
+    let basicRegionsHtml = '';
+    defaultRegions.forEach(region => {
+        const regionSizes = sizesByRegion[region];
+        basicRegionsHtml += `
+            <div class="grid_container_size">
+                <div class="size_region">${region}</div>
+                <div class="size_key_container">
+                    ${regionSizes.map(size => `
+                        <div class="tag_item">
+                            <input type="checkbox" id="size_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                            <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
     
     container.innerHTML = `
         <div class="filter_size_basic" id="new_filter_size_basic">
-            <h4>Actual Sizes</h4>
-            <div class="size_values_container">
-                ${basicSizes.map(size => `
-                    <div class="tag_item">
-                        <input type="checkbox" id="size_actual_${size.replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
-                        <label for="size_actual_${size.replace(/\s+/g, '_')}" class="size_option_label">${size}</label>
-                    </div>
-                `).join('')}
-            </div>
-        </div>
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleSizeList()" style="display: ${expandedSizes.length > 0 ? 'block' : 'none'}">
-                <span class="load_more_icon"></span>
-            </button>
+            ${basicRegionsHtml}
         </div>
         <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
-            <div class="size_values_container">
-                ${expandedSizes.map(size => `
-                    <div class="tag_item">
-                        <input type="checkbox" id="size_actual_${size.replace(/\s+/g, '_')}_expanded" name="filter_sizes" value="${size}">
-                        <label for="size_actual_${size.replace(/\s+/g, '_')}_expanded" class="size_option_label">${size}</label>
-                    </div>
-                `).join('')}
-            </div>
+            <!-- Will be populated when expanded with more regions -->
+        </div>
+        <div class="load_more_section">
+            <button class="load_more_button ${expandedRegions.length > 0 ? 'show' : 'hide'}" onclick="toggleSizeList()">
+                <span class="load_more_icon"></span>
+            </button>
         </div>
     `;
 }
@@ -3293,6 +3416,9 @@ function buildCategoryKey(category, subcategory, subcategory2) {
 function getMeasurementsByCategory(category) {
     if (category == "top" || category == "outer") {
         return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length"];
+    } else if (category.includes("outer")) {
+        // outer의 모든 변형 (long sleeve_long_outer, short sleeve_long_outer 등)
+        return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length"];
     } else if (category == "dress") {
         return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width"];
     } else if (category == "pants") {
@@ -3327,9 +3453,14 @@ function updateFilterMeasurements(selectedCategories) {
     
     let allMeasurements = [];
     
+    const measurementSection = document.getElementById('measurement_section');
+    
     if (selectedCategories.length === 0) {
         // 카테고리 선택 안했을 때는 TOP 기준
         allMeasurements = getMeasurementsByCategory("top").slice(0, 3);
+        if (measurementSection) {
+            measurementSection.style.display = 'block';
+        }
     } else {
         // 선택된 카테고리들의 measurements 수집
         selectedCategories.forEach(category => {
@@ -3352,10 +3483,10 @@ function updateFilterMeasurements(selectedCategories) {
                 <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
                 <span>-</span>
                 <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                    <span class="clear_icon"></span>
-                </button>
             </div>
+            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                <span class="clear_icon"></span>
+            </button>
         </div>
     `).join('');
 }
@@ -3376,20 +3507,20 @@ function initializeFilterMeasurements() {
                         <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
                         <span>-</span>
                         <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                            <span class="clear_icon"></span>
-                        </button>
                     </div>
+                    <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                        <span class="clear_icon"></span>
+                    </button>
                 </div>
             `).join('')}
+        </div>
+        <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
+            <!-- Will be populated when expanded -->
         </div>
         <div class="load_more_section">
             <button class="load_more_button" onclick="toggleMeasurementList()">
                 <span class="load_more_icon"></span>
             </button>
-        </div>
-        <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
-            <!-- Will be populated when expanded -->
         </div>
     `;
 }
@@ -3416,6 +3547,8 @@ function initializeFilterCompositions() {
     // 기본 6개만 표시
     const basicCompositions = actualList.slice(0, 6);
     
+    const hasMore = actualList.length > 6;
+    
     container.innerHTML = `
         <div class="filter_composition_basic" id="new_filter_composition_basic">
             ${basicCompositions.map(composition => `
@@ -3425,14 +3558,16 @@ function initializeFilterCompositions() {
                 </div>
             `).join('')}
         </div>
+        <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
+            <!-- Will be populated when expanded -->
+        </div>
+        ${hasMore ? `
         <div class="load_more_section">
             <button class="load_more_button" onclick="toggleCompositionList()">
                 <span class="load_more_icon"></span>
             </button>
         </div>
-        <div class="filter_composition_expanded filter_expanded" id="new_filter_composition_expanded">
-            <!-- Will be populated when expanded -->
-        </div>
+        ` : ''}
     `;
 }
 
@@ -3455,6 +3590,8 @@ function getSizesByRegion(region) {
         accordingSizes.push("One Size", "XXXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
         accordingSizes.push(230, 235, 240, 44, 55);
+    } else if (region == "Kids") {
+            accordingSizes.push(130, 140, 150, 160, "12Y", "13Y", "14Y", "15Y", "16Y");
     } else if (region == "Ring") {
         accordingSizes.push(48, 50, 52, 4, 5, 6, "KR 5", "KR 6", "KR 7", "KR 8", "KR 9", "KR 10", "KR 11", "I", "J", "IT5");
     } else if (region == "etc") {
@@ -3472,19 +3609,20 @@ function initializeFilterSizes() {
     // 기본값: WW, US, DE 지역만 디폴트로 표시 (임의 사이즈 생성 금지)
     const defaultRegions = ["WW", "US", "DE"];
     
+    // regions을 rows로 배치 (vertical layout) - region | sizes
     let sizeRegionsHtml = '';
     
     defaultRegions.forEach(region => {
         const regionSizes = getSizesByRegion(region);
         
         sizeRegionsHtml += `
-            <div class="size_region_container">
-                <h4>${region}</h4>
-                <div class="size_values_container">
+            <div class="grid_container_size">
+                <div class="size_region">${region}</div>
+                <div class="size_key_container">
                     ${regionSizes.map(size => `
                         <div class="tag_item">
                             <input type="checkbox" id="size_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
-                            <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_option_label">${size}</label>
+                            <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
                         </div>
                     `).join('')}
                 </div>
@@ -3496,13 +3634,13 @@ function initializeFilterSizes() {
         <div class="filter_size_basic" id="new_filter_size_basic">
             ${sizeRegionsHtml}
         </div>
+        <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
+            <!-- Will be populated when expanded with more regions -->
+        </div>
         <div class="load_more_section">
             <button class="load_more_button" onclick="toggleSizeList()">
                 <span class="load_more_icon"></span>
             </button>
-        </div>
-        <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
-            <!-- Will be populated when expanded with more regions -->
         </div>
     `;
 }
@@ -3513,30 +3651,39 @@ function toggleSizeList() {
     
     if (expanded.classList.contains('filter_expanded')) {
         // Expand - show all sizes from db.js sizeRegionList (참조만, 새로 정의 금지)
-        const allSizes = [];
+        let expandedRegionsHtml = '';
+        
         if (typeof sizeRegionList !== 'undefined' && sizeRegionList) {
-            sizeRegionList.forEach(region => {
-            const regionSizes = getSizesByRegion(region);
-            regionSizes.forEach(size => {
-                const sizeStr = size.toString();
-                if (!allSizes.includes(sizeStr)) {
-                    allSizes.push(sizeStr);
-                }
+            // 이미 표시된 regions 제외하고 나머지 regions 표시
+            const defaultRegions = ["WW", "US", "DE"];
+            const expandedRegions = sizeRegionList.filter(region => !defaultRegions.includes(region));
+            
+            // Use row layout for expanded regions too (vertical)
+            expandedRegions.forEach(region => {
+                const regionSizes = getSizesByRegion(region);
+                
+                expandedRegionsHtml += `
+                    <div class="grid_container_size">
+                        <div class="size_region">${region}</div>
+                        <div class="size_key_container">
+                            ${regionSizes.map(size => `
+                                <div class="tag_item">
+                                    <input type="checkbox" id="size_expanded_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                                    <label for="size_expanded_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
             });
-        });
         }
         
-        expanded.innerHTML = allSizes.map(size => `
-            <div class="tag_item">
-                <input type="checkbox" id="size_expanded_${size.replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
-                <label for="size_expanded_${size.replace(/\s+/g, '_')}">${size}</label>
-            </div>
-        `).join('');
-        
+        expanded.innerHTML = expandedRegionsHtml;
         expanded.classList.remove('filter_expanded');
         button.classList.add('load_more_collapsed');
     } else {
         // Collapse - hide expanded list
+        expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
         button.classList.remove('load_more_collapsed');
     }
@@ -3554,58 +3701,75 @@ function toggleMeasurementList() {
     if (expanded.classList.contains('filter_expanded')) {
         // Expand - show additional measurements only (no duplicates)
         
-        // Check if we have current measurement data from category selection
+        // Get existing measurements to avoid duplicates
+        const basicContainer = document.getElementById('new_filter_measurement_basic');
+        const existingMeasurements = new Set();
+        
+        if (basicContainer) {
+            const existingLabels = basicContainer.querySelectorAll('.filter_measurement_item label');
+            existingLabels.forEach(label => {
+                const measurementName = label.textContent.trim();
+                existingMeasurements.add(measurementName);
+            });
+        }
+        
+        // Check if we have category-specific measurements from reconfigureMeasurements
+        let availableMeasurements = [];
         if (window.currentCategoryMeasurements) {
-            // Use the measurements from current category
-            const allMeasurements = Object.keys(window.currentCategoryMeasurements);
-            const basicContainer = document.getElementById('new_filter_measurement_basic');
-            const existingMeasurements = new Set();
-            
-            // Get existing measurements to avoid duplicates
-            if (basicContainer) {
-                const existingLabels = basicContainer.querySelectorAll('.filter_measurement_item label');
-                existingLabels.forEach(label => {
-                    const measurementName = label.textContent.split(' (')[0]; // Remove range info
-                    existingMeasurements.add(measurementName);
-                });
-            }
-            
-            // Show only measurements not already displayed
-            const additionalMeasurements = allMeasurements.filter(m => !existingMeasurements.has(m));
-            
-            console.log('Existing measurements:', Array.from(existingMeasurements));
-            console.log('Additional measurements to show:', additionalMeasurements);
-            
-            if (additionalMeasurements.length > 0) {
-                const measurementData = window.currentCategoryMeasurements;
-                expanded.innerHTML = additionalMeasurements.map(measurement => {
-                    const data = measurementData[measurement];
-                    return `
-                        <div class="filter_measurement_item">
-                            <label>${measurement} (${data.min}-${data.max})</label>
-                            <div class="filter_measurement_range">
-                                <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
-                                <span>-</span>
-                                <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                                <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                                    <span class="clear_icon"></span>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            } else {
-                expanded.innerHTML = '<div class="no_additional_measurements">All measurements for this category are already shown</div>';
-            }
+            // Use category-specific measurements if available
+            availableMeasurements = Object.keys(window.currentCategoryMeasurements);
+            console.log('Using category-specific measurements:', availableMeasurements);
         } else {
-            // Fallback: show default measurements if no category data
-            expanded.innerHTML = '<div class="no_additional_measurements">Select a category to see more measurements</div>';
+            // Fallback to all possible measurements
+            availableMeasurements = [
+                "chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", 
+                "hem width", "hip", "rise", "inseam", "thigh", "legOpening", "heel", 
+                "width", "height", "circumference"
+            ];
+            console.log('Using fallback measurements - no category selected');
+        }
+        
+        // Show measurements not already displayed
+        const additionalMeasurements = availableMeasurements.filter(m => !existingMeasurements.has(m));
+        
+        console.log('Existing measurements:', Array.from(existingMeasurements));
+        console.log('Additional measurements to show:', additionalMeasurements);
+        
+        if (additionalMeasurements.length > 0) {
+            expanded.innerHTML = additionalMeasurements.map(measurement => {
+                // Use actual measurement data if available from category
+                let minPlaceholder = "from";
+                let maxPlaceholder = "to";
+                
+                if (window.currentCategoryMeasurements && window.currentCategoryMeasurements[measurement]) {
+                    const data = window.currentCategoryMeasurements[measurement];
+                    minPlaceholder = data.min;
+                    maxPlaceholder = data.max;
+                }
+                
+                return `
+                    <div class="filter_measurement_item">
+                        <label class="measurement_label">${measurement}</label>
+                        <div class="filter_measurement_range">
+                            <input type="text" placeholder="${minPlaceholder}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                            <span>-</span>
+                            <input type="text" placeholder="${maxPlaceholder}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                        </div>
+                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                            <span class="clear_icon"></span>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            expanded.innerHTML = '<div class="no_additional_measurements">All measurements are already shown</div>';
         }
         
         expanded.classList.remove('filter_expanded');
         button.classList.add('load_more_collapsed');
     } else {
         // Collapse - hide expanded list
+        expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
         button.classList.remove('load_more_collapsed');
     }
@@ -3614,6 +3778,7 @@ function toggleMeasurementList() {
 function toggleCompositionList() {
     const expanded = document.getElementById('new_filter_composition_expanded');
     const button = document.querySelector('#new_filter_composition_container .load_more_button');
+    const basic = document.getElementById('new_filter_composition_basic');
     
     console.log('toggleCompositionList called');
     
@@ -3624,7 +3789,11 @@ function toggleCompositionList() {
             return;
         }
         
-        expanded.innerHTML = compositionList.map(composition => `
+        // 기본에 표시된 composition 제외하고 나머지만 expanded에 표시
+        const basicCompositions = Array.from(basic.querySelectorAll('input[name="filter_compositions"]')).map(input => input.value);
+        const expandedCompositions = compositionList.filter(comp => !basicCompositions.includes(comp));
+        
+        expanded.innerHTML = expandedCompositions.map(composition => `
             <div class="tag_item">
                 <input type="checkbox" id="composition_expanded_${composition}" name="filter_compositions" value="${composition}">
                 <label for="composition_expanded_${composition}">${composition}</label>
@@ -3635,6 +3804,7 @@ function toggleCompositionList() {
         button.classList.add('load_more_collapsed');
     } else {
         // Collapse - hide expanded list
+        expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
         button.classList.remove('load_more_collapsed');
     }
@@ -3657,6 +3827,9 @@ function clearMeasurementRange(measurementName) {
 
 function applyFilters() {
     console.log('🔧 Applying filters...');
+    
+    // 새로운 필터 적용 시 기존 저장된 상태 클리어
+    clearSavedFilterState();
     
     // Collect all selected filters
     const selectedFilters = {
@@ -3791,21 +3964,43 @@ function applyFiltersToItems(items, filters) {
                     }
                     console.log(`✅ Item passes ${measurement} filter: ${itemValue} is within range`);
                 } else {
-                    // If no valid measurement value found, exclude this item
-                    console.log(`❌ Item filtered out: no valid ${measurement} value found (${itemValue})`);
-                    return false;
+                    // If only 'to' filter is set and no measurement value, allow item to pass
+                    if (range.from === undefined && range.to !== undefined) {
+                        console.log(`✅ Item passes ${measurement} filter: no measurement value but only max filter set`);
+                    } else {
+                        // If no valid measurement value found, exclude this item
+                        console.log(`❌ Item filtered out: no valid ${measurement} value found (${itemValue})`);
+                        return false;
+                    }
                 }
             }
         }
         
         // Composition filtering
         if (filters.compositions.length > 0) {
-            const itemCompositions = item.compositions || [];
+            let itemCompositions = [];
+            
+            // Handle different composition data formats
+            if (item.compositions) {
+                if (Array.isArray(item.compositions)) {
+                    itemCompositions = item.compositions;
+                } else if (typeof item.compositions === 'string') {
+                    // Handle string compositions (comma-separated)
+                    itemCompositions = item.compositions.split(',').map(comp => comp.trim());
+                } else if (typeof item.compositions === 'object' && item.compositions !== null) {
+                    // Handle object compositions like {cotton: 100, polyester: 50}
+                    itemCompositions = Object.keys(item.compositions);
+                }
+            }
+            
+            console.log(`🧵 Checking compositions for item: ${JSON.stringify(item.compositions)} -> parsed as: ${JSON.stringify(itemCompositions)}`);
+            
             const hasMatchingComposition = filters.compositions.some(comp => 
                 itemCompositions.some(itemComp => itemComp.toLowerCase().includes(comp.toLowerCase()))
             );
             
             if (!hasMatchingComposition) {
+                console.log(`❌ Item filtered out: no matching composition. Item has: ${JSON.stringify(itemCompositions)}, Filter needs: ${JSON.stringify(filters.compositions)}`);
                 return false;
             }
         }
@@ -3859,16 +4054,67 @@ function updateSubheaderForFilter(items) {
         return;
     }
     
-    // Get the applied filter info
-    const selectedCategory = document.querySelector('#new_filter_category_grid input[type="radio"]:checked');
-    let filterText = 'Filter Results';
+    // Collect all applied filter info
+    const appliedFilters = [];
     
+    // Category filter
+    const selectedCategory = document.querySelector('#new_filter_category_grid input[type="radio"]:checked');
     if (selectedCategory) {
-        filterText = `Filter Results - "${selectedCategory.value}"`;
+        appliedFilters.push(selectedCategory.value);
     }
     
+    // Measurement filters
+    const measurementInputs = document.querySelectorAll('.filter_measurement_input');
+    const measurementFilters = [];
+    measurementInputs.forEach(input => {
+        if (input.value && input.value.trim()) {
+            const idParts = input.id.split('_');
+            const measurementName = idParts[1];
+            const isFrom = input.id.includes('_from');
+            
+            let existingFilter = measurementFilters.find(f => f.name === measurementName);
+            if (!existingFilter) {
+                existingFilter = { name: measurementName, range: {} };
+                measurementFilters.push(existingFilter);
+            }
+            
+            if (isFrom) {
+                existingFilter.range.from = input.value;
+            } else {
+                existingFilter.range.to = input.value;
+            }
+        }
+    });
+    
+    measurementFilters.forEach(filter => {
+        let rangeText = filter.name;
+        if (filter.range.from && filter.range.to) {
+            rangeText += ` (${filter.range.from}-${filter.range.to})`;
+        } else if (filter.range.from) {
+            rangeText += ` (≥${filter.range.from})`;
+        } else if (filter.range.to) {
+            rangeText += ` (≤${filter.range.to})`;
+        }
+        appliedFilters.push(rangeText);
+    });
+    
+    // Composition filters
+    const compositionInputs = document.querySelectorAll('.filter_panel input[name="filter_compositions"]:checked');
+    const compositions = Array.from(compositionInputs).map(input => input.value);
+    if (compositions.length > 0) {
+        appliedFilters.push(...compositions);
+    }
+    
+    // Size filters
+    const sizeInputs = document.querySelectorAll('.filter_panel input[name="filter_sizes"]:checked');
+    const sizes = Array.from(sizeInputs).map(input => input.value);
+    if (sizes.length > 0) {
+        appliedFilters.push(...sizes);
+    }
+    
+    let filterText = appliedFilters.length > 0 ? appliedFilters.join(' · ') : 'Filter Results';
     if (items.length > 0) {
-        filterText += ` (${items.length} items)`;
+        filterText += ` (${items.length})`;
     }
     
     subheaderText.textContent = filterText;
@@ -3909,9 +4155,9 @@ function createGridItem(item) {
         console.log(`❌ Failed to load image: ${this.src}`);
         if (this.src.includes('measurement_top.svg')) {
             // Already tried placeholder, show colored background
-            this.style.display = 'none';
-            gridItem.style.backgroundColor = '#f0f0f0';
-            gridItem.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-size:12px;text-align:center;">${item.brand || 'No Image'}<br>${item.category || ''}</div>`;
+            this.classList.add('hidden');
+            gridItem.classList.add('grid_item_no_image');
+            gridItem.innerHTML = `<div class="grid_item_placeholder">${item.brand || 'No Image'}<br>${item.category || ''}</div>`;
         } else {
             // Try placeholder image (short sleeve top measurement)
             this.src = '/static/src/img/measurement/measurement_top.svg';
@@ -3924,6 +4170,8 @@ function createGridItem(item) {
     gridItem.addEventListener('click', () => {
         const itemId = item.item_id || item.id;
         if (itemId) {
+            // 현재 필터 상태와 화면 상태를 저장
+            saveCurrentFilterState();
             window.location.href = `/item.html?id=supabase_${itemId}`;
         } else {
             console.error('No item ID found for item:', item);
@@ -4021,10 +4269,10 @@ function filterCurrentPageItems(filters) {
         
         // Show/hide item
         if (shouldShow) {
-            item.style.display = '';
+            item.classList.remove('hidden');
             visibleCount++;
         } else {
-            item.style.display = 'none';
+            item.classList.add('hidden');
         }
     });
     
@@ -4050,13 +4298,13 @@ function showNoItemsMessage() {
             gridContainer.appendChild(message);
         }
     }
-    message.style.display = 'block';
+    message.classList.remove('hidden');
 }
 
 function hideNoItemsMessage() {
     const message = document.querySelector('.no_items_message');
     if (message) {
-        message.style.display = 'none';
+        message.classList.add('hidden');
     }
 }
 
@@ -4707,9 +4955,9 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
             <div class="part">${material}</div>
             <input type="text" 
                    id="compositionInput_${setIndex}_${i}" 
-                   class="composition_input"
                    value="${existingValue}"
                    autocomplete="off"
+                   class="composition_input"
                    onchange="updateCompositionValue(${setIndex}, '${material}', this.value)">
         `;
         grid.appendChild(item);
@@ -5050,11 +5298,25 @@ function populateItemView(item) {
             
             // 카테고리별 measurement 생성
             if (item.category === 'top' || item.category === 'outer') {
-                // Top/Outer 카테고리 - 서브카테고리에 따라 분기
+                // outer 카테고리의 경우 length (subcategory2)에 따라 분기
                 const subcategory = item.subcategory || '';
-                if (subcategory.toLowerCase().includes('long sleeve')) {
+                const subcategory2 = item.subcategory2 || '';
+                
+                if (item.category === 'outer' && subcategory2 === 'long') {
+                    // Outer에서 length가 long인 경우 sleeve type에 따라 분기
+                    if (subcategory === 'long sleeve') {
+                        createOuterLongSleeveLongMeasurement(measurementContainer, item.measurements);
+                    } else if (subcategory === 'short sleeve') {
+                        createOuterShortSleeveLongMeasurement(measurementContainer, item.measurements);
+                    } else {
+                        // sleeve 정보가 없으면 기본 long sleeve로 처리
+                        createOuterLongSleeveLongMeasurement(measurementContainer, item.measurements);
+                    }
+                } else if (subcategory.toLowerCase().includes('long sleeve')) {
+                    // Top 또는 outer에서 long sleeve인 경우
                     createTopLongSleeveMeasurement(measurementContainer, item.measurements);
                 } else {
+                    // 기본값: top measurement 사용 (outer short length 포함)
                     createTopMeasurement(measurementContainer, item.measurements);
                 }
             } else if (item.category === 'dress') {
@@ -5840,6 +6102,9 @@ function updateColorDisplay(item) {
     const compositionContainer = document.querySelector('.view_composition');
     if (!compositionContainer) return;
     
+    // 동적 색상 CSS 생성 (add 페이지와 동일하게)
+    generateColorCSS();
+    
     // 기존 color 제거
     const existingColors = compositionContainer.querySelectorAll('.color_boxes_container');
     existingColors.forEach(color => color.remove());
@@ -5848,7 +6113,7 @@ function updateColorDisplay(item) {
         // Color boxes container 생성 (헤더 없이)
         const colorBoxesContainer = document.createElement('div');
         colorBoxesContainer.className = 'color_boxes_container';
-        colorBoxesContainer.style.marginTop = '15px';
+        // marginTop styling handled by .color_boxes_container CSS class
         
         // Color 문자열을 쉼표로 분리
         const colors = item.color.split(',').map(c => c.trim()).filter(c => c !== '');
@@ -5857,20 +6122,14 @@ function updateColorDisplay(item) {
             const colorBox = document.createElement('div');
             colorBox.className = 'color_box';
             
-            // 특별한 패턴 색상 처리
-            if (colorName === 'stripe') {
-                colorBox.classList.add('stripe');
-            } else if (colorName === 'multi') {
-                colorBox.classList.add('multi');
+            // add 페이지와 동일한 방식으로 색상 클래스 적용
+            const colorData = colorList.find(c => c.label === colorName);
+            if (colorData) {
+                // 동적으로 생성된 CSS 클래스 사용 (예: color_black, color_red 등)
+                colorBox.classList.add(`color_${colorName}`);
             } else {
-                // colorList에서 해당 색상 찾기
-                const colorData = colorList.find(c => c.label === colorName);
-                if (colorData && colorData.value) {
-                    colorBox.style.backgroundColor = `#${colorData.value}`;
-                } else {
-                    // 색상을 찾을 수 없으면 기본 회색
-                    colorBox.style.backgroundColor = '#ccc';
-                }
+                // 색상을 찾을 수 없으면 기본 회색
+                colorBox.style.backgroundColor = '#cccccc';
             }
             
             colorBoxesContainer.appendChild(colorBox);
@@ -6013,11 +6272,25 @@ function updateMeasurementDisplay(item) {
         
         // 카테고리별 measurement 구성
         if (category === 'top' || category === 'outer') {
-            // 서브카테고리 확인 (long sleeve 여부)
+            // outer 카테고리의 경우 length (subcategory2)에 따라 분기
             const subcategory = item.subcategory || '';
-            if (subcategory.toLowerCase().includes('long sleeve')) {
+            const subcategory2 = item.subcategory2 || '';
+            
+            if (category === 'outer' && subcategory2 === 'long') {
+                // Outer에서 length가 long인 경우 sleeve type에 따라 분기
+                if (subcategory === 'long sleeve') {
+                    createOuterLongSleeveLongMeasurement(measurementContainer, measurements);
+                } else if (subcategory === 'short sleeve') {
+                    createOuterShortSleeveLongMeasurement(measurementContainer, measurements);
+                } else {
+                    // sleeve 정보가 없으면 기본 long sleeve로 처리
+                    createOuterLongSleeveLongMeasurement(measurementContainer, measurements);
+                }
+            } else if (subcategory.toLowerCase().includes('long sleeve')) {
+                // Top 또는 outer에서 long sleeve인 경우
                 createTopLongSleeveMeasurement(measurementContainer, measurements);
             } else {
+                // 기본값: top measurement 사용 (outer short length 포함)
                 createTopMeasurement(measurementContainer, measurements);
             }
         } else if (category === 'dress') {
@@ -6058,9 +6331,12 @@ function createTopMeasurement(container, measurements) {
     
     measurementMap.forEach(item => {
         if (measurements && measurements[item.key]) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key}`;
+            box.className = `box ${cssKey}`;
             box.textContent = measurements[item.key];
             container.appendChild(box);
             
@@ -6068,7 +6344,7 @@ function createTopMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6095,9 +6371,12 @@ function createTopLongSleeveMeasurement(container, measurements) {
     
     measurementMap.forEach(item => {
         if (measurements && measurements[item.key]) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} long_sleeve`;
+            box.className = `box ${cssKey} long_sleeve`;
             box.textContent = measurements[item.key];
             container.appendChild(box);
             
@@ -6105,7 +6384,7 @@ function createTopLongSleeveMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6157,9 +6436,12 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
         const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} short_sleeve_mini_dress`;
+            box.className = `box ${cssKey} short_sleeve_mini_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6167,7 +6449,7 @@ function createDressShortSleeveMiniMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6198,9 +6480,12 @@ function createDressShortSleeveMidiMeasurement(container, measurements) {
         const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} short_sleeve_midi_dress`;
+            box.className = `box ${cssKey} short_sleeve_midi_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6208,7 +6493,7 @@ function createDressShortSleeveMidiMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6239,9 +6524,12 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
         const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} short_sleeve_long_dress`;
+            box.className = `box ${cssKey} short_sleeve_long_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6249,7 +6537,7 @@ function createDressShortSleeveLongMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6280,9 +6568,12 @@ function createDressLongSleeveLongMeasurement(container, measurements) {
         const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} long_sleeve_long_dress`;
+            box.className = `box ${cssKey} long_sleeve_long_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6290,7 +6581,7 @@ function createDressLongSleeveLongMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6321,9 +6612,12 @@ function createDressLongSleeveMidiMeasurement(container, measurements) {
         const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
         
         if (measurements && measurementValue) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // 수치 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} long_sleeve_midi_dress`;
+            box.className = `box ${cssKey} long_sleeve_midi_dress`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6331,7 +6625,7 @@ function createDressLongSleeveMidiMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         }
     });
@@ -6504,9 +6798,12 @@ function createPantsShortMeasurement(container, measurements) {
         if (measurementValue && measurementValue !== '' && measurementValue !== null && measurementValue !== undefined) {
             console.log(`👖 Adding pants_short measurement: ${item.key} = ${measurementValue}`);
             
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // Measurement 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} pants_short`;
+            box.className = `box ${cssKey} pants_short`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6514,7 +6811,7 @@ function createPantsShortMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         } else {
             console.log(`👖 Skipping pants_short measurement: ${item.key} (no valid value)`);
@@ -6549,9 +6846,12 @@ function createPantsLongMeasurement(container, measurements) {
         if (measurementValue && measurementValue !== '' && measurementValue !== null && measurementValue !== undefined) {
             console.log(`👖 Adding pants_long measurement: ${item.key} = ${measurementValue}`);
             
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
             // Measurement 박스 생성
             const box = document.createElement('div');
-            box.className = `box ${item.key} pants_long`;
+            box.className = `box ${cssKey} pants_long`;
             box.textContent = measurementValue;
             container.appendChild(box);
             
@@ -6559,10 +6859,88 @@ function createPantsLongMeasurement(container, measurements) {
             const guidelineImg = document.createElement('img');
             guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
             guidelineImg.className = 'measurement_guideline';
-            guidelineImg.setAttribute('data-measurement', item.key);
+            guidelineImg.setAttribute('data-measurement', cssKey);
             container.appendChild(guidelineImg);
         } else {
             console.log(`👖 Skipping pants_long measurement: ${item.key} (no valid value)`);
+        }
+    });
+}
+
+// Outer long sleeve + long length measurement 생성
+function createOuterLongSleeveLongMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/outer_long sleeve, long.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // outer long sleeve long measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_outer_long sleeve, long_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_outer_long sleeve, long_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_outer_long sleeve, long_sleeve.svg' },
+        { key: 'sleeve opening', label: '소매단', guideline: 'measurement_outer_long sleeve, long_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_outer_long sleeve, long_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_outer_long sleeve, long_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_outer_long sleeve, long_length.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        if (measurements && measurements[item.key]) {
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            // CSS 클래스명을 위해 key의 공백을 camelCase로 변환
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            box.className = `box ${cssKey} outer_long_sleeve_long`;
+            box.textContent = measurements[item.key];
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', cssKey);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Outer short sleeve + long length measurement 생성  
+function createOuterShortSleeveLongMeasurement(container, measurements) {
+    // 베이스 이미지
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/outer_short sleeve, long.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // outer short sleeve long measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_outer_short sleeve, long_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_outer_short sleeve, long_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_outer_short sleeve, long_sleeve.svg' },
+        { key: 'sleeve opening', label: '소매단', guideline: 'measurement_outer_short sleeve, long_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_outer_short sleeve, long_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_outer_short sleeve, long_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_outer_short sleeve, long_length.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        if (measurements && measurements[item.key]) {
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            // CSS 클래스명을 위해 key의 공백을 camelCase로 변환
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            box.className = `box ${cssKey} outer_short_sleeve_long`;
+            box.textContent = measurements[item.key];
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', cssKey);
+            container.appendChild(guidelineImg);
         }
     });
 }
@@ -7068,6 +7446,224 @@ function loadTagsForPage(pageType) {
             {value: 'evening wear', label: 'Evening wear'}
         ];
         generateTagCheckboxes(fallbackTags, pageType);
+    }
+}
+
+// 필터 상태 저장 및 복원 기능
+function saveCurrentFilterState() {
+    console.log('💾 Saving current filter state...');
+    
+    // 현재 필터 상태 수집
+    const currentFilters = {
+        categories: [],
+        measurements: {},
+        compositions: [],
+        sizes: []
+    };
+    
+    // 선택된 카테고리 저장
+    const selectedCategory = document.querySelector('#new_filter_category_grid input[type="radio"]:checked');
+    if (selectedCategory) {
+        currentFilters.categories.push(selectedCategory.value);
+    }
+    
+    // 측정값 필터 저장
+    const measurementInputs = document.querySelectorAll('.filter_measurement_input');
+    measurementInputs.forEach(input => {
+        if (input.value && input.value.trim()) {
+            const idParts = input.id.split('_');
+            const measurementName = idParts[1];
+            const isFrom = input.id.includes('_from');
+            
+            if (!currentFilters.measurements[measurementName]) {
+                currentFilters.measurements[measurementName] = {};
+            }
+            
+            const numValue = parseFloat(input.value);
+            if (!isNaN(numValue)) {
+                if (isFrom) {
+                    currentFilters.measurements[measurementName].from = numValue;
+                } else {
+                    currentFilters.measurements[measurementName].to = numValue;
+                }
+            }
+        }
+    });
+    
+    // 컴포지션 필터 저장
+    const compositionInputs = document.querySelectorAll('.filter_panel input[name="filter_compositions"]:checked');
+    compositionInputs.forEach(input => {
+        currentFilters.compositions.push(input.value);
+    });
+    
+    // 사이즈 필터 저장
+    const sizeInputs = document.querySelectorAll('.filter_panel input[name="filter_sizes"]:checked');
+    sizeInputs.forEach(input => {
+        currentFilters.sizes.push(input.value);
+    });
+    
+    // 현재 그리드 상태도 저장
+    const gridItems = document.querySelectorAll('.grid_item');
+    const currentItems = Array.from(gridItems).map(item => {
+        return {
+            id: item.dataset.itemId,
+            visible: !item.classList.contains('hidden')
+        };
+    });
+    
+    // sessionStorage에 저장
+    sessionStorage.setItem('savedFilterState', JSON.stringify({
+        filters: currentFilters,
+        items: currentItems,
+        timestamp: Date.now()
+    }));
+    
+    console.log('💾 Saved filter state:', currentFilters);
+}
+
+function restoreFilterState() {
+    console.log('🔄 Attempting to restore filter state...');
+    
+    const savedState = sessionStorage.getItem('savedFilterState');
+    if (!savedState) {
+        console.log('❌ No saved filter state found');
+        return false;
+    }
+    
+    try {
+        const state = JSON.parse(savedState);
+        const filters = state.filters;
+        
+        console.log('🔄 Restoring filter state:', filters);
+        
+        // 카테고리 복원
+        if (filters.categories.length > 0) {
+            const categoryRadio = document.querySelector(`#new_filter_category_grid input[value="${filters.categories[0]}"]`);
+            if (categoryRadio) {
+                categoryRadio.checked = true;
+                // 카테고리 선택 이벤트 트리거하여 측정값 업데이트
+                onCategorySelected(filters.categories[0]);
+            }
+        }
+        
+        // 측정값 복원 (카테고리 로드 후 약간의 지연)
+        setTimeout(() => {
+            Object.keys(filters.measurements).forEach(measurement => {
+                const range = filters.measurements[measurement];
+                
+                if (range.from !== undefined) {
+                    const fromInput = document.getElementById(`measurement_${measurement}_from`);
+                    if (fromInput) fromInput.value = range.from;
+                }
+                
+                if (range.to !== undefined) {
+                    const toInput = document.getElementById(`measurement_${measurement}_to`);
+                    if (toInput) toInput.value = range.to;
+                }
+            });
+        }, 500);
+        
+        // 컴포지션 복원
+        filters.compositions.forEach(comp => {
+            const compInput = document.querySelector(`.filter_panel input[name="filter_compositions"][value="${comp}"]`);
+            if (compInput) compInput.checked = true;
+        });
+        
+        // 사이즈 복원
+        filters.sizes.forEach(size => {
+            const sizeInput = document.querySelector(`.filter_panel input[name="filter_sizes"][value="${size}"]`);
+            if (sizeInput) sizeInput.checked = true;
+        });
+        
+        // 필터 적용하여 그리드 복원
+        setTimeout(() => {
+            applyFilters();
+        }, 1000);
+        
+        console.log('✅ Filter state restored successfully');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Error restoring filter state:', error);
+        return false;
+    }
+}
+
+function clearSavedFilterState() {
+    sessionStorage.removeItem('savedFilterState');
+    console.log('🗑️ Cleared saved filter state');
+}
+
+function restoreFilterValues() {
+    console.log('🔄 Restoring filter values in panel...');
+    
+    const savedState = sessionStorage.getItem('savedFilterState');
+    if (!savedState) {
+        console.log('❌ No saved filter state for values restoration');
+        return;
+    }
+    
+    try {
+        const state = JSON.parse(savedState);
+        const filters = state.filters;
+        
+        console.log('🔄 Restoring filter values:', filters);
+        
+        // 카테고리 복원
+        if (filters.categories.length > 0) {
+            const categoryRadio = document.querySelector(`#new_filter_category_grid input[value="${filters.categories[0]}"]`);
+            if (categoryRadio) {
+                categoryRadio.checked = true;
+                // 카테고리 선택 이벤트 트리거하여 측정값 옵션 업데이트
+                onCategorySelected(filters.categories[0]);
+            }
+        }
+        
+        // 측정값 복원 (카테고리 로드 후 약간의 지연)
+        setTimeout(() => {
+            Object.keys(filters.measurements).forEach(measurement => {
+                const range = filters.measurements[measurement];
+                
+                if (range.from !== undefined) {
+                    const fromInput = document.getElementById(`measurement_${measurement}_from`);
+                    if (fromInput) {
+                        fromInput.value = range.from;
+                        console.log(`✅ Restored ${measurement} from: ${range.from}`);
+                    }
+                }
+                
+                if (range.to !== undefined) {
+                    const toInput = document.getElementById(`measurement_${measurement}_to`);
+                    if (toInput) {
+                        toInput.value = range.to;
+                        console.log(`✅ Restored ${measurement} to: ${range.to}`);
+                    }
+                }
+            });
+        }, 500);
+        
+        // 컴포지션 복원
+        filters.compositions.forEach(comp => {
+            const compInput = document.querySelector(`.filter_panel input[name="filter_compositions"][value="${comp}"]`);
+            if (compInput) {
+                compInput.checked = true;
+                console.log(`✅ Restored composition: ${comp}`);
+            }
+        });
+        
+        // 사이즈 복원
+        filters.sizes.forEach(size => {
+            const sizeInput = document.querySelector(`.filter_panel input[name="filter_sizes"][value="${size}"]`);
+            if (sizeInput) {
+                sizeInput.checked = true;
+                console.log(`✅ Restored size: ${size}`);
+            }
+        });
+        
+        console.log('✅ Filter values restored in panel');
+        
+    } catch (error) {
+        console.error('❌ Error restoring filter values:', error);
     }
 }
 

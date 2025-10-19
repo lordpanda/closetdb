@@ -417,8 +417,8 @@
     left: 50%;
 }
 .view_measurement .inseam.pants_long {
-    top: 50%;
-    left: 75%;
+    top: 57%;
+    left: 52%;
 }
 .view_measurement .thigh.pants_long {
     top: 35%;
@@ -433,6 +433,66 @@
     left: 62%;
 }
 
+/* Outer Long Sleeve Long measurement positions */
+.view_measurement .chest.outer_long_sleeve_long {
+    top: 25%;
+    left: 50%;
+}
+.view_measurement .shoulder.outer_long_sleeve_long {
+    top: 7%;
+    left: 50%;
+}
+.view_measurement .sleeve.outer_long_sleeve_long {
+    top: 28%;
+    left: 81%;
+}
+.view_measurement .sleeveOpening.outer_long_sleeve_long {
+    top: 50%;
+    left: 14%;
+}
+.view_measurement .armhole.outer_long_sleeve_long {
+    top: 18%;
+    left: 30%;
+}
+.view_measurement .waist.outer_long_sleeve_long {
+    top: 48%;
+    left: 50%;
+}
+.view_measurement .length.outer_long_sleeve_long {
+    top: 70%;
+    left: 59%;
+}
+
+/* Outer Short Sleeve Long measurement positions */
+.view_measurement .chest.outer_short_sleeve_long {
+    top: 25%;
+    left: 50%;
+}
+.view_measurement .shoulder.outer_short_sleeve_long {
+    top: 7%;
+    left: 50%;
+}
+.view_measurement .sleeve.outer_short_sleeve_long {
+    top: 28%;
+    left: 81%;
+}
+.view_measurement .sleeveOpening.outer_short_sleeve_long {
+    top: 50%;
+    left: 14%;
+}
+.view_measurement .armhole.outer_short_sleeve_long {
+    top: 18%;
+    left: 30%;
+}
+.view_measurement .waist.outer_short_sleeve_long {
+    top: 48%;
+    left: 50%;
+}
+.view_measurement .length.outer_short_sleeve_long {
+    top: 70%;
+    left: 59%;
+}
+
 .measurement_base {
     width: 100%;
     top: 0;
@@ -441,17 +501,23 @@
 }
 
 /* No measurement 텍스트 스타일 */
-.no_measurement_text {
+.view_measurement .no_measurement_text {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    left: 0;
+    width: 100%;
+    aspect-ratio: 476/436; /* measurement 이미지의 실제 비율 476x436 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: 'Sequel45', sans-serif;
     font-size: 1em;
     color: var(--darkgray);
     text-align: center;
     line-height: 1.2;
     z-index: 20;
+    pointer-events: none;
+    border-radius: 30px;
 }
 .measurement_guideline {
     z-index: 10;
@@ -672,6 +738,14 @@
     background: linear-gradient(45deg, #ffff00 10%, #78DFF1 30%, #6877E0 50%, #F178B6 80%, #ED4447 100%);
 }
 
+.color_box.custom-color {
+    background-color: var(--color);
+}
+
+.color_box.default-color {
+    background-color: #cccccc;
+}
+
 .color_label {
     font-family: 'Sequel65', sans-serif;
     font-size: 1.1em;
@@ -707,6 +781,13 @@
 
 /* Carousel container overrides for mobile */
 @media screen and (max-width: 400px) {
+    .intro {
+        margin-top: 10px;
+    }
+    #item_brand {
+        overflow-wrap: break-word;
+        word-break: break-all;
+    }
     .carousel_height_override {
         height: auto !important;
         max-height: none !important;
