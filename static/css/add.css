@@ -32,9 +32,13 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: 1px solid var(--gray);
+    border: none;
     transition: all 0.2s ease;
     position: relative;
+}
+
+.color_circle.color_white {
+    border: 1px solid var(--lightgray);
 }
 
 .color_option:hover .color_circle {
@@ -138,7 +142,7 @@ input:checked + .toggle_slider {
     margin-bottom: 15px;
     border-radius: 15px;
     overflow: hidden;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -226,7 +230,7 @@ input:checked + .toggle_slider {
     border-radius: 60px;
     width: 250px;
     height: 400px;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     margin-right: 20px;
     text-align: center;
 }
@@ -252,8 +256,8 @@ input:checked + .toggle_slider {
     display: none;
 }
 .preview_image {
-    border: 1px solid var(--gray);   
-    border-color: var(--gray);
+    border: 1px solid var(--lightgray);   
+    border-color: var(--lightgray);
     overflow: clip;
     position: relative;
     cursor: pointer;
@@ -313,7 +317,7 @@ input:checked + .toggle_slider {
     font-family: 'Poppins' !important;
     font-size: 1.2em !important;
     background-color: transparent !important;
-    border: 1px solid var(--gray) !important;
+    border: 1px solid var(--lightgray) !important;
     border-radius: 2rem !important;
     cursor: pointer !important;
     display: inline-block !important;
@@ -349,16 +353,17 @@ input:checked + .toggle_slider {
     display: block;
 }
 .grid_container_size {
-    display: grid;
+    display: flex;
+    align-items: center;
     min-height: 80px;
     line-height: 60px;
     padding: 10px;
-    grid-template-columns: 120px 1fr;
+    gap: 20px;
 }
 .size_region {
     width: 80px;
     height: 60px;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     display: inline-block;
     text-align: center;
     font-size: 1.2em;
@@ -466,7 +471,7 @@ input:checked + .toggle_slider {
     font-family: 'Poppins';
     font-size: 1.2em;
     line-height: 58px;
-    border: solid 1px var(--gray);
+    border: solid 1px var(--lightgray);
     border-radius: 60px;
     margin: 0;
     padding: 0 20px;
@@ -490,16 +495,19 @@ input:checked + .toggle_slider {
     display: block;
 }
 .size_key_container {
-    display: inline-block;
-    display: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    gap: 10px;
 }
 .size_key {
     width: 90px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    margin-right: 20px;
-    margin-bottom: 6px;
     height: 60px;
+    flex-shrink: 0;
 }
 
 .size_etc_input {
@@ -511,7 +519,7 @@ input:checked + .toggle_slider {
     padding: 0.5rem;
     font-family: 'Poppins', sans-serif;
     font-size: 1.1em;
-    border: 2px solid var(--gray);
+    border: 2px solid var(--lightgray);
     background-color: transparent;
     border-radius: 2rem;
     outline: none;
@@ -530,7 +538,7 @@ input:checked + .toggle_slider {
     font-size: 1.7rem;
     font-weight: 400;
     line-height: 1.5;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -563,7 +571,7 @@ input:checked + .toggle_slider {
     padding: 10px 1.75rem;
     font-size: 1.2em;
     cursor: pointer;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
 }
 .brand_autocomplete_items div:hover {
     /*when hovering an item:*/
@@ -607,7 +615,7 @@ input:checked + .toggle_slider {
     font-family: 'GmarketSans', 'Poppins', sans-serif;
     font-size: 1.3em;
     border-radius: 26px;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     border-color: transparent;
     color: var(--black);
     outline: none;
@@ -699,7 +707,7 @@ input:checked + .toggle_slider {
     font-weight: 400;
     line-height: 1.5;
     letter-spacing: 1;
-    background-color: var(--gray);
+    background-color: var(--lightgray);
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;

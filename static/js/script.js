@@ -2380,15 +2380,14 @@ function collectEditFormData() {
         console.log('🔍 [EDIT SIZE] regular region selected:', size);
     }
     
-    // 측정 데이터
+    // 측정 데이터 - 빈 값도 포함하여 삭제 처리
     const measurements = {};
     const measurementInputs = document.querySelectorAll('.measurement_input');
     measurementInputs.forEach((input, index) => {
-        if (input.value) {
-            const label = input.parentElement.querySelector('.part');
-            if (label) {
-                measurements[label.textContent] = input.value;
-            }
+        const label = input.parentElement.querySelector('.part');
+        if (label) {
+            // 빈 값도 전송하여 서버에서 삭제 처리할 수 있도록 함
+            measurements[label.textContent] = input.value || '';
         }
     });
     
@@ -2486,7 +2485,8 @@ function collectEditFormData() {
     if (sizeRegion && sizeRegion !== 'Select') formData.append('sizeRegion', sizeRegion);
     if (size && size.trim() !== '') formData.append('size', size);
     if (sizeEtc && sizeEtc.trim() !== '') formData.append('sizeEtc', sizeEtc);
-    if (Object.keys(measurements).length > 0) formData.append('measurements', JSON.stringify(measurements));
+    // 빈 값도 포함하여 measurements 전송 (삭제 처리를 위해)
+    formData.append('measurements', JSON.stringify(measurements));
     // Composition 데이터 추가 (배열이거나 객체일 수 있음)
     
     const hasCompositionData = window.usingMultiSets 
@@ -2959,7 +2959,12 @@ function extractMeasurements(items, category) {
     
     // Define measurement fields based on category (from script.js displayMeasurementInput)
     let measurementFields = [];
-    if (category === "top" || category === "outer") {
+    if (category === null || category === undefined) {
+        // Global mode: check all possible measurement fields
+        measurementFields = ["chest", "shoulder", "sleeve", "sleeve_opening", "armhole", "waist", "length", 
+                            "hem_width", "hip", "rise", "leg_opening", "heel", "width", "height", "circumference"];
+        console.log('🌍 Global measurement mode: checking all fields');
+    } else if (category === "top" || category === "outer") {
         measurementFields = ["chest", "shoulder", "sleeve", "sleeve_opening", "armhole", "waist", "length"];
     } else if (category === "dress") {
         measurementFields = ["chest", "shoulder", "sleeve", "sleeve_opening", "armhole", "waist", "length", "hem_width"];
@@ -3038,11 +3043,34 @@ function extractCompositions(items) {
                     }
                 });
             } else if (typeof item.compositions === 'object' && item.compositions !== null) {
-                // Handle object compositions like {cotton: 100}
-                Object.keys(item.compositions).forEach(comp => {
-                    if (comp && comp.trim()) {
-                        compositions.add(comp.trim().toLowerCase());
-                        console.log(`✅ Added composition from object: ${comp}`);
+                // Handle composition sets - extract materials from within sets
+                Object.keys(item.compositions).forEach(setKey => {
+                    const setData = item.compositions[setKey];
+                    console.log(`🔍 Processing composition set "${setKey}":`, setData);
+                    
+                    if (typeof setData === 'object' && setData !== null) {
+                        // Extract material names from set (not set names)
+                        Object.keys(setData).forEach(material => {
+                            if (material && material.trim()) {
+                                compositions.add(material.trim().toLowerCase());
+                                console.log(`✅ Added material from set "${setKey}": ${material}`);
+                            }
+                        });
+                    } else if (typeof setData === 'string') {
+                        // Handle string-based composition data
+                        const materials = setData.split(',');
+                        materials.forEach(material => {
+                            if (material && material.trim()) {
+                                compositions.add(material.trim().toLowerCase());
+                                console.log(`✅ Added material from string: ${material}`);
+                            }
+                        });
+                    } else {
+                        // Fallback: if it's a simple key-value, treat key as material
+                        if (setKey && setKey.trim() && !setKey.toLowerCase().includes('set')) {
+                            compositions.add(setKey.trim().toLowerCase());
+                            console.log(`✅ Added composition (fallback): ${setKey}`);
+                        }
                     }
                 });
             }
@@ -3205,21 +3233,18 @@ function reconfigureMeasurements(measurementData) {
         }
     }
     
-    // Show first 3 measurements by default
-    const basicMeasurements = availableMeasurements.slice(0, 3);
-    const expandedMeasurements = availableMeasurements.slice(3);
-    
+    // 카테고리 선택 시에는 모든 measurement 표시, load more 버튼 없음
     container.innerHTML = `
         <div class="filter_measurement_basic" id="new_filter_measurement_basic">
-            ${basicMeasurements.map(measurement => {
+            ${availableMeasurements.map(measurement => {
                 const data = measurementData[measurement];
                 return `
                     <div class="filter_measurement_item">
                         <label class="measurement_label">${measurement}</label>
                         <div class="filter_measurement_range">
-                            <input type="text" placeholder="${data.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                            <input type="text" placeholder="${data.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" autocomplete="off" />
                             <span>-</span>
-                            <input type="text" placeholder="${data.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                            <input type="text" placeholder="${data.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" autocomplete="off" />
                         </div>
                         <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
                             <span class="clear_icon"></span>
@@ -3229,30 +3254,8 @@ function reconfigureMeasurements(measurementData) {
             }).join('')}
         </div>
         <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
-            ${expandedMeasurements.map(measurement => {
-                const data = measurementData[measurement];
-                return `
-                    <div class="filter_measurement_item">
-                        <label class="measurement_label">${measurement}</label>
-                        <div class="filter_measurement_range">
-                            <input type="text" placeholder="${data.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
-                            <span>-</span>
-                            <input type="text" placeholder="${data.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                        </div>
-                        <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                            <span class="clear_icon"></span>
-                        </button>
-                    </div>
-                `;
-            }).join('')}
+            <!-- Hidden when category selected -->
         </div>
-        ${availableMeasurements.length > 3 ? `
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleMeasurementList()">
-                <span class="load_more_icon"></span>
-            </button>
-        </div>
-        ` : ''}
     `;
 }
 
@@ -3341,41 +3344,37 @@ function reconfigureSizes(sizes) {
         sizesByRegion[region].push(size);
     });
     
-    // Build HTML with regions as rows (vertical layout) - region | sizes
-    const defaultRegions = Object.keys(sizesByRegion).slice(0, 3);
-    const expandedRegions = Object.keys(sizesByRegion).slice(3);
-    
-    let basicRegionsHtml = '';
-    defaultRegions.forEach(region => {
+    // 카테고리 선택 시에는 모든 size 표시, region 표시 없음, load more 버튼 없음
+    let allSizesHtml = '';
+    Object.keys(sizesByRegion).forEach(region => {
         const regionSizes = sizesByRegion[region];
-        basicRegionsHtml += `
-            <div class="grid_container_size">
-                <div class="size_region">${region}</div>
-                <div class="size_key_container">
-                    ${regionSizes.map(size => `
-                        <div class="tag_item">
-                            <input type="checkbox" id="size_${region}_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
-                            <label for="size_${region}_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
-                        </div>
-                    `).join('')}
-                </div>
+        // region 표시 없이 sizes만 표시
+        allSizesHtml += regionSizes.map(size => `
+            <div class="tag_item">
+                <input type="checkbox" id="size_category_${size.toString().replace(/\s+/g, '_')}" name="filter_sizes" value="${size}">
+                <label for="size_category_${size.toString().replace(/\s+/g, '_')}" class="size_key">${size}</label>
             </div>
-        `;
+        `).join('');
     });
     
+    console.log('📐 Setting size container HTML without regions, without load more button');
     container.innerHTML = `
         <div class="filter_size_basic" id="new_filter_size_basic">
-            ${basicRegionsHtml}
+            <div class="size_values_container">
+                ${allSizesHtml}
+            </div>
         </div>
         <div class="filter_size_expanded filter_expanded" id="new_filter_size_expanded">
-            <!-- Will be populated when expanded with more regions -->
-        </div>
-        <div class="load_more_section">
-            <button class="load_more_button ${expandedRegions.length > 0 ? 'show' : 'hide'}" onclick="toggleSizeList()">
-                <span class="load_more_icon"></span>
-            </button>
+            <!-- Hidden when category selected -->
         </div>
     `;
+    
+    // 확실하게 load more 버튼 제거
+    const loadMoreSection = container.querySelector('.load_more_section');
+    if (loadMoreSection) {
+        console.log('🗑️ Removing existing load more section');
+        loadMoreSection.remove();
+    }
 }
 
 function resetFilterOptions() {
@@ -3480,9 +3479,9 @@ function updateFilterMeasurements(selectedCategories) {
         <div class="filter_measurement_item">
             <label>${measurement}</label>
             <div class="filter_measurement_range">
-                <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
+                <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" autocomplete="off" />
                 <span>-</span>
-                <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
+                <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" autocomplete="off" />
             </div>
             <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
                 <span class="clear_icon"></span>
@@ -3491,38 +3490,100 @@ function updateFilterMeasurements(selectedCategories) {
     `).join('');
 }
 
+function fetchAllMeasurementRanges() {
+    console.log('🔍 Fetching global measurement ranges from all items');
+    
+    return fetch('/api/items')
+        .then(response => response.json())
+        .then(data => {
+            const items = data.items || [];
+            console.log(`📦 Found ${items.length} total items for measurement analysis`);
+            
+            // Extract measurements from all items without category filtering
+            const globalMeasurementData = extractMeasurements(items, null);
+            
+            return globalMeasurementData;
+        })
+        .catch(error => {
+            console.error('❌ Failed to fetch all items for measurement ranges:', error);
+            throw error;
+        });
+}
+
 function initializeFilterMeasurements() {
     const container = document.getElementById('new_filter_measurement_container');
     if (!container) return;
     
-    // 기본 측정값은 TOP 카테고리 기준 (script.js displayMeasurementInput 참조)
-    const basicMeasurements = ['chest', 'shoulder', 'sleeve'];
+    console.log('🏗️ Initializing measurements with global data ranges');
     
-    container.innerHTML = `
-        <div class="filter_measurement_basic" id="new_filter_measurement_basic">
-            ${basicMeasurements.map(measurement => `
-                <div class="filter_measurement_item">
-                    <label>${measurement}</label>
-                    <div class="filter_measurement_range">
-                        <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" />
-                        <span>-</span>
-                        <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" />
-                    </div>
-                    <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
-                        <span class="clear_icon"></span>
+    // 모든 아이템에서 measurement 범위 계산
+    fetchAllMeasurementRanges()
+        .then(globalMeasurementData => {
+            console.log('📊 Global measurement ranges:', globalMeasurementData);
+            
+            // 기본 측정값은 TOP 카테고리 기준 (script.js displayMeasurementInput 참조)
+            const basicMeasurements = ['chest', 'shoulder', 'sleeve'];
+            
+            container.innerHTML = `
+                <div class="filter_measurement_basic" id="new_filter_measurement_basic">
+                    ${basicMeasurements.map(measurement => {
+                        const data = globalMeasurementData[measurement] || { min: 'from', max: 'to' };
+                        return `
+                            <div class="filter_measurement_item">
+                                <label>${measurement}</label>
+                                <div class="filter_measurement_range">
+                                    <input type="text" placeholder="${data.min}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" autocomplete="off" />
+                                    <span>-</span>
+                                    <input type="text" placeholder="${data.max}" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" autocomplete="off" />
+                                </div>
+                                <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                                    <span class="clear_icon"></span>
+                                </button>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
+                    <!-- Will be populated when expanded -->
+                </div>
+                <div class="load_more_section">
+                    <button class="load_more_button" onclick="toggleMeasurementList()">
+                        <span class="load_more_icon"></span>
                     </button>
                 </div>
-            `).join('')}
-        </div>
-        <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
-            <!-- Will be populated when expanded -->
-        </div>
-        <div class="load_more_section">
-            <button class="load_more_button" onclick="toggleMeasurementList()">
-                <span class="load_more_icon"></span>
-            </button>
-        </div>
-    `;
+            `;
+        })
+        .catch(error => {
+            console.error('❌ Failed to fetch global measurement ranges:', error);
+            // Fallback to basic placeholders
+            const basicMeasurements = ['chest', 'shoulder', 'sleeve'];
+            
+            container.innerHTML = `
+                <div class="filter_measurement_basic" id="new_filter_measurement_basic">
+                    ${basicMeasurements.map(measurement => `
+                        <div class="filter_measurement_item">
+                            <label>${measurement}</label>
+                            <div class="filter_measurement_range">
+                                <input type="text" placeholder="from" class="measurement_input filter_measurement_input" id="measurement_${measurement}_from" autocomplete="off" />
+                                <span>-</span>
+                                <input type="text" placeholder="to" class="measurement_input filter_measurement_input" id="measurement_${measurement}_to" autocomplete="off" />
+                            </div>
+                            <button class="clear_button filter_measurement_clear" onclick="clearMeasurementRange('${measurement}')">
+                                <span class="clear_icon"></span>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="filter_measurement_expanded filter_expanded" id="new_filter_measurement_expanded">
+                    <!-- Will be populated when expanded -->
+                </div>
+                <div class="load_more_section">
+                    <button class="load_more_button" onclick="toggleMeasurementList()">
+                        <span class="load_more_icon"></span>
+                    </button>
+                </div>
+            `;
+        });
 }
 
 function initializeFilterCompositions() {
@@ -3680,12 +3741,18 @@ function toggleSizeList() {
         
         expanded.innerHTML = expandedRegionsHtml;
         expanded.classList.remove('filter_expanded');
-        button.classList.add('load_more_collapsed');
+        const icon = button.querySelector('.load_more_icon');
+        if (icon) {
+            icon.classList.add('collapsed');
+        }
     } else {
         // Collapse - hide expanded list
         expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
-        button.classList.remove('load_more_collapsed');
+        const icon = button.querySelector('.load_more_icon');
+        if (icon) {
+            icon.classList.remove('collapsed');
+        }
     }
 }
 
@@ -3766,12 +3833,18 @@ function toggleMeasurementList() {
         }
         
         expanded.classList.remove('filter_expanded');
-        button.classList.add('load_more_collapsed');
+        const icon = button.querySelector('.load_more_icon');
+        if (icon) {
+            icon.classList.add('collapsed');
+        }
     } else {
         // Collapse - hide expanded list
         expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
-        button.classList.remove('load_more_collapsed');
+        const icon = button.querySelector('.load_more_icon');
+        if (icon) {
+            icon.classList.remove('collapsed');
+        }
     }
 }
 
@@ -3801,12 +3874,18 @@ function toggleCompositionList() {
         `).join('');
         
         expanded.classList.remove('filter_expanded');
-        button.classList.add('load_more_collapsed');
+        const icon = button.querySelector('.load_more_icon');
+        if (icon) {
+            icon.classList.add('collapsed');
+        }
     } else {
         // Collapse - hide expanded list
         expanded.innerHTML = '';
         expanded.classList.add('filter_expanded');
-        button.classList.remove('load_more_collapsed');
+        const icon = button.querySelector('.load_more_icon');
+        if (icon) {
+            icon.classList.remove('collapsed');
+        }
     }
 }
 
@@ -4758,7 +4837,7 @@ function displayColorInput() {
     colorGrid.className = 'color_grid';
     colorGrid.innerHTML = colorList.map(color => `
         <div class="color_option" data-color="${color.label}" onclick="selectColor('${color.label}')">
-            <div class="color_circle color_${color.label}" title="${color.label}"></div>
+            <div class="color_circle color_${color.label}${color.label === 'white' ? ' color_white' : ''}" title="${color.label}"></div>
             <span class="color_label">${color.label}</span>
         </div>
     `).join('');
@@ -5493,15 +5572,14 @@ function submitForm(event) {
         console.log('🔍 [SIZE] regular region selected:', size);
     }
     
-    // 측정 데이터 (measurement)
+    // 측정 데이터 (measurement) - 빈 값도 포함하여 삭제 처리
     const measurements = {};
     const measurementInputs = document.querySelectorAll('.measurement_input');
     measurementInputs.forEach((input, index) => {
-        if (input.value) {
-            const label = input.parentElement.querySelector('.part');
-            if (label) {
-                measurements[label.textContent] = input.value;
-            }
+        const label = input.parentElement.querySelector('.part');
+        if (label) {
+            // 빈 값도 전송하여 서버에서 삭제 처리할 수 있도록 함
+            measurements[label.textContent] = input.value || '';
         }
     });
     
@@ -5602,7 +5680,8 @@ function submitForm(event) {
     if (sizeRegion && sizeRegion !== 'Select') formData.append('sizeRegion', sizeRegion);
     if (size && size.trim() !== '') formData.append('size', size);
     if (sizeEtc && sizeEtc.trim() !== '') formData.append('sizeEtc', sizeEtc);
-    if (Object.keys(measurements).length > 0) formData.append('measurements', JSON.stringify(measurements));
+    // 빈 값도 포함하여 measurements 전송 (삭제 처리를 위해)
+    formData.append('measurements', JSON.stringify(measurements));
     // Composition 데이터 추가 (Edit 페이지와 동일한 로직 사용)
     const hasCompositionData = window.usingMultiSets 
         ? (typeof compositions === 'object' && compositions !== null && Object.keys(compositions).length > 0 && Object.values(compositions).some(set => Object.keys(set).length > 0))
@@ -6127,6 +6206,11 @@ function updateColorDisplay(item) {
             if (colorData) {
                 // 동적으로 생성된 CSS 클래스 사용 (예: color_black, color_red 등)
                 colorBox.classList.add(`color_${colorName}`);
+                
+                // white 색상일 때만 border 추가
+                if (colorName === 'white') {
+                    colorBox.classList.add('color_white');
+                }
             } else {
                 // 색상을 찾을 수 없으면 기본 회색
                 colorBox.style.backgroundColor = '#cccccc';
