@@ -5429,28 +5429,9 @@ function populateItemView(item) {
         if (isStitchedImage(item.images)) {
             displayStitchedImagesAsCarousel(item.images, imageContainer);
         } else {
-            console.log('🖼️ Displaying individual images (non-stitched)');
-            // 첫 번째 이미지만 표시 (또는 갤러리 형태로)
-            const img = document.createElement('img');
-            img.src = item.images[0];
-            img.classList.add('fallback_image');
-            img.onload = () => {
-                // 이미지가 윈도우보다 작으면 중앙 정렬
-                console.log('🖼️ Image width:', img.naturalWidth);
-                console.log('🖼️ Window width:', window.innerWidth);
-                console.log('🖼️ Should center?', img.naturalWidth < window.innerWidth);
-                
-                if (img.naturalWidth < window.innerWidth) {
-                    console.log('✅ Adding center_align class');
-                    img.classList.add('center_align');
-                } else {
-                    console.log('❌ Image is wider than window, no centering');
-                }
-            };
-            img.onerror = () => {
-                imageContainer.innerHTML = '<div class="no-image">이미지를 로드할 수 없습니다</div>';
-            };
-            imageContainer.appendChild(img);
+            console.log('🖼️ Displaying individual images (non-stitched) as carousel:', item.images.length, 'images');
+            // Individual 이미지들도 stitched와 동일한 carousel 형태로 표시
+            displayStitchedImagesAsCarousel(item.images, imageContainer);
         }
     }
     
@@ -7603,6 +7584,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add page에서 copy & paste, drag & drop 기능 초기화
     if (window.location.pathname.includes('add.html')) {
         setupImageModeToggle(); // 이미지 모드 토글 설정 추가
+        setupImagePasteAndDrop(); // 클립보드 붙여넣기 기능 초기화
         loadTagsForPage('add'); // 동적 태그 로드
         loadExistingBrandsForAutocomplete(); // 브랜드 자동완성 로드
     }
