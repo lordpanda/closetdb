@@ -156,7 +156,8 @@ function changeDate(days) {
 }
 
 function formatDateForInput(date) {
-    return date.toISOString().split('T')[0];
+    // 시간대 독립적인 날짜 문자열 생성 (ootdLog 방식)
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 function handleLocationClick() {
@@ -1052,32 +1053,50 @@ function uploadImageToR2(file) {
 }
 
 function extractEXIFData(file) {
+    console.log('🔍 Extracting EXIF data from:', file.name);
+    
     exifr.parse(file).then(exifData => {
+        console.log('📋 EXIF data found:', exifData);
+        
         if (exifData) {
             // Extract date
             if (exifData.DateTimeOriginal || exifData.DateTime) {
                 const dateString = exifData.DateTimeOriginal || exifData.DateTime;
                 const imageDate = new Date(dateString);
+                console.log('📅 Image date:', dateString, '→', imageDate);
+                
                 if (!isNaN(imageDate.getTime())) {
                     currentDate = imageDate;
-                    document.getElementById('ootd_date').value = formatDateForInput(currentDate);
+                    console.log('✅ Updated currentDate to:', currentDate);
+                    updateDateDisplay(); // HTML 날짜 표시 업데이트
                 }
+            } else {
+                console.log('⚠️ No date information in EXIF');
             }
             
             // Extract location
             if (exifData.latitude && exifData.longitude) {
+                console.log('📍 GPS coordinates found:', exifData.latitude, exifData.longitude);
                 reverseGeocode(exifData.latitude, exifData.longitude);
+            } else {
+                console.log('⚠️ No GPS coordinates in EXIF');
             }
+        } else {
+            console.log('⚠️ No EXIF data found');
         }
     }).catch(error => {
-        console.log('No EXIF data found or error reading EXIF:', error);
+        console.log('❌ Error reading EXIF:', error);
     });
 }
 
 function reverseGeocode(lat, lon) {
+    console.log('🌍 Reverse geocoding:', lat, lon);
+    
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1&accept-language=en`)
         .then(response => response.json())
         .then(data => {
+            console.log('📍 Geocoding response:', data);
+            
             if (data && data.address) {
                 const addr = data.address;
                 const locationParts = [];
@@ -1086,8 +1105,14 @@ function reverseGeocode(lat, lon) {
                 if (addr.state) locationParts.push(addr.state);
                 
                 if (locationParts.length > 0) {
-                    currentLocation = locationParts.join(', ').toUpperCase();
+                    const newLocation = locationParts.join(', ').toUpperCase();
+                    console.log('✅ Updated location to:', newLocation);
+                    currentLocation = newLocation;
+                    currentCoords = { lat, lon };
                     updateLocationDisplay();
+                    
+                    // 새 위치의 날씨 업데이트
+                    updateWeatherForLocation(lat, lon);
                 }
             }
         })
