@@ -536,6 +536,7 @@ def add_item():
                                     image_urls.append(url)
                     
                     logging.info(f"Successfully uploaded {len(image_urls)} individual images with thumbnail")
+                    logging.info(f"🔍 DEBUGGING: Individual image URLs: {image_urls}")
                     
                 except Exception as e:
                     logging.error(f"Error processing individual images: {e}")

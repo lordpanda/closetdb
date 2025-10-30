@@ -71,7 +71,8 @@
 .view_measurement {
     position: relative;
     max-width: 520px;
-    min-height: 450px;
+    width: 100%;
+    aspect-ratio: 476/436; /* measurement 이미지의 실제 비율에 맞춤 */
 }
 .view_measurement .box {
     position: absolute;
@@ -114,17 +115,17 @@
 }
 .view_measurement .armhole {
     top: 30%;
-    left: 27%;
+    left: 29%;
 }
 
 /* Short Sleeve Mini Dress 전용 위치 설정 */
 .view_measurement .chest.short_sleeve_mini_dress {
-    top: 28%;
+    top: 34%;
     left: 50%;
 }
 
 .view_measurement .shoulder.short_sleeve_mini_dress {
-    top: 11%;
+    top: 17%;
     left: 50%;
 }
 
@@ -135,7 +136,7 @@
 
 .view_measurement .sleeveOpening.short_sleeve_mini_dress {
     top: 47%;
-    left: 22%;
+    left: 25%;
 }
 
 .view_measurement .armhole.short_sleeve_mini_dress {
@@ -252,7 +253,7 @@
 }
 .view_measurement .sleeve.long_sleeve {
     top: 39%;
-    left: 85%; 
+    left: 83%; 
 }
 .view_measurement .length.long_sleeve {
     top: 55%;
@@ -302,43 +303,43 @@
 
 /* Long Sleeve Midi Dress 전용 위치 설정 */
 .view_measurement .chest.long_sleeve_midi_dress {
-    top: 20%;
+    top: 27%;
     left: 50%;
 }
 
 .view_measurement .shoulder.long_sleeve_midi_dress {
-    top: 8%;
+    top: 9%;
     left: 50%;
 }
 
 .view_measurement .sleeve.long_sleeve_midi_dress {
-    top: 39%;
-    left: 85%;
+    top: 37%;
+    left: 79%;
 }
 
 .view_measurement .sleeveOpening.long_sleeve_midi_dress {
     top: 65%;
-    left: 85%;
+    left: 19%;
 }
 
 .view_measurement .armhole.long_sleeve_midi_dress {
     top: 15%;
-    left: 24%;
+    left: 27%;
 }
 
 .view_measurement .waist.long_sleeve_midi_dress {
-    top: 33%;
+    top: 41%;
     left: 50%;
 }
 
 .view_measurement .length.long_sleeve_midi_dress {
-    top: 60%;
+    top: 70%;
     left: 62%;
 }
 
 .view_measurement .hemWidth.long_sleeve_midi_dress {
-    top: 70%;
-    left: 46%;
+    top: 95%;
+    left: 50%;
 }
 
 /* Skirt Mini measurement positions */
@@ -494,10 +495,13 @@
 }
 
 .measurement_base {
+    position: absolute;
     width: 100%;
+    height: 100%;
     top: 0;
     left: 0;
     border-radius: 30px;
+    object-fit: contain; /* 이미지 비율 유지하면서 컨테이너에 맞춤 */
 }
 
 /* No measurement 텍스트 스타일 */
@@ -522,11 +526,13 @@
 .measurement_guideline {
     z-index: 10;
     width: 100%;
+    height: 100%;
     position: absolute;
     top: 0;
     left: 0;
     stroke-width: 0px;
     background-color: transparent;
+    object-fit: contain; /* 이미지 비율 유지하면서 컨테이너에 맞춤 */
 }
 .view_size {
     padding: 10px 0 20px;
@@ -593,7 +599,7 @@
         grid-template-rows: auto auto;
     }
     .view_measurement {
-        min-height: 300px; /* 모바일에서 높이 줄임 */
+        /* aspect-ratio는 데스크톱과 동일하게 유지 */
     }
     .view_measurement .box {
         padding: 6px 10px;
@@ -814,5 +820,31 @@
         display: block;
         scroll-snap-align: center;
         scroll-snap-stop: always;
+    }
+
+    .grid_container_view_details {
+        padding-bottom: 0px;
+        grid-gap: 0.5em;
+    }
+    .comp_label {
+        font-size: 1em;
+    }
+    .comp_value {
+        font-size: 1em;
+    }
+    .detail_label {
+        margin-bottom: -4px;
+    }
+    .detail_value {
+        font-size: 1em;
+    }
+    .color_box {
+        width: 34px;
+        height: 34px;
+    }
+
+    .edit_section {
+        margin: 10px 0;
+        padding: 10px;
     }
 }

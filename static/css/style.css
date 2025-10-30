@@ -140,6 +140,7 @@
     align-items: flex-start;
     justify-content: flex-start;
     width: 100%;
+    padding-left: 20px;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE */
     cursor: grab;

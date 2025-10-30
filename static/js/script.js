@@ -13,27 +13,20 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log('Login successful!', data);
-                    
                     // 토큰이 있으면 저장
                     if (data.token) {
-                        console.log('Saving token:', data.token);
                         localStorage.setItem('userToken', data.token);
                     } else {
-                        console.log('No token in response, creating dummy token');
                         localStorage.setItem('userToken', 'logged_in_' + Date.now());
                     }
                     
                     // 로그인 전에 저장된 목표 URL이 있으면 그곳으로, 없으면 메인으로
                     const redirectUrl = localStorage.getItem('redirectAfterLogin');
-                    console.log('Checking for saved redirect URL:', redirectUrl);
                     
                     if (redirectUrl) {
-                        console.log("Redirecting to saved URL:", redirectUrl);
                         localStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
                         window.location.href = redirectUrl;
                     } else {
-                        console.log("No saved URL, redirecting to main page");
                         window.location.href = '/';
                     }
                 } else {
@@ -76,20 +69,15 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(data => {
                 if (data.token) {
-                    console.log("Login successful! Received token: ", data.token);
-
                     localStorage.setItem('userToken', data.token);  // Store token
 
                     // 로그인 전에 저장된 목표 URL이 있으면 그곳으로, 없으면 메인으로
                     const redirectUrl = localStorage.getItem('redirectAfterLogin');
-                    console.log('Checking for saved redirect URL:', redirectUrl);
                     
                     if (redirectUrl) {
-                        console.log("Redirecting to saved URL:", redirectUrl);
                         localStorage.removeItem('redirectAfterLogin'); // 사용 후 제거
                         window.location.href = redirectUrl;
                     } else {
-                        console.log("No saved URL, redirecting to main page");
                         window.location.href = '/'; // Redirect to the dashboard page
                     }
                 } else {
@@ -133,7 +121,6 @@ function displayGlobalMenu(parm1) {
 
 // 모든 메뉴 링크에 이벤트 리스너 추가
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Setting up menu link event listeners');
     
     // 이미지 파일 배열 초기화
     window.individualFiles = [];
@@ -144,28 +131,41 @@ document.addEventListener('DOMContentLoaded', function() {
     const protectedPages = ['/index.html', '/add.html', '/edit.html', '/filter.html', '/all.html', '/item.html'];
     const isProtectedPage = protectedPages.includes(currentPath);
     
-    console.log('Current path:', currentPath);
-    console.log('Is protected page:', isProtectedPage);
     
     // 필터 페이지나 all 페이지에서 브라우저 뒤로가기로 온 경우 저장된 필터 상태 복원
     if (currentPath.includes('/index.html') || currentPath.includes('/all.html') || currentPath.includes('/filter.html')) {
         setTimeout(() => {
             restoreFilterState();
+            
+            // all.html과 index.html에서 검색 상태 복원
+            if (currentPath.includes('/all.html') || currentPath.includes('/index.html')) {
+                const searchState = restoreSearchState();
+                if (searchState && searchState.query) {
+                    const searchInput = document.querySelector('.search_input');
+                    if (searchInput) {
+                        searchInput.value = searchState.query;
+                        window.isRestoringSearch = true; // 복원 모드 설정
+                        
+                        if (currentPath.includes('/all.html')) {
+                            performSearchForAll(searchState.query);
+                        } else if (currentPath.includes('/index.html')) {
+                            // index.html에서는 해당 페이지의 검색 함수 사용
+                            performSearch(searchState.query);
+                        }
+                        
+                        window.isRestoringSearch = false; // 복원 모드 해제
+                    }
+                }
+            }
         }, 1500); // 페이지 로드 완료 후 복원
     }
     
     if (isProtectedPage) {
-        console.log('Protected page detected, checking login status...');
         const token = localStorage.getItem('userToken');
-        console.log('Token check:', token ? 'EXISTS' : 'NOT_EXISTS');
-        console.log('Actual token value:', token);
         
         if (!token || (!token.startsWith('authenticated_') && !token.startsWith('google_auth_') && !token.startsWith('logged_in_'))) {
-            console.log('❌ Not logged in on protected page, redirecting to landing');
             window.location.href = '/';
             return;
-        } else {
-            console.log('User is logged in, allowing access to protected page');
         }
     }
     
@@ -174,10 +174,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // closetDB 로고 링크
         const logoLink = document.getElementById('logo_link');
         if (logoLink) {
-            console.log('Found logo link, attaching event');
             logoLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('Logo clicked!');
+                
+                // 로고 클릭은 명시적으로 메인으로 이동하려는 의도이므로 검색 상태 삭제
+                clearSearchState();
                 checkLoginAndRedirect('/index.html');
             });
         }
@@ -185,10 +186,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // View all 링크
         const viewAllLink = document.getElementById('view_all_link');
         if (viewAllLink) {
-            console.log('Found view all link, attaching event');
             viewAllLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('View all clicked!');
+                
+                // View all 클릭은 명시적으로 모든 아이템을 보려는 의도이므로 검색 상태 삭제
+                clearSearchState();
                 checkLoginAndRedirect('./all.html');
             });
         }
@@ -196,10 +198,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Filter 링크
         const filterLink = document.getElementById('filter_link');
         if (filterLink) {
-            console.log('Found filter link, attaching event');
             filterLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('Filter clicked!');
                 openFilterPanel();
             });
         }
@@ -207,34 +207,27 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add new 링크
         const addNewLink = document.getElementById('add_new_link');
         if (addNewLink) {
-            console.log('Found Add new link, attaching event');
             addNewLink.addEventListener('click', function(e) {
                 e.preventDefault();
-                console.log('Add new clicked!');
                 checkLoginAndRedirect('/add.html');
             });
         }
         
-        console.log('All menu link event listeners set up');
     }, 100);
 });
 
 // 구글 로그인 시작 함수
 function initiateGoogleLogin() {
-    console.log('Starting Google OAuth login');
     
     // 현재 저장된 리다이렉트 URL 확인
     const savedRedirectUrl = localStorage.getItem('redirectAfterLogin');
-    console.log('Current saved redirect URL:', savedRedirectUrl);
     
     // 목표 URL이 없으면 기본값 설정
     if (!savedRedirectUrl) {
-        console.log('Setting default redirect URL to /add.html');
         localStorage.setItem('redirectAfterLogin', '/add.html');
     }
     
     // 구글 OAuth로 리다이렉트 (절대 경로 사용)
-    console.log('Redirecting to Google OAuth');
     window.location.href = '/auth/google';
 }
 
@@ -242,12 +235,6 @@ function initiateGoogleLogin() {
 function debugTokenStatus() {
     const token = localStorage.getItem('userToken');
     const redirectUrl = localStorage.getItem('redirectAfterLogin');
-    console.log('=== TOKEN DEBUG ===');
-    console.log('Token exists:', !!token);
-    console.log('Token value:', token);
-    console.log('Redirect URL:', redirectUrl);
-    console.log('LocalStorage contents:', localStorage);
-    console.log('==================');
 }
 
 // 로그인 체크 및 리다이렉트 함수
@@ -257,26 +244,19 @@ function checkLoginAndRedirect(targetUrl) {
     // 세션에서 토큰 확인
     const token = localStorage.getItem('userToken');
     
-    console.log('Checking login status for URL:', targetUrl);
-    console.log('Token found:', token ? 'YES' : 'NO');
-    console.log('Token value:', token);
     
     if (token && token.trim() !== '') {
-        console.log('✅ Token exists, checking validity...');
         
         // 토큰이 유효한지 간단히 확인 (더미 토큰 형식 체크)
         if (token.startsWith('authenticated_') || token.startsWith('google_auth_') || token.startsWith('logged_in_')) {
-            console.log('Token format valid, redirecting to:', targetUrl);
             window.location.href = targetUrl;
         } else {
-            console.log('Invalid token format, clearing and redirecting to login');
             localStorage.removeItem('userToken');
             localStorage.setItem('redirectAfterLogin', targetUrl);
             window.location.href = '/login.html';
         }
     } else {
         // 토큰이 없으면 목표 URL을 저장하고 로그인 페이지로 이동
-        console.log('No token found, saving target URL and redirecting to login');
         localStorage.setItem('redirectAfterLogin', targetUrl);
         window.location.href = '/login.html';
     }
@@ -304,10 +284,8 @@ function displayRecentlyAdded() {
     }
     
     // Supabase에서 모든 아이템들 가져오기
-    console.log('Fetching recently added items from /api/items');
     fetch('/api/items')
         .then(response => {
-            console.log('Response status:', response.status);
             return response.json();
         })
         .then(data => {
@@ -367,20 +345,16 @@ function createAndAppendGridItem(item, grid) {
     // 썸네일이 있으면 썸네일 사용, 없으면 원본 이미지, 그것도 없으면 기본 이미지
     if (item.thumbnail_url) {
         img.src = item.thumbnail_url;
-        console.log('Loading thumbnail:', item.thumbnail_url); // 디버깅용
     } else if (item.images && item.images.length > 0) {
         img.src = item.images[0];
-        console.log('Loading original image:', item.images[0]); // 디버깅용
     } else {
         // 기본 이미지 (short sleeve top measurement)
         img.src = "/static/src/img/measurement/measurement_top.svg";
         img.classList.add('image_placeholder');
-        console.log('No images found for item:', item); // 디버깅용
     }
     
     img.onerror = function() {
         // 이미지 로드 실패시 기본 이미지
-        console.log('Image load failed:', this.src); // 디버깅용
         this.src = "/static/src/img/measurement/measurement_top.svg";
         this.classList.add('image_placeholder');
     };
@@ -397,7 +371,6 @@ function updateLoadMoreButton() {
     
     // 검색 모드일 때는 버튼을 숨김
     if (isSearchMode) {
-        console.log('🔍 updateLoadMoreButton: 검색 모드이므로 버튼 숨김');
         loadMoreBtn.classList.remove('show', 'inline-block');
         loadMoreBtn.classList.add('hide');
         loadMoreBtn.style.display = 'none';
@@ -428,7 +401,6 @@ function loadMoreItems() {
     const grid = document.querySelector('.grid_container');
     const nextBatch = allItems.slice(currentOffset, currentOffset + 12);
     
-    console.log(`Loading ${nextBatch.length} more items (offset: ${currentOffset})`);
     
     // 약간의 딜레이로 로딩 상태 표시
     setTimeout(() => {
@@ -445,7 +417,6 @@ function loadMoreItems() {
         
         updateLoadMoreButton();
         
-        console.log(`Loaded ${nextBatch.length} items. Total loaded: ${currentOffset}/${allItems.length}`);
     }, 300);
 }
 
@@ -462,7 +433,6 @@ function displayAllItems() {
     // Supabase에서 모든 아이템 가져오기
         fetch('/api/items')
         .then(response => {
-            console.log('Response status:', response.status);
             return response.json();
         })
         .then(data => {
@@ -483,21 +453,17 @@ function displayAllItems() {
                     // 썸네일이 있으면 썸네일 사용, 없으면 원본 이미지, 그것도 없으면 기본 이미지
                     if (item.thumbnail_url) {
                         img.src = item.thumbnail_url;
-                        console.log('Loading thumbnail:', item.thumbnail_url); // 디버깅용
-                    } else if (item.images && item.images.length > 0) {
+                                    } else if (item.images && item.images.length > 0) {
                         img.src = item.images[0];
-                        console.log('Loading original image:', item.images[0]); // 디버깅용
-                    } else {
+                                    } else {
                         // 기본 이미지 (short sleeve top measurement)
                         img.src = "/static/src/img/measurement/measurement_top.svg";
                         img.classList.add('image_placeholder');
-                        console.log('No images found for item:', item); // 디버깅용
-                    }
+                                    }
                     
                     img.onerror = function() {
                         // 이미지 로드 실패시 기본 이미지
-                        console.log('Image load failed:', this.src); // 디버깅용
-                        this.src = "/static/src/img/measurement/measurement_top.svg";
+                                        this.src = "/static/src/img/measurement/measurement_top.svg";
                         this.classList.add('image_placeholder');
                     };
                     
@@ -551,7 +517,6 @@ function setupImageModeToggle() {
     if (!modeToggle || !stitchedMode || !individualMode) return;
     
     // 초기 상태 설정 (default: stitched mode)
-    console.log('Setting up image mode toggle - default to stitched mode');
     stitchedMode.classList.remove('hidden');
     individualMode.classList.add('hidden');
     modeToggle.checked = true; // checked = stitched mode
@@ -621,7 +586,6 @@ function readStitchedImage() {
     
     // + 버튼 숨기기
     const addButton = container.querySelector('.add_image');
-    console.log('➕ Add button found:', !!addButton);
     if (addButton) {
         addButton.classList.add('hidden');
     }
@@ -866,7 +830,6 @@ function showFallbackCarousel() {
             img.classList.add('small_radius');
             
             img.onload = function() {
-                console.log('✅ Fallback image loaded:', this.src);
             };
             
             img.onerror = function() {
@@ -895,7 +858,6 @@ function initializeSearch() {
     const searchInput = document.getElementById('form1');
     if (!searchInput) return;
     
-    console.log('🔍 Initializing search functionality with optimization');
     
     // 아이템 데이터 미리 로드
     preloadSearchData();
@@ -942,17 +904,14 @@ function initializeSearch() {
 // 검색 데이터 미리 로드 (캐싱)
 function preloadSearchData() {
     if (searchCache !== null) {
-        console.log('🚀 Search data already cached');
         return Promise.resolve(searchCache);
     }
     
-    console.log('🔄 Preloading search data...');
     return fetch('/api/items')
         .then(response => response.json())
         .then(data => {
             if (data.items) {
                 searchCache = data.items;
-                console.log(`✅ Search data cached: ${searchCache.length} items`);
                 return searchCache;
             }
             return [];
@@ -965,7 +924,6 @@ function preloadSearchData() {
 
 // 최적화된 검색 함수 (캐시된 데이터 사용)
 function performSearchOptimized(query) {
-    console.log('🚀 Performing optimized search for:', query);
     
     // 캐시된 데이터가 있으면 즉시 검색, 없으면 로드
     const searchPromise = searchCache ? Promise.resolve(searchCache) : preloadSearchData();
@@ -974,13 +932,6 @@ function performSearchOptimized(query) {
     if ((query.toLowerCase().includes('uk') || query.toLowerCase().includes('de')) && searchCache && Array.isArray(searchCache)) {
         const searchRegion = query.toLowerCase().includes('uk') ? 'uk' : 'de';
         const regionItems = searchCache.filter(item => (item.sizeRegion || item.size_region)?.toLowerCase() === searchRegion);
-        console.log(`🔍 ${searchRegion.toUpperCase()} 사이즈 아이템들:`, regionItems.length, regionItems.slice(0, 3).map(item => ({
-            id: item.item_id,
-            size_region: item.size_region,
-            sizeRegion: item.sizeRegion,
-            brand: item.brand,
-            category: item.category
-        })));
     }
     
     searchPromise.then(items => {
@@ -1061,17 +1012,28 @@ function performSearchOptimized(query) {
                         if (lowerTerm === '!all') {
                             return itemSeason !== 'all' && itemSeason !== '';
                         }
-                        // season 관련 검색어들만 확인
-                        const seasonKeywords = ['spring', 'summer', 'fall', 'autumn', 'winter', 'all'];
+                        // season 관련 검색어들 - 실제 DB 값과 검색어 매핑
+                        const seasonMapping = {
+                            'spring': ['Spring/Fall', 'FW'], 
+                            'fall': ['Spring/Fall', 'FW'],
+                            'autumn': ['Spring/Fall', 'FW'],
+                            'summer': ['Summer', 'Midsummer'],
+                            'midsummer': ['Midsummer'],
+                            'fw': ['FW'],
+                            'winter': ['Winter', 'FW'],
+                            'all': ['All']
+                        };
+                        const seasonKeywords = Object.keys(seasonMapping);
                         if (!seasonKeywords.includes(lowerTerm)) {
                             return false; // season 관련 검색어가 아니면 매치하지 않음
                         }
-                        // "all" season은 season 관련 검색어에만 매치
+                        // "All" season은 "all" 검색어에만 매치
                         if (itemSeason === 'all') {
                             return lowerTerm === 'all';
                         }
-                        // 일반 season 매치
-                        return itemSeason.includes(lowerTerm);
+                        // 일반 season 매치 - 매핑된 값들과 비교
+                        const mappedSeasons = seasonMapping[lowerTerm] || [];
+                        return mappedSeasons.some(season => itemSeason.toLowerCase() === season.toLowerCase());
                     })();
                     
                     matches.push(seasonMatch);
@@ -1115,23 +1077,9 @@ function performSearchOptimized(query) {
                 return measurementValid && compositionValid && generalValid;
             });
             
-            console.log(`🎯 Search results: ${filteredItems.length} items found for query: "${query}"`);
             
-            // UK/DE 검색 디버깅 - 매치된 결과
-            if (query.toLowerCase().includes('uk') || query.toLowerCase().includes('de')) {
-                const searchRegion = query.toLowerCase().includes('uk') ? 'UK' : 'DE';
-                console.log(`🎯 ${searchRegion} 매치된 아이템들:`, filteredItems.slice(0, 5).map(item => ({
-                    id: item.item_id,
-                    size_region: item.size_region,
-                    sizeRegion: item.sizeRegion,
-                    brand: item.brand,
-                    category: item.category,
-                    matchReason: `size_region: ${item.size_region}, brand: ${item.brand}, category: ${item.category}`
-                })));
-            }
             displaySearchResults(filteredItems, query);
         } else {
-            console.log('❌ No items available for search');
             displaySearchResults([], query);
         }
     }).catch(error => {
@@ -1145,7 +1093,6 @@ function initializeSearchForAll() {
     const searchInput = document.getElementById('form1');
     if (!searchInput) return;
     
-    console.log('🔍 Initializing search functionality for all.html with optimization');
     
     // 아이템 데이터 미리 로드
     preloadSearchData();
@@ -1191,7 +1138,6 @@ function initializeSearchForAll() {
 
 // All.html용 최적화된 검색 함수 (캐시된 데이터 사용)
 function performSearchForAllOptimized(query) {
-    console.log('🚀 Performing optimized search for all.html:', query);
     
     // 캐시된 데이터가 있으면 즉시 검색, 없으면 로드
     const searchPromise = searchCache ? Promise.resolve(searchCache) : preloadSearchData();
@@ -1274,17 +1220,28 @@ function performSearchForAllOptimized(query) {
                         if (lowerTerm === '!all') {
                             return itemSeason !== 'all' && itemSeason !== '';
                         }
-                        // season 관련 검색어들만 확인
-                        const seasonKeywords = ['spring', 'summer', 'fall', 'autumn', 'winter', 'all'];
+                        // season 관련 검색어들 - 실제 DB 값과 검색어 매핑
+                        const seasonMapping = {
+                            'spring': ['Spring/Fall', 'FW'], 
+                            'fall': ['Spring/Fall', 'FW'],
+                            'autumn': ['Spring/Fall', 'FW'],
+                            'summer': ['Summer', 'Midsummer'],
+                            'midsummer': ['Midsummer'],
+                            'fw': ['FW'],
+                            'winter': ['Winter', 'FW'],
+                            'all': ['All']
+                        };
+                        const seasonKeywords = Object.keys(seasonMapping);
                         if (!seasonKeywords.includes(lowerTerm)) {
                             return false; // season 관련 검색어가 아니면 매치하지 않음
                         }
-                        // "all" season은 season 관련 검색어에만 매치
+                        // "All" season은 "all" 검색어에만 매치
                         if (itemSeason === 'all') {
                             return lowerTerm === 'all';
                         }
-                        // 일반 season 매치
-                        return itemSeason.includes(lowerTerm);
+                        // 일반 season 매치 - 매핑된 값들과 비교
+                        const mappedSeasons = seasonMapping[lowerTerm] || [];
+                        return mappedSeasons.some(season => itemSeason.toLowerCase() === season.toLowerCase());
                     })();
                     
                     matches.push(seasonMatch);
@@ -1328,10 +1285,8 @@ function performSearchForAllOptimized(query) {
                 return measurementValid && compositionValid && generalValid;
             });
             
-            console.log(`🎯 All.html search results: ${filteredItems.length} items found`);
             displaySearchResultsForAll(filteredItems, query);
         } else {
-            console.log('❌ No items available for search');
             displaySearchResultsForAll([], query);
         }
     }).catch(error => {
@@ -1342,20 +1297,57 @@ function performSearchForAllOptimized(query) {
 
 // 검색 캐시 초기화 함수 (새 아이템 추가 시 호출)
 function clearSearchCache() {
-    console.log('🗑️ Clearing search cache');
     searchCache = null;
+}
+
+// 검색 상태 저장 함수
+function saveSearchState(query) {
+    const searchState = {
+        query: query,
+        timestamp: Date.now(),
+        currentPage: window.location.pathname
+    };
+    localStorage.setItem('searchState', JSON.stringify(searchState));
+}
+
+// 검색 상태 복원 함수
+function restoreSearchState() {
+    const savedState = localStorage.getItem('searchState');
+    if (savedState) {
+        try {
+            const searchState = JSON.parse(savedState);
+            // 5분 이내의 검색 상태만 복원
+            if (Date.now() - searchState.timestamp < 5 * 60 * 1000) {
+                return searchState;
+            } else {
+                localStorage.removeItem('searchState');
+            }
+        } catch (error) {
+            console.error('❌ 검색 상태 복원 실패:', error);
+            localStorage.removeItem('searchState');
+        }
+    }
+    return null;
+}
+
+// 검색 상태 삭제 함수
+function clearSearchState() {
+    localStorage.removeItem('searchState');
 }
 
 // 검색 캐시 강제 새로고침
 function refreshSearchCache() {
-    console.log('🔄 Refreshing search cache');
     searchCache = null;
     return preloadSearchData();
 }
 
 // All.html용 검색 수행 (다중 키워드 및 region+size 조합 포함)
 function performSearchForAll(query) {
-    console.log('🔍 Performing search for all.html:', query);
+    
+    // 새로운 검색 시작 시 이전 검색 상태 삭제 (자동 복원이 아닌 경우)
+    if (!window.isRestoringSearch) {
+        clearSearchState();
+    }
     
     fetch('/api/items')
         .then(response => response.json())
@@ -1418,8 +1410,20 @@ function performSearchForAll(query) {
                             if (itemSeason === 'all') {
                                 return true;
                             }
-                            // 일반 season 매치
-                            return itemSeason.includes(term);
+                            // 일반 season 매치 - 검색어를 실제 DB 값과 매핑
+                            const seasonMapping = {
+                                'spring': ['Spring/Fall', 'FW'], 
+                                'fall': ['Spring/Fall', 'FW'],
+                                'autumn': ['Spring/Fall', 'FW'],
+                                'summer': ['Summer', 'Midsummer'],
+                                'midsummer': ['Midsummer'],
+                                'fw': ['FW'],
+                                'winter': ['Winter', 'FW'],
+                                'all': ['All']
+                            };
+                            const mappedSeasons = seasonMapping[term.toLowerCase()] || [];
+                            return mappedSeasons.some(season => itemSeason.toLowerCase() === season.toLowerCase()) || 
+                                   itemSeason.includes(term);
                         })();
                         
                         // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
@@ -1472,16 +1476,10 @@ function displaySearchResultsForAll(items, query) {
     // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
-        console.log('🔍 검색결과 표시 - Load More 버튼 숨기기 시도');
         loadMoreBtn.classList.remove('show', 'inline-block');
         loadMoreBtn.classList.add('hide');
         loadMoreBtn.style.display = 'none'; // 강제로 숨기기
-        console.log('🔍 Load More 버튼 숨김 완료:', {
-            classList: Array.from(loadMoreBtn.classList),
-            style: loadMoreBtn.style.display
-        });
     } else {
-        console.log('🔍 Load More 버튼을 찾을 수 없음');
     }
     
     // 검색 결과 아이템들 표시
@@ -1491,6 +1489,11 @@ function displaySearchResultsForAll(items, query) {
         
         const link = document.createElement('a');
         link.href = `/item.html?id=supabase_${item.item_id}`;
+        
+        // 검색 결과에서 아이템 클릭 시 검색 상태 저장
+        link.addEventListener('click', function(e) {
+            saveSearchState(query);
+        });
         
         const img = document.createElement('img');
         
@@ -1515,7 +1518,11 @@ function displaySearchResultsForAll(items, query) {
 
 // 검색 수행 (다중 키워드 및 region+size 조합 포함)
 function performSearch(query) {
-    console.log('🔍 Performing search for:', query);
+    
+    // 새로운 검색 시작 시 이전 검색 상태 삭제 (자동 복원이 아닌 경우)
+    if (!window.isRestoringSearch) {
+        clearSearchState();
+    }
     
     fetch('/api/items')
         .then(response => response.json())
@@ -1578,8 +1585,20 @@ function performSearch(query) {
                             if (itemSeason === 'all') {
                                 return true;
                             }
-                            // 일반 season 매치
-                            return itemSeason.includes(term);
+                            // 일반 season 매치 - 검색어를 실제 DB 값과 매핑
+                            const seasonMapping = {
+                                'spring': ['Spring/Fall', 'FW'], 
+                                'fall': ['Spring/Fall', 'FW'],
+                                'autumn': ['Spring/Fall', 'FW'],
+                                'summer': ['Summer', 'Midsummer'],
+                                'midsummer': ['Midsummer'],
+                                'fw': ['FW'],
+                                'winter': ['Winter', 'FW'],
+                                'all': ['All']
+                            };
+                            const mappedSeasons = seasonMapping[term.toLowerCase()] || [];
+                            return mappedSeasons.some(season => itemSeason.toLowerCase() === season.toLowerCase()) || 
+                                   itemSeason.includes(term);
                         })();
                         
                         // Region+Size 조합 검색 (예: "IT38", "US2", "KR240")
@@ -1701,14 +1720,32 @@ function checkCompositionSearch(term, item) {
     
     // compositions가 객체 형태인지 확인
     if (typeof item.compositions === 'object' && item.compositions !== null) {
-        // 객체의 키들을 확인 (예: {cotton: 100, polyester: 0})
-        const compositionKeys = Object.keys(item.compositions);
-        const hasComposition = compositionKeys.some(key => 
-            key.toLowerCase().includes(term.toLowerCase()) || term.toLowerCase().includes(key.toLowerCase())
-        );
+        // 재귀적으로 모든 composition 데이터를 검색하는 함수
+        function searchInCompositions(obj) {
+            for (const [key, value] of Object.entries(obj)) {
+                // 키 자체가 소재 이름인 경우 (예: cotton, polyester)
+                if (key.toLowerCase().includes(term.toLowerCase()) || term.toLowerCase().includes(key.toLowerCase())) {
+                    return true;
+                }
+                
+                // 값이 또 다른 객체인 경우 재귀적으로 검색 (composition set 처리)
+                if (typeof value === 'object' && value !== null) {
+                    if (searchInCompositions(value)) {
+                        return true;
+                    }
+                }
+                
+                // 값이 문자열인 경우 검색
+                if (typeof value === 'string') {
+                    if (value.toLowerCase().includes(term.toLowerCase()) || term.toLowerCase().includes(value.toLowerCase())) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
         
-        if (hasComposition) {
-            console.log(`✅ Found composition match: "${term}" in ${compositionKeys.join(', ')}`);
+        if (searchInCompositions(item.compositions)) {
             return true;
         }
     }
@@ -1719,7 +1756,6 @@ function checkCompositionSearch(term, item) {
             comp.toLowerCase().includes(term.toLowerCase()) || term.toLowerCase().includes(comp.toLowerCase())
         );
         if (hasComposition) {
-            console.log(`✅ Found composition match in array: "${term}"`);
             return true;
         }
     }
@@ -1728,7 +1764,6 @@ function checkCompositionSearch(term, item) {
         const hasComposition = item.compositions.toLowerCase().includes(term.toLowerCase()) || 
                               term.toLowerCase().includes(item.compositions.toLowerCase());
         if (hasComposition) {
-            console.log(`✅ Found composition match in string: "${term}"`);
             return true;
         }
     }
@@ -1772,7 +1807,6 @@ function checkColorSearch(term, item) {
     );
     
     if (hasColorMatch) {
-        console.log(`✅ Found color match: "${term}" in ${item.color}`);
         return true;
     }
     
@@ -1812,16 +1846,10 @@ function displaySearchResults(items, query) {
     // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
-        console.log('🔍 검색결과 표시 - Load More 버튼 숨기기 시도');
         loadMoreBtn.classList.remove('show', 'inline-block');
         loadMoreBtn.classList.add('hide');
         loadMoreBtn.style.display = 'none'; // 강제로 숨기기
-        console.log('🔍 Load More 버튼 숨김 완료:', {
-            classList: Array.from(loadMoreBtn.classList),
-            style: loadMoreBtn.style.display
-        });
     } else {
-        console.log('🔍 Load More 버튼을 찾을 수 없음');
     }
     
     // 검색 결과 아이템들 표시
@@ -1831,6 +1859,11 @@ function displaySearchResults(items, query) {
         
         const link = document.createElement('a');
         link.href = `/item.html?id=supabase_${item.item_id}`;
+        
+        // index.html 검색 결과에서 아이템 클릭 시 검색 상태 저장
+        link.addEventListener('click', function(e) {
+            saveSearchState(query);
+        });
         
         const img = document.createElement('img');
         
@@ -1867,7 +1900,6 @@ function editItem() {
 
 // Edit 페이지 초기화 함수
 function initEditPage() {
-    console.log('🔧 Initializing edit page...');
     
     // 이미지 모드 토글 설정 - 페이지 로드 시 바로 설정
     setupImageModeToggle();
@@ -1900,7 +1932,6 @@ function initEditPage() {
 
 // 편집 폼에 기존 데이터 채우기
 function populateEditForm(item) {
-    console.log('📝 Populating edit form with item data:', item);
     console.log('🏷️ Item tags debug:', {
         tags: item.tags,
         type: typeof item.tags,
@@ -1935,11 +1966,9 @@ function populateEditForm(item) {
                     const hasSubcategories = ["dress", "top", "outer", "skirt", "pants", "etc.", "etc"].includes(item.category);
                     if (hasSubcategories) {
                         subCategoryElement.classList.add('show_sub');
-                        console.log('✅ Subcategory area shown for category:', item.category);
                         
                         // 서브카테고리 필드 생성
                         displayFilterSubCategory(item.category);
-                        console.log('✅ Subcategory fields generated');
                     } else {
                         subCategoryElement.classList.remove('show_sub');
                         console.log('ℹ️ No subcategories for category:', item.category);
@@ -1964,7 +1993,6 @@ function populateEditForm(item) {
                 console.log('🔍 Found subcategory radio:', !!subcategoryRadio);
                 if (subcategoryRadio) {
                     subcategoryRadio.checked = true;
-                    console.log('✅ Subcategory set:', item.subcategory);
                     
                     // 서브카테고리 설정 후 measurement 필드 업데이트
                     setTimeout(() => {
@@ -1992,7 +2020,6 @@ function populateEditForm(item) {
             console.log('🔍 Found subcategory2 radio:', !!subcategory2Radio);
             if (subcategory2Radio) {
                 subcategory2Radio.checked = true;
-                console.log('✅ Subcategory2 set:', item.subcategory2);
                 
                 // 서브카테고리2 설정 후 measurement 필드 업데이트
                 setTimeout(() => {
@@ -2055,7 +2082,6 @@ function populateEditForm(item) {
                 const label = input.parentElement.querySelector('.part');
                 if (label && measurements[label.textContent]) {
                     input.value = measurements[label.textContent];
-                    console.log(`✅ Restored ${label.textContent}: ${measurements[label.textContent]}`);
                 }
             });
         }, 800); // 서브카테고리 설정과 measurement 필드 재생성 후에 실행
@@ -2088,7 +2114,6 @@ function populateEditForm(item) {
                         const label = input.parentElement.querySelector('.part');
                         if (label && label.textContent.trim() === material) {
                             input.value = String.fromCharCode(97 + index); // a, b, c...
-                            console.log(`✅ Set ${material} to ${input.value}`);
                         }
                     });
                 });
@@ -2100,35 +2125,8 @@ function populateEditForm(item) {
                 const isMultiSet = firstKey && typeof compositions[firstKey] === 'object';
                 
                 if (isMultiSet) {
-                    console.log('🧪 Detected multi-set compositions, loading composition sets...');
-                    
-                    // Multi-set composition 로딩
-                    window.compositionSets = [];
-                    window.usingMultiSets = true;
-                    
-                    Object.keys(compositions).forEach((setName, index) => {
-                        const setCompositions = compositions[setName];
-                        console.log(`🧪 Loading composition set "${setName}":`, setCompositions);
-                        
-                        window.compositionSets.push({
-                            name: setName,
-                            compositions: setCompositions
-                        });
-                    });
-                    
-                    // composition UI 재생성
-                    setTimeout(() => {
-                        const container = document.getElementById('composition_sets_container');
-                        if (container) {
-                            container.innerHTML = '';
-                            
-                            window.compositionSets.forEach((set, index) => {
-                                createCompositionSet(index, set.name, set.compositions);
-                            });
-                            
-                            console.log('✅ Multi-set compositions restored');
-                        }
-                    }, 100);
+                    console.log('🧪 Detected multi-set compositions, using loadExistingCompositions...');
+                    loadExistingCompositions(compositions);
                     
                 } else {
                     // 단일 객체 형태 (퍼센테이지)
@@ -2138,7 +2136,6 @@ function populateEditForm(item) {
                             const material = label.textContent.trim();
                             if (compositions[material]) {
                                 input.value = compositions[material];
-                                console.log(`✅ Set ${material} to ${compositions[material]}%`);
                             }
                         }
                     });
@@ -2185,7 +2182,6 @@ function populateEditForm(item) {
                 const checkbox = document.querySelector(`input[name="tags"][value="${tag}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
-                    console.log(`✅ Checked tag: ${tag}`);
                 } else {
                     console.log(`❌ Tag checkbox not found for: ${tag}`);
                     const availableValues = Array.from(allTagCheckboxes).map(cb => cb.value);
@@ -2210,7 +2206,6 @@ function populateEditForm(item) {
                 const colorOption = document.querySelector(`.color_option[data-color="${color}"]`);
                 if (colorOption) {
                     colorOption.classList.add('selected');
-                    console.log('✅ Color restored:', color);
                 } else {
                     console.log('❌ Color option not found for:', color);
                 }
@@ -2458,17 +2453,13 @@ function collectEditFormData() {
     
     if (mode === 'stitched') {
         const stitchedFile = document.querySelector('.file_uploader_stitched').files[0];
-        console.log('🖼️ Edit: Checking stitched file:', stitchedFile);
-        console.log('🖼️ Edit: File name:', stitchedFile ? stitchedFile.name : 'No file');
         if (stitchedFile) {
             formData.append('stitched_image', stitchedFile);
             const sectionCount = document.querySelector('input[name="section_count"]:checked').value;
             formData.append('section_count', sectionCount);
             formData.append('image_mode', mode);
             hasNewImages = true;
-            console.log('✅ Edit: Added stitched file to FormData:', stitchedFile.name);
         } else {
-            console.log('❌ Edit: No stitched file selected');
         }
     } else {
         if (window.individualFiles && window.individualFiles.length > 0) {
@@ -2517,19 +2508,16 @@ function collectEditFormData() {
         if (sizeInput) {
             // 라디오 버튼(1, 2) 선택된 경우
             size = sizeInput.value;
-            console.log('🔍 [EDIT SIZE] etc region radio button selected:', size);
         } else {
             // 텍스트 입력창 값 사용
             const sizeEtcInput = document.getElementById('size_etc_input');
             sizeEtc = sizeEtcInput ? sizeEtcInput.value.trim() : '';
             size = sizeEtc;
-            console.log('🔍 [EDIT SIZE] etc region text input used:', size);
         }
     } else {
         // 일반 region들의 사이즈 버튼에서 선택
         const sizeInput = document.querySelector('input[name="size_key"]:checked');
         size = sizeInput ? sizeInput.value : '';
-        console.log('🔍 [EDIT SIZE] regular region selected:', size);
     }
     
     // 측정 데이터 - 빈 값도 포함하여 삭제 처리
@@ -2547,19 +2535,35 @@ function collectEditFormData() {
     let compositions;
     
     if (window.usingMultiSets && window.compositionSets && window.compositionSets.length > 0) {
+        console.log('🧪 Multi-set mode: collecting from window.compositionSets:', window.compositionSets);
+        
         // 다중 세트 구조로 수집
         const validSets = window.compositionSets.filter(set => 
             set.compositions && Object.keys(set.compositions).length > 0
         );
         
+        console.log('🧪 Valid sets found:', validSets.length, validSets);
+        
         if (validSets.length > 0) {
             compositions = {};
-            validSets.forEach(set => {
+            validSets.forEach((set, index) => {
                 const setName = set.name && set.name.trim() !== '' ? set.name : '';
-                compositions[setName] = set.compositions;
+                // 빈 값들을 필터링하여 저장
+                const filteredCompositions = {};
+                Object.entries(set.compositions).forEach(([material, value]) => {
+                    if (value && value.toString().trim() !== '') {
+                        filteredCompositions[material] = value;
+                    }
+                });
+                
+                if (Object.keys(filteredCompositions).length > 0) {
+                    compositions[setName] = filteredCompositions;
+                    console.log(`🧪 Set ${index}: name="${setName}", filtered compositions:`, filteredCompositions);
+                }
             });
             console.log('🧪 Final compositions (multi-set mode):', compositions);
         } else {
+            console.log('🧪 No valid sets found, using empty object');
             compositions = {};
         }
     } else {
@@ -2648,7 +2652,6 @@ function collectEditFormData() {
     
     if (hasCompositionData) {
         const compositionJson = JSON.stringify(compositions);
-        console.log('✅ Adding composition data to FormData:', compositionJson);
         formData.append('compositions', compositionJson);
         
         // FormData에 실제로 추가되었는지 확인
@@ -2664,7 +2667,6 @@ function collectEditFormData() {
         });
         
         // Edit 모드에서는 빈 composition이라도 일단 전송 (기존 데이터 삭제 목적일 수 있음)
-        console.log('🔧 Adding empty compositions for edit mode');
         formData.append('compositions', JSON.stringify({}));
     }
     if (year) formData.append('year', year);
@@ -2730,12 +2732,10 @@ function readImages() {
     
     // 디버깅을 위해 + 버튼 상태도 확인
     const addButton = container?.querySelector('.add_image');
-    console.log('➕ Add button found:', !!addButton);
     console.log('➕ Add button classes:', addButton?.className);
     console.log('➕ Add button hidden:', addButton?.classList.contains('hidden'));
     
     if (isIndividualMode) {
-        console.log('✅ Using individual mode logic');
         // Individual 모드: 대표 이미지 선택 기능 포함
         if (!window.individualFiles) {
             window.individualFiles = [];
@@ -2785,7 +2785,6 @@ function readImages() {
             console.log(`➕ Inserting preview before add button`);
             addImage.before(preview);
             
-            console.log(`✅ Preview ${i + 1} added to DOM`);
             
             // 클릭 이벤트: 이미지 제거
             preview.addEventListener('click', () => {
@@ -3159,7 +3158,6 @@ function extractMeasurements(items, category) {
                 max: Math.max(...values),
                 count: values.length
             };
-            console.log(`✅ Found ${values.length} values for ${field}: ${Math.min(...values)}-${Math.max(...values)}`);
         } else {
             console.log(`❌ No values found for ${field}`);
         }
@@ -4247,7 +4245,6 @@ function filterAllItems(filters) {
             
             // Apply client-side filtering
             const filteredItems = applyFiltersToItems(data.items, filters);
-            console.log(`✅ Filtered to ${filteredItems.length} items`);
             
             // Re-render grid with filtered items
             renderFilteredGrid(filteredItems);
@@ -5108,7 +5105,6 @@ function displayColorInput() {
     `).join('');
     
     container.appendChild(colorGrid);
-    console.log('✅ Color selection grid created');
 }
 
 function generateColorCSS() {
@@ -5302,7 +5298,8 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
                    value="${existingValue}"
                    autocomplete="off"
                    class="composition_input"
-                   onchange="updateCompositionValue(${setIndex}, '${material}', this.value)">
+                   onchange="updateCompositionValue(${setIndex}, '${material}', this.value)"
+                   oninput="updateCompositionValue(${setIndex}, '${material}', this.value)">
         `;
         grid.appendChild(item);
     }
@@ -5403,12 +5400,20 @@ function updateCompositionSetName(setIndex, newName) {
 // composition 값 업데이트
 function updateCompositionValue(setIndex, material, value) {
     if (window.compositionSets && window.compositionSets[setIndex]) {
+        console.log(`📝 updateCompositionValue called: setIndex=${setIndex}, material=${material}, value="${value}"`);
+        
         if (value && value.trim() !== '') {
             window.compositionSets[setIndex].compositions[material] = value.trim();
+            console.log(`✅ Added/Updated ${material} in set ${setIndex} to: "${value}"`);
         } else {
+            console.log(`🗑️ Deleting ${material} from set ${setIndex} (empty value)`);
             delete window.compositionSets[setIndex].compositions[material];
         }
-        console.log(`📝 Updated ${material} in set ${setIndex} to: ${value}`);
+        
+        console.log(`🧪 Current set ${setIndex} compositions:`, window.compositionSets[setIndex].compositions);
+        console.log(`🧪 All composition sets:`, window.compositionSets);
+    } else {
+        console.error(`❌ Cannot update composition: setIndex=${setIndex}, compositionSets available:`, !!window.compositionSets);
     }
 }
 
@@ -5494,8 +5499,6 @@ function displayCompositionFilter() {
 }
 
 function displayItemImage() {
-    console.log('🔧 Loading item data for item view page...');
-    
     let query = window.location.search;
     let param = new URLSearchParams(query);
     let id = param.get('id');
@@ -5505,14 +5508,12 @@ function displayItemImage() {
         return;
     }
 
-    console.log('🔍 Loading item with ID:', id);
 
     // Supabase에서 실제 아이템 데이터 로드
     fetch(`/api/items/${id}`)
         .then(response => response.json())
         .then(data => {
             if (data.item) {
-                console.log('✅ Item data loaded:', data.item);
                 populateItemView(data.item);
             } else {
                 console.error('❌ Item not found');
@@ -5541,7 +5542,6 @@ function displayItemImage() {
 
 // 아이템 뷰 페이지에 데이터를 채우는 함수
 function populateItemView(item) {
-    console.log('🖼️ Populating item view with data:', item);
     
     // 브랜드와 카테고리 정보 표시
     const brandElement = document.getElementById('item_brand');
@@ -5553,13 +5553,10 @@ function populateItemView(item) {
         // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
         if (item.brand) {
             const hasKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(item.brand);
-            console.log(`🔤 Brand: "${item.brand}", hasKorean: ${hasKorean}`);
             if (hasKorean) {
                 brandElement.classList.add('item_brand');
-                console.log('✅ Added item_brand class');
             } else {
                 brandElement.classList.remove('item_brand');
-                console.log('❌ Removed item_brand class');
             }
         } else {
             brandElement.classList.remove('item_brand');
@@ -5581,7 +5578,6 @@ function populateItemView(item) {
         if (isStitchedImage(item.images)) {
             displayStitchedImagesAsCarousel(item.images, imageContainer);
         } else {
-            console.log('🖼️ Displaying individual images (non-stitched) as carousel:', item.images.length, 'images');
             // Individual 이미지들도 stitched와 동일한 carousel 형태로 표시
             displayStitchedImagesAsCarousel(item.images, imageContainer);
         }
@@ -5697,7 +5693,6 @@ function populateItemView(item) {
     window.removeEventListener('resize', handleResize);
     window.addEventListener('resize', handleResize);
     
-    console.log('✅ Item view populated successfully');
 }
 
 function input(){
@@ -5764,7 +5759,8 @@ function submitForm(event) {
                 formData.append('individual_images', window.individualFiles[i]);
                 console.log('Added window file:', window.individualFiles[i].name);
             }
-            console.log('Sending', window.individualFiles.length, 'individual files (window.individualFiles)');
+            console.log('🔍 DEBUGGING: Sending', window.individualFiles.length, 'individual files (window.individualFiles)');
+            console.log('🔍 DEBUGGING: Files being sent:', window.individualFiles.map(f => f.name));
             hasImages = true;
         }
         formData.append('main_image_index', mainImageIndex || 0);
@@ -6076,24 +6072,15 @@ function loadItemDetails() {
     const urlParams = new URLSearchParams(window.location.search);
     const itemId = urlParams.get('id');
     
-    console.log('🔍 Loading item with ID:', itemId);
-    
+        
     if (itemId && itemId.startsWith('supabase_')) {
         fetch(`/api/items/${itemId}`)
             .then(response => response.json())
             .then(data => {
-                console.log('📦 Raw API response:', data);
                 if (data.item) {
                     const item = data.item;
-                    console.log('🔍 DEBUGGING ITEM DATA:');
-                    console.log('   - Item ID:', item.item_id);
-                    console.log('   - Name:', item.name);
-                    console.log('   - Thumbnail URL:', item.thumbnail_url);
-                    console.log('   - Images array:', item.images);
-                    console.log('   - Images length:', item.images ? item.images.length : 'undefined');
                     
                     if (item.images) {
-                        console.log('🖼️  Analyzing each image:');
                         
                         // URL 수정 시도 및 fallback 처리
                         const originalImages = [...item.images];
@@ -6109,72 +6096,53 @@ function loadItemDetails() {
                             if (match) {
                                 const fixedFilename = match[2]; // 두 번째 그룹 (올바른 부분)
                                 const fixedUrl = url.replace(filename, fixedFilename);
-                                console.log(`   🔧 Trying fixed URL: ${filename} -> ${fixedFilename}`);
                                 return { fixed: fixedUrl, original: url };
                             }
                             return { fixed: url, original: url };
                         });
                         
                         // 첫 번째 이미지로 URL 접근성 테스트 (프록시를 통해 테스트)
-                        console.log('🔍 Testing URL accessibility via proxy...');
                         const testImg = new Image();
                         let urlTestComplete = false;
                         
                         testImg.onload = () => {
-                            console.log('✅ URLs are accessible via proxy');
                             // 수정된 URL 사용
                             item.images = fixedImages.map(img => img.fixed);
                             urlTestComplete = true;
                             
                             const viewContainer = document.querySelector('.view_item_image');
-                            console.log('🔍 View container children count:', viewContainer.children.length);
-                            console.log('🔍 View container content:', viewContainer.innerHTML);
                             
                             if (viewContainer.children.length === 0) {
-                                console.log('✅ Container is empty, calling updateItemDisplay');
                                 updateItemDisplay(item);
                             } else {
-                                console.log('⚠️ Container not empty, skipping updateItemDisplay to avoid duplicates');
                                 // 중복 호출 방지 - 이미 populateItemView에서 처리됨
                             }
                         };
                         
                         testImg.onerror = () => {
-                            console.log('❌ URLs not accessible even via proxy, using original URLs');
                             // 원본 URL 사용
                             item.images = originalImages;
                             fixedImages = originalImages.map(url => ({ fixed: url, original: url }));
                             urlTestComplete = true;
-                            console.log('🔄 URL test failed, but skipping updateItemDisplay to avoid duplicates');
                             // updateItemDisplay은 이미 populateItemView에서 호출되었음
                         };
                         
                         if (fixedImages && fixedImages.length > 0 && fixedImages[0].fixed) {
                             // 직접 URL 사용 (프록시 우회)
-                            console.log('🔗 Testing direct URL:', fixedImages[0].fixed);
                             testImg.src = fixedImages[0].fixed;
                         } else {
-                            console.log('❌ No fixed images available for testing');
                             urlTestComplete = true;
                         }
                         
                         // 테스트 타임아웃 (1초 후 원본 URL 사용)
                         setTimeout(() => {
                             if (!urlTestComplete) {
-                                console.log('⏰ URL test timeout, using original URLs');
                                 item.images = originalImages;
                                 urlTestComplete = true;
-                                console.log('🔄 URL test timeout, but skipping updateItemDisplay to avoid duplicates');
                                 // updateItemDisplay은 이미 populateItemView에서 호출되었음
                             }
                         }, 1000);
                         
-                        // 로그를 위한 분석 (비동기 테스트 후에는 실행하지 않음)
-                        console.log('   Initial analysis of URLs:');
-                        fixedImages.forEach((urlObj, index) => {
-                            const hasSection = urlObj.fixed.includes('_section_');
-                            console.log(`   ${index + 1}. ${urlObj.fixed} -> Has _section_: ${hasSection}`);
-                        });
                         
                         // updateItemDisplay는 위의 비동기 테스트에서 조건부로 호출됨
                         // 여기서는 호출하지 않음
@@ -6183,7 +6151,6 @@ function loadItemDetails() {
                         updateItemDisplay(item);
                     }
                 } else {
-                    console.error('❌ No item data in response');
                 }
             })
             .catch(error => {
@@ -6202,13 +6169,10 @@ function updateItemDisplay(item) {
         
         // 한글이 포함된 브랜드명에는 GmarketSans Bold 폰트 적용
         const hasKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(item.brand);
-        console.log(`🔤 UpdateDisplay Brand: "${item.brand}", hasKorean: ${hasKorean}`);
         if (hasKorean) {
             brandElement.classList.add('item_brand');
-            console.log('✅ UpdateDisplay Added item_brand class');
         } else {
             brandElement.classList.remove('item_brand');
-            console.log('❌ UpdateDisplay Removed item_brand class');
         }
     }
     
@@ -6222,7 +6186,6 @@ function updateItemDisplay(item) {
     }
     
     // 이미지 처리는 populateItemView에서만 수행하도록 중복 제거
-    console.log('📍 updateItemDisplay: Skipping image processing to avoid duplicates');
     
     // 사이즈 정보 업데이트
     updateSizeDisplay(item);
@@ -6253,22 +6216,14 @@ function updateSizeDisplay(item) {
         }
         
         if (sizeText) {
-            console.log('🔍 Size data debug:', {
-                size_region: item.size_region,
-                size: item.size,
-                size_etc: item.size_etc,
-                final_sizeText: sizeText
-            });
             sizeElement.textContent = sizeText;
             sizeElement.classList.remove('hidden'); // CSS 클래스 제거
             sizeElement.classList.remove('hidden', 'item_size_hidden');
             sizeElement.classList.add('item_size');
-            console.log('Updated size display:', sizeText);
         } else {
             // 사이즈 정보가 없으면 숨김
             sizeElement.classList.remove('item_size');
             sizeElement.classList.add('item_size_hidden');
-            console.log('No size information, hiding size element');
         }
     }
 }
@@ -6409,8 +6364,7 @@ function updateCompositionDisplay(item) {
                 }
             }
             
-            console.log('Updated composition display:', compositions);
-        } catch (error) {
+            } catch (error) {
             console.error('Error updating composition:', error);
         }
     }
@@ -6483,7 +6437,6 @@ function updateColorDisplay(item) {
             }
         }
         
-        console.log('✅ Color display updated:', colors);
     }
 }
 
@@ -6735,6 +6688,8 @@ function createDressMeasurement(container, measurements, subcategory, subcategor
         createDressLongSleeveLongMeasurement(container, measurements);
     } else if (subcategoryLower.includes('long sleeve') && subcategory2Lower.includes('midi')) {
         createDressLongSleeveMidiMeasurement(container, measurements);
+    } else if (subcategoryLower.includes('long sleeve') && subcategory2Lower.includes('mini')) {
+        createDressLongSleeveMiniMeasurement(container, measurements);
     } else {
         // 기본 dress 처리 (현재는 top과 동일)
         createTopMeasurement(container, measurements);
@@ -6926,6 +6881,51 @@ function createDressLongSleeveMidiMeasurement(container, measurements) {
     container.appendChild(baseImg);
     
     // long sleeve midi dress measurement 데이터와 가이드라인 이미지 매핑
+    const measurementMap = [
+        { key: 'chest', label: '가슴', guideline: 'measurement_dress_long sleeve, midi_chest.svg' },
+        { key: 'shoulder', label: '어깨', guideline: 'measurement_dress_long sleeve, midi_shoulder.svg' },
+        { key: 'sleeve', label: '소매', guideline: 'measurement_dress_long sleeve, midi_sleeve.svg' },
+        { key: 'sleeveOpening', label: '소매단', guideline: 'measurement_dress_long sleeve, midi_sleeveOpening.svg' },
+        { key: 'armhole', label: '암홀', guideline: 'measurement_dress_long sleeve, midi_armhole.svg' },
+        { key: 'waist', label: '허리', guideline: 'measurement_dress_long sleeve, midi_waist.svg' },
+        { key: 'length', label: '총장', guideline: 'measurement_dress_long sleeve, midi_length.svg' },
+        { key: 'hemWidth', label: 'hem width', guideline: 'measurement_dress_long sleeve, midi_hemwidth.svg' }
+    ];
+    
+    measurementMap.forEach(item => {
+        // Check for both camelCase (hemWidth) and display text (hem width) formats
+        const measurementValue = measurements && (measurements[item.key] || measurements[item.key.replace(/([A-Z])/g, ' $1').toLowerCase().trim()]);
+        
+        if (measurements && measurementValue) {
+            // CSS key 변환 (공백을 camelCase로)
+            const cssKey = item.key.replace(/\s+(.)/g, (match, letter) => letter.toUpperCase());
+            
+            // 수치 박스 생성
+            const box = document.createElement('div');
+            box.className = `box ${cssKey} long_sleeve_midi_dress`;
+            box.textContent = measurementValue;
+            container.appendChild(box);
+            
+            // 가이드라인 이미지 생성
+            const guidelineImg = document.createElement('img');
+            guidelineImg.src = `/static/src/img/measurement/${item.guideline}`;
+            guidelineImg.className = 'measurement_guideline';
+            guidelineImg.setAttribute('data-measurement', cssKey);
+            container.appendChild(guidelineImg);
+        }
+    });
+}
+
+// Long Sleeve Mini Dress 카테고리 measurement 생성
+function createDressLongSleeveMiniMeasurement(container, measurements) {
+    // 베이스 이미지 (long sleeve mini dress 전용 SVG가 없으므로 long sleeve midi를 사용)
+    const baseImg = document.createElement('img');
+    baseImg.src = '/static/src/img/measurement/dress_long sleeve, midi.svg';
+    baseImg.className = 'measurement_base';
+    container.appendChild(baseImg);
+    
+    // long sleeve mini dress measurement 데이터와 가이드라인 이미지 매핑
+    // SVG 파일이 없으므로 long sleeve midi의 가이드라인을 사용
     const measurementMap = [
         { key: 'chest', label: '가슴', guideline: 'measurement_dress_long sleeve, midi_chest.svg' },
         { key: 'shoulder', label: '어깨', guideline: 'measurement_dress_long sleeve, midi_shoulder.svg' },
@@ -7477,9 +7477,6 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
     paddingContainer.appendChild(carouselContainer);
     container.appendChild(paddingContainer);
     
-    console.log(`🏗️ Container structure:`);
-    console.log(`   📦 Main container:`, container);
-    console.log(`   📦 Padding container:`, paddingContainer);
 }
 
 // 이미지들을 Canvas에서 가로로 합치기
