@@ -1011,6 +1011,13 @@ function updatePinnedItemsDisplay() {
 function handleImageUpload(event) {
     const file = event.target.files[0];
     if (file) {
+        // EXIF 데이터 추출 (지오로케이션, 날짜)
+        extractEXIFData(file);
+        
+        // R2에 이미지 업로드
+        uploadImageToR2(file);
+        
+        // 임시로 local preview 표시
         const reader = new FileReader();
         reader.onload = function(e) {
             uploadedImage = e.target.result;
@@ -1034,6 +1041,7 @@ function uploadImageToR2(file) {
         if (data.success) {
             console.log('✅ Image uploaded to R2:', data.url);
             uploadedImage = data.url;
+            updatePinnedItemsDisplay(); // R2 URL로 업데이트
         } else {
             console.error('❌ Upload failed:', data.error);
         }
