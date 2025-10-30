@@ -2179,13 +2179,15 @@ function populateEditForm(item) {
             allTagCheckboxes.forEach(checkbox => checkbox.checked = false);
             
             tagsArray.forEach(tag => {
+                console.log(`🏷️ [EDIT] Trying to restore tag: "${tag}"`);
                 const checkbox = document.querySelector(`input[name="tags"][value="${tag}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
+                    console.log(`✅ [EDIT] Successfully restored tag: "${tag}"`);
                 } else {
-                    console.log(`❌ Tag checkbox not found for: ${tag}`);
+                    console.log(`❌ [EDIT] Tag checkbox not found for: "${tag}"`);
                     const availableValues = Array.from(allTagCheckboxes).map(cb => cb.value);
-                    console.log(`🏷️ Available checkbox values:`, availableValues);
+                    console.log(`🏷️ [EDIT] Available checkbox values:`, availableValues);
                 }
             });
         }, 900); // measurement 복원 후에 실행
@@ -2428,9 +2430,24 @@ function submitEditForm(event) {
         
         // 검색 캐시 클리어 (아이템이 업데이트되었으므로)
         clearSearchCache();
-        // 아이템 상세 페이지로 돌아가기 (supabase_ 접두사 추가)
+        
+        // 편집 완료 후 아이템 페이지로 돌아가기
         const redirectId = itemId.toString().startsWith('supabase_') ? itemId : `supabase_${itemId}`;
-        window.location.href = `/item.html?id=${redirectId}`;
+        
+        // 검색 상태가 있는 경우 히스토리를 조작하여 뒤로가기 시 검색 결과로 가도록 함
+        const searchState = restoreSearchState();
+        if (searchState && searchState.query) {
+            // 편집 페이지의 히스토리 엔트리를 검색 결과 페이지로 교체
+            const searchResultPage = searchState.currentPage && searchState.currentPage.includes('/all.html') ? '/all.html' : '/index.html';
+            history.replaceState(null, '', searchResultPage);
+            
+            // 그리고 아이템 페이지로 이동 (새로운 히스토리 엔트리 생성)
+            history.pushState(null, '', `/item.html?id=${redirectId}`);
+            window.location.href = `/item.html?id=${redirectId}`;
+        } else {
+            // 검색 상태가 없으면 단순히 아이템 페이지로 돌아가기
+            window.location.href = `/item.html?id=${redirectId}`;
+        }
     })
     .catch(error => {
         console.error('Network/Parse error:', error);
@@ -2676,12 +2693,17 @@ function collectEditFormData() {
     // Tags 데이터 수집
     const selectedTags = [];
     const tagCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
-    tagCheckboxes.forEach(checkbox => {
+    console.log('🏷️ [DEBUG] Found checked tag checkboxes:', tagCheckboxes.length);
+    tagCheckboxes.forEach((checkbox, index) => {
+        console.log(`🏷️ [DEBUG] Tag ${index}: value="${checkbox.value}", id="${checkbox.id}"`);
         selectedTags.push(checkbox.value);
     });
+    console.log('🏷️ [DEBUG] Final selectedTags array:', selectedTags);
     if (selectedTags.length > 0) {
         formData.append('tags', selectedTags.join(', '));
         console.log('🏷️ Adding tags to FormData:', selectedTags.join(', '));
+    } else {
+        console.log('🏷️ [DEBUG] No tags selected or found');
     }
     
     // Color 데이터 수집 (멀티 셀렉트) - 디버깅 강화
@@ -5156,6 +5178,39 @@ function selectColor(colorLabel) {
     }
 }
 
+// Tags 입력 필드 동적 생성 함수
+function displayTagsInput(pageType) {
+    const container = document.getElementById(`tags_container_${pageType}`);
+    
+    if (!container) {
+        console.error('❌ Tags container not found for page:', pageType);
+        return;
+    }
+    
+    
+    // 태그 체크박스 생성
+    container.innerHTML = '';
+    
+    tagsList.forEach((tag, index) => {
+        const tagItem = document.createElement('div');
+        tagItem.className = 'tag_item';
+        
+        // ID 생성: tag_ + (tag의 공백을 밑줄로 변경) + _pageType
+        const tagId = `tag_${tag.replace(/\s+/g, '_')}_${pageType}`;
+        
+        console.log(`🏷️ [DEBUG] Creating tag checkbox: "${tag}", id="${tagId}"`);
+        
+        tagItem.innerHTML = `
+            <input type="checkbox" id="${tagId}" name="tags" value="${tag}">
+            <label for="${tagId}">${tag}</label>
+        `;
+        
+        container.appendChild(tagItem);
+    });
+    
+    console.log(`✅ Generated ${tagsList.length} tag checkboxes for ${pageType} page`);
+}
+
 function displayCompositionInput() {
     console.log('🧪 displayCompositionInput called');
     var grid = document.querySelector(".composition_sets_container");
@@ -5956,12 +6011,17 @@ function submitForm(event) {
     // Tags 데이터 수집
     const selectedTags = [];
     const tagCheckboxes = document.querySelectorAll('input[name="tags"]:checked');
-    tagCheckboxes.forEach(checkbox => {
+    console.log('🏷️ [DEBUG] Found checked tag checkboxes:', tagCheckboxes.length);
+    tagCheckboxes.forEach((checkbox, index) => {
+        console.log(`🏷️ [DEBUG] Tag ${index}: value="${checkbox.value}", id="${checkbox.id}"`);
         selectedTags.push(checkbox.value);
     });
+    console.log('🏷️ [DEBUG] Final selectedTags array:', selectedTags);
     if (selectedTags.length > 0) {
         formData.append('tags', selectedTags.join(', '));
         console.log('🏷️ Adding tags to FormData:', selectedTags.join(', '));
+    } else {
+        console.log('🏷️ [DEBUG] No tags selected or found');
     }
     
     // Color 데이터 수집 (멀티 셀렉트) - 디버깅 강화
@@ -7734,48 +7794,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('add.html')) {
         setupImageModeToggle(); // 이미지 모드 토글 설정 추가
         setupImagePasteAndDrop(); // 클립보드 붙여넣기 기능 초기화
-        loadTagsForPage('add'); // 동적 태그 로드
         loadExistingBrandsForAutocomplete(); // 브랜드 자동완성 로드
     }
     
-    // Edit page에서 태그 로드
+    // Edit page에서 초기화
     if (window.location.pathname.includes('edit.html')) {
-        loadTagsForPage('edit'); // 동적 태그 로드
         setupImagePasteAndDrop();
         loadExistingBrandsForAutocomplete();
     }
 });
 
-// 동적으로 태그 로드하는 함수 (db.js의 tagsList 사용)
-function loadTagsForPage(pageType) {
-    try {
-        // db.js에서 정의된 tagsList 사용
-        if (typeof tagsList !== 'undefined' && tagsList.length > 0) {
-            generateTagCheckboxes(tagsList, pageType);
-            console.log(`✅ Loaded ${tagsList.length} tags from db.js`);
-        } else {
-            console.warn('tagsList not found in db.js, using fallback');
-            // 백업용 기본 태그들
-            const fallbackTags = [
-                {value: 'occasion wear', label: 'Occasion wear'},
-                {value: 'activewear', label: 'Activewear'},
-                {value: 'basic', label: 'Basic'},
-                {value: 'evening wear', label: 'Evening wear'}
-            ];
-            generateTagCheckboxes(fallbackTags, pageType);
-        }
-    } catch (error) {
-        console.error('Error loading tags:', error);
-        // 에러 시 기본 태그 사용
-        const fallbackTags = [
-            {value: 'occasion wear', label: 'Occasion wear'},
-            {value: 'activewear', label: 'Activewear'},
-            {value: 'basic', label: 'Basic'},
-            {value: 'evening wear', label: 'Evening wear'}
-        ];
-        generateTagCheckboxes(fallbackTags, pageType);
-    }
-}
 
 // 필터 상태 저장 및 복원 기능
 function saveCurrentFilterState() {
@@ -7995,34 +8023,6 @@ function restoreFilterValues() {
     }
 }
 
-// 태그 체크박스들을 동적으로 생성
-function generateTagCheckboxes(tags, pageType) {
-    const container = document.querySelector('.grid_container_tags');
-    if (!container) {
-        console.warn('Tags container not found');
-        return;
-    }
-    
-    // 기존 태그들 제거
-    container.innerHTML = '';
-    
-    tags.forEach((tag, index) => {
-        const tagItem = document.createElement('div');
-        tagItem.className = 'tag_item';
-        
-        const suffix = pageType === 'edit' ? '_edit' : '';
-        const tagId = `tag_${tag.value.replace(/\s+/g, '_')}${suffix}`;
-        
-        tagItem.innerHTML = `
-            <input type="checkbox" id="${tagId}" name="tags" value="${tag.value}">
-            <label for="${tagId}">${tag.label}</label>
-        `;
-        
-        container.appendChild(tagItem);
-    });
-    
-    console.log(`✅ Generated ${tags.length} tag checkboxes for ${pageType} page`);
-}
 
 // 기존 저장된 브랜드들을 가져와서 자동완성 리스트에 추가
 function loadExistingBrandsForAutocomplete() {

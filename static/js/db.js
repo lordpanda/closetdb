@@ -6,11 +6,13 @@ const sizeRegionList = ["WW", "US", "EU", "FR", "IT", "DE", "UK", "KR", "JP", "K
 const compositionList = ["cotton", "silk", "wool", "cashmere", "alpaca", "leather", "viscose", "rayon", "polyesther","polyurethane", "polyamide", 
 "elastane", "nylon", "lyocell", "acryl", "acetate", "tri-acetate", "cupro", "spandex",  "metallic", "brass", "rubber", "mother of pearl", "sterling silver", "gold 14K", "gold 18K"];
 const tagsList = [
-    {value: "occasion wear", label: "occasion wear"},
-    {value: "activewear", label: "activewear"}, 
-    {value: "basic", label: "basic"},];
-var brandList = ["APIECE APART", "Burberry", "Derek Lam 10 Crosby", "HAUSOFPBK", "Juun.J", "KIMHEKIM", "Maison Margiela", "MM6", "MSGM", 
-"Opening Ceremony", "Palm Angels", "Sandro", "Stella McCartney", "Tibi", "Tory Burch", "Versace", "ZARA"];
+    "occasion",
+    "active", 
+    "basic",
+    "sleep"
+];
+var brandList = ["APIECE APART", "Burberry", "Derek Lam 10 Crosby", "HAUSOFPBK", "Juun.J", "Maison Margiela", "MM6", "MSGM", 
+"Opening Ceremony", "Palm Angels", "sandro", "Stella McCartney", "Tibi", "Tory Burch", "Versace", "ZARA"];
 const colorList = [
     {value: "000000", label: "black"},
     {value: "FFFFFF", label: "white"},

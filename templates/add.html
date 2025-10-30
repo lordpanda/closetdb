@@ -178,23 +178,8 @@
             <div class="subheader">
                 <h1>tags</h1>
             </div>
-            <div class="grid_container_tags">
-                <div class="tag_item">
-                    <input type="checkbox" id="tag_occasion" name="tags" value="occasion wear">
-                    <label for="tag_occasion">Occasion wear</label>
-                </div>
-                <div class="tag_item">
-                    <input type="checkbox" id="tag_active" name="tags" value="activewear">
-                    <label for="tag_active">Activewear</label>
-                </div>
-                <div class="tag_item">
-                    <input type="checkbox" id="tag_essentials" name="tags" value="basic">
-                    <label for="tag_essentials">Basic</label>
-                </div>
-                <div class="tag_item">
-                    <input type="checkbox" id="tag_evening" name="tags" value="evening wear">
-                    <label for="tag_evening">Evening wear</label>
-                </div>
+            <div class="grid_container_tags" id="tags_container_add">
+                <script>displayTagsInput('add');</script>
             </div>
 
     </section>

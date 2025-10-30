@@ -246,7 +246,21 @@
     white-space: nowrap;
 }
 
-/* Long sleeve 전용 위치 설정 */
+/* 기본 top measurement 위치 설정 (short sleeve) */
+.view_measurement .shoulder {
+    top: 16%; 
+    left: 50%;
+}
+.view_measurement .sleeve {
+    top: 25%;
+    left: 83%; 
+}
+.view_measurement .length {
+    top: 55%;
+    left: 60%;
+}
+
+/* Long sleeve top 전용 위치 설정 */
 .view_measurement .shoulder.long_sleeve {
     top: 20%; 
     left: 50%;
