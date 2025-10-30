@@ -2026,7 +2026,7 @@ function populateEditForm(item) {
                 // 카테고리에 따라 서브카테고리 영역 표시 여부 결정
                 const subCategoryElement = document.querySelector('.sub_category');
                 if (subCategoryElement) {
-                    const hasSubcategories = ["dress", "top", "outer", "skirt", "pants", "etc.", "etc"].includes(item.category);
+                    const hasSubcategories = ["dress", "top", "outer", "skirt", "pants", "shoes", "etc.", "etc"].includes(item.category);
                     if (hasSubcategories) {
                         subCategoryElement.classList.add('show_sub');
                         
@@ -2034,6 +2034,9 @@ function populateEditForm(item) {
                         displayFilterSubCategory(item.category);
                     } else {
                         subCategoryElement.classList.remove('show_sub');
+                        
+                        // 서브카테고리가 없는 카테고리의 경우 바로 measurement 필드 생성
+                        displayMeasurementInput(item.category);
                     }
                 }
             }
@@ -2103,10 +2106,20 @@ function populateEditForm(item) {
                 // 사이즈 선택
                 setTimeout(() => {
                     if (item.size_region === 'etc') {
-                        const etcInput = document.getElementById('size_etc_input');
-                        if (etcInput) {
-                            etcInput.value = item.size;
-                            etcInput.classList.add('size_etc_input_visible');
+                        // etc region의 경우 라디오 버튼(1, 2 등) 먼저 확인
+                        const sizeRadio = document.querySelector(`input[name="size_key"][value="${item.size}"]`);
+                        if (sizeRadio) {
+                            // 라디오 버튼이 있으면 선택
+                            sizeRadio.checked = true;
+                            console.log('✅ Selected etc radio button:', item.size);
+                        } else {
+                            // 라디오 버튼이 없으면 텍스트 입력창에 입력
+                            const etcInput = document.getElementById('size_etc_input');
+                            if (etcInput) {
+                                etcInput.value = item.size;
+                                etcInput.classList.add('size_etc_input_visible');
+                                console.log('✅ Set etc input value:', item.size);
+                            }
                         }
                     } else {
                         const sizeRadio = document.querySelector(`input[name="size_key"][value="${item.size}"]`);
@@ -3201,7 +3214,7 @@ function extractMeasurements(items, category) {
     } else if (category === "skirt") {
         measurementFields = ["waist", "hip", "length", "hem_width"];
     } else if (category === "shoes") {
-        measurementFields = ["heel"];
+        measurementFields = ["heel", "circumference", "length"];
     } else {
         measurementFields = ["width", "height", "length", "circumference"];
     }
@@ -3636,7 +3649,7 @@ function getMeasurementsByCategory(category) {
         // 모든 dress 변형 (short_sleeve_mini_dress, long_sleeve_long_dress 등)
         return ["chest", "shoulder", "sleeve", "sleeve opening", "armhole", "waist", "length", "hem width"];
     } else if (category == "shoes") {
-        return ["heel"];
+        return ["heel", "circumference", "length"];
     } else if (category == "jewerly" || category == ".etc" || category == "etc." || category == "etc") {
         return ["width", "height", "length", "circumference"];
     }
@@ -3895,7 +3908,7 @@ function getSizesByRegion(region) {
     } else if (region == "WW") {
         accordingSizes.push("One Size", "XXXS", "XXS", "XS", "S", "M", "L", "XL");
     } else if (region == "KR") {
-        accordingSizes.push(230, 235, 240, 44, 55);
+        accordingSizes.push(225, 230, 235, 240, 44, 55);
     } else if (region == "Kids") {
             accordingSizes.push(130, 140, 150, 160, "12Y", "13Y", "14Y", "15Y", "16Y");
     } else if (region == "Ring") {
@@ -4920,6 +4933,14 @@ function displayFilterSubCategory(cat) {
             item.innerHTML = `<input type="radio" name="sub_category_input" class="category_image" id="sub_category_list_`+i+`" value="` + subCategoryList[i] + `" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
             grid.appendChild(item);
         } 
+    } else if (cat == "shoes") {
+        // shoes 카테고리의 서브카테고리: sneakers, boots, sandals, heels, etc (인덱스 11-15)
+        for (var i = 11; i < 16; i++) {
+            const item = document.createElement('div');
+            item.className = "grid_sub_category";
+            item.innerHTML = `<input type="radio" name="sub_category_input" class="category_image" id="sub_category_list_`+i+`" value="` + subCategoryList[i] + `" /><label for="sub_category_list_`+i+`">`+subCategoryList[i]+`</label></input>`;
+            grid.appendChild(item);
+        }
     } else if (cat == "etc." || cat == "etc") {
         console.log('🎯 Creating etc category subcategories');
         // etc 카테고리의 서브카테고리: bag, socks, belt, hat, etc (인덱스 7-11)
@@ -5304,10 +5325,7 @@ function displayCompositionInput() {
 }
 
 // + 버튼 클릭시 다중 세트 모드로 전환
-function addCompositionSet(setName = '', preloadedData = null) {
-    console.log('🧪 Adding new composition set - transitioning to multi-set mode');
-    console.log('🧪 SetName:', setName, 'PreloadedData:', preloadedData);
-    
+function addCompositionSet(setName = '', preloadedData = null) {    
     // compositionList 확인
     if (typeof compositionList === 'undefined') {
         window.compositionList = ["cotton", "silk", "wool", "cashmere", "leather", "viscose", "polyester", "polyamide"];
@@ -5321,7 +5339,6 @@ function addCompositionSet(setName = '', preloadedData = null) {
     
     // 첫 번째 + 버튼 클릭인지 확인
     if (!window.usingMultiSets) {
-        console.log('🔄 Converting to multi-set mode');
         window.usingMultiSets = true;
         
         // 기존 단일 그리드의 값들 저장
@@ -5358,7 +5375,6 @@ function addCompositionSet(setName = '', preloadedData = null) {
 
 // 실제 composition 세트 생성 함수
 function createCompositionSet(setIndex, setName, existingValues = {}) {
-    console.log(`🧪 Creating composition set ${setIndex} with name: "${setName}"`);
     const container = document.getElementById('composition_sets_container');
     
     // 새 세트 객체 생성
@@ -5436,7 +5452,6 @@ function createCompositionSet(setIndex, setName, existingValues = {}) {
 
 // composition 세트 제거
 function removeCompositionSet(setIndex) {
-    console.log(`🗑️ Removing composition set ${setIndex}`);
     
     if (!window.compositionSets || setIndex >= window.compositionSets.length) {
         console.error('❌ Invalid composition set index');
@@ -5478,7 +5493,6 @@ function refreshCompositionSets() {
     
     // 세트가 하나만 남은 경우 원래 스타일로 복원
     if (sets.length === 1) {
-        console.log('🔄 Reverting to single set mode');
         window.usingMultiSets = false; // 단일 모드로 되돌림
         
         const container = document.getElementById('composition_sets_container');
@@ -5561,7 +5575,6 @@ function loadExistingCompositions(compositionsData) {
         );
         
         if (isMultiSet) {
-            console.log('🧪 Loading multi-set compositions');
             Object.entries(compositionsData).forEach(([setName, setCompositions]) => {
                 addCompositionSet(setName);
                 const setIndex = window.compositionSets.length - 1;
@@ -6388,10 +6401,7 @@ function updateCompositionDisplay(item) {
                     typeof value === 'object' && value !== null && !Array.isArray(value)
                 );
                 
-                if (hasNestedObjects) {
-                    // Multi-set composition 처리
-                    console.log('🧪 Processing multi-set composition:', compositions);
-                    
+                if (hasNestedObjects) {                    
                     // Custom ordering: shell (any shell*) first, then lining, then others alphabetically
                     console.log('🔧 Original composition sets order:', Object.keys(compositions));
                     const sortedSets = Object.entries(compositions).sort(([a], [b]) => {
@@ -7392,13 +7402,11 @@ function createOuterShortSleeveLongMeasurement(container, measurements) {
 // Stitched 이미지인지 판단 (파일명에 'section'이 포함되어 있으면 Stitched)
 function isStitchedImage(imageUrls) {
     const hasSection = imageUrls.some(url => url.includes('_section_'));
-    console.log('Checking if stitched image:', imageUrls, 'Has section:', hasSection);
     return hasSection;
 }
 
 // Stitched 이미지들을 다시 합치는 함수
 function stitchImagesBack(imageUrls, container) {
-    console.log('Starting stitchImagesBack with urls:', imageUrls);
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const loadedImages = [];
@@ -7565,10 +7573,7 @@ function displayStitchedImagesAsCarousel(imageUrls, container) {
             document.body.appendChild(modal);
         };
         
-        img.onload = function() {
-            console.log(`📐 Image dimensions: ${this.naturalWidth}x${this.naturalHeight}`);
-            console.log(`🎨 Image styles: height=${this.style.height}, width=${this.style.width}`);
-            
+        img.onload = function() {            
             loadedCount++;
             checkCenterAlignment();
         };

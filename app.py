@@ -219,6 +219,42 @@ def get_items():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/upload-ootd-image', methods=['POST'])
+def upload_ootd_image():
+    """ootdLog용 이미지 업로드 API"""
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image file provided'}), 400
+        
+        file = request.files['image']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        # 고유한 파일명 생성 (타임스탬프 기반)
+        import time
+        timestamp = int(time.time() * 1000)  # 밀리초 포함
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        if not file_extension:
+            file_extension = '.jpg'  # 기본 확장자
+        
+        filename = f"ootd_{timestamp}{file_extension}"
+        
+        # R2에 업로드
+        url = r2.upload_image(file, filename)
+        
+        if url:
+            logging.info(f"✅ OOTD image uploaded successfully: {url}")
+            return jsonify({'success': True, 'url': url}), 200
+        else:
+            logging.error("❌ Failed to upload OOTD image to R2")
+            return jsonify({'error': 'Failed to upload image'}), 500
+            
+    except Exception as e:
+        logging.error(f"Error uploading OOTD image: {e}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/items/<item_id>')
 def get_item(item_id):
     try:
