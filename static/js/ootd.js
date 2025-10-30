@@ -1055,31 +1055,54 @@ function uploadImageToR2(file) {
 function extractEXIFData(file) {
     console.log('🔍 Extracting EXIF data from:', file.name);
     
-    exifr.parse(file).then(exifData => {
+    // Check if exifr is loaded
+    if (typeof exifr === 'undefined') {
+        console.error('❌ exifr library not loaded!');
+        return;
+    }
+    
+    // Try with more detailed options
+    exifr.parse(file, {
+        gps: true,
+        exif: true,
+        ifd0: true,
+        ifd1: true
+    }).then(exifData => {
         console.log('📋 EXIF data found:', exifData);
         
         if (exifData) {
-            // Extract date
-            if (exifData.DateTimeOriginal || exifData.DateTime) {
-                const dateString = exifData.DateTimeOriginal || exifData.DateTime;
-                const imageDate = new Date(dateString);
-                console.log('📅 Image date:', dateString, '→', imageDate);
-                
-                if (!isNaN(imageDate.getTime())) {
-                    currentDate = imageDate;
-                    console.log('✅ Updated currentDate to:', currentDate);
-                    updateDateDisplay(); // HTML 날짜 표시 업데이트
+            // Extract date with more options
+            const dateFields = ['DateTimeOriginal', 'DateTime', 'CreateDate', 'ModifyDate'];
+            let imageDate = null;
+            
+            for (const field of dateFields) {
+                if (exifData[field]) {
+                    console.log(`📅 Found date field ${field}:`, exifData[field]);
+                    imageDate = new Date(exifData[field]);
+                    if (!isNaN(imageDate.getTime())) {
+                        break;
+                    }
                 }
-            } else {
-                console.log('⚠️ No date information in EXIF');
             }
             
-            // Extract location
-            if (exifData.latitude && exifData.longitude) {
-                console.log('📍 GPS coordinates found:', exifData.latitude, exifData.longitude);
-                reverseGeocode(exifData.latitude, exifData.longitude);
+            if (imageDate && !isNaN(imageDate.getTime())) {
+                currentDate = imageDate;
+                console.log('✅ Updated currentDate to:', currentDate);
+                updateDateDisplay(); // HTML 날짜 표시 업데이트
+            } else {
+                console.log('⚠️ No valid date information in EXIF');
+            }
+            
+            // Extract location with more field options
+            const lat = exifData.latitude || exifData.GPSLatitude;
+            const lon = exifData.longitude || exifData.GPSLongitude;
+            
+            if (lat && lon) {
+                console.log('📍 GPS coordinates found:', lat, lon);
+                reverseGeocode(lat, lon);
             } else {
                 console.log('⚠️ No GPS coordinates in EXIF');
+                console.log('Available EXIF fields:', Object.keys(exifData));
             }
         } else {
             console.log('⚠️ No EXIF data found');
