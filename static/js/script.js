@@ -290,9 +290,15 @@ let isLoading = false;
 function displayRecentlyAdded() {
     var grid = document.querySelector(".grid_container"); 
     
-    // Load More 버튼 다시 보이기 (초기 상태로 돌아갈 때)
+    // 검색 결과 클래스 제거 (원래 상태로 복원)
+    const subheader = document.querySelector('.subheader');
+    if (subheader) {
+        subheader.classList.remove('search-results');
+    }
+    
+    // Load More 버튼 다시 보이기 (초기 상태로 돌아갈 때만)
     const loadMoreBtn = document.getElementById('load_more_btn');
-    if (loadMoreBtn) {
+    if (loadMoreBtn && !isSearchMode) {
         loadMoreBtn.classList.remove('hide');
         loadMoreBtn.classList.add('show');
     }
@@ -389,6 +395,15 @@ function updateLoadMoreButton() {
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (!loadMoreBtn) return;
     
+    // 검색 모드일 때는 버튼을 숨김
+    if (isSearchMode) {
+        console.log('🔍 updateLoadMoreButton: 검색 모드이므로 버튼 숨김');
+        loadMoreBtn.classList.remove('show', 'inline-block');
+        loadMoreBtn.classList.add('hide');
+        loadMoreBtn.style.display = 'none';
+        return;
+    }
+    
     if (currentOffset >= allItems.length) {
         loadMoreBtn.classList.remove('show', 'inline-block');
         loadMoreBtn.classList.add('hide');
@@ -437,6 +452,12 @@ function loadMoreItems() {
 // all.html에서 사용할 모든 아이템 표시 함수
 function displayAllItems() {
     var grid = document.querySelector(".grid_container"); 
+    
+    // 검색 결과 클래스 제거 (원래 상태로 복원)
+    const subheader = document.querySelector('.subheader');
+    if (subheader) {
+        subheader.classList.remove('search-results');
+    }
     
     // Supabase에서 모든 아이템 가져오기
         fetch('/api/items')
@@ -867,6 +888,7 @@ function showFallbackCarousel() {
 // 검색 최적화를 위한 변수들
 let searchCache = null;
 let searchDebounceTimer = null;
+let isSearchMode = false; // 검색 모드 상태 추적
 const SEARCH_DEBOUNCE_DELAY = 300; // 300ms 디바운싱
 
 function initializeSearch() {
@@ -890,10 +912,12 @@ function initializeSearch() {
         if (query.length > 0) {
             // 디바운싱 적용: 300ms 후에 검색 실행
             searchDebounceTimer = setTimeout(() => {
+                isSearchMode = true; // 검색 모드 설정
                 performSearchOptimized(query);
             }, SEARCH_DEBOUNCE_DELAY);
         } else {
             // 검색어가 없으면 즉시 원래 아이템들 표시
+            isSearchMode = false; // 검색 모드 해제
             displayRecentlyAdded();
         }
     });
@@ -908,6 +932,7 @@ function initializeSearch() {
                 if (searchDebounceTimer) {
                     clearTimeout(searchDebounceTimer);
                 }
+                isSearchMode = true; // 검색 모드 설정
                 performSearchOptimized(query);
             }
         }
@@ -996,29 +1021,54 @@ function performSearchOptimized(query) {
                 const generalValid = generalTerms.every(term => {
                     const lowerTerm = term.toLowerCase();
                     
-                    // 기본 필드 검색
+                    // 카테고리는 정확한 매치를 위해 별도 처리
+                    const categoryMatch = (() => {
+                        const itemCategory = item.category?.toLowerCase() || '';
+                        // 카테고리명에 대한 정확한 매치
+                        if (lowerTerm === itemCategory) {
+                            return true;
+                        }
+                        // 단어 경계를 고려한 매치 (카테고리가 복합어인 경우)
+                        const categoryWords = itemCategory.split(/[\s_-]+/);
+                        return categoryWords.includes(lowerTerm);
+                    })();
+                    
+                    // 기본 필드 검색 (category 제외) - 디버그 로그 추가
+                    const subcategoryMatch = item.subcategory?.toLowerCase().includes(lowerTerm);
+                    const subcategory2Match = item.subcategory2?.toLowerCase().includes(lowerTerm);
+                    const brandMatch = item.brand?.toLowerCase().includes(lowerTerm);
+                    const sizeMatch = item.size?.toLowerCase().includes(lowerTerm);
+                    const sizeRegionMatch = (item.sizeRegion || item.size_region)?.toLowerCase().includes(lowerTerm);
+                    const tagsMatch = item.tags?.toLowerCase().includes(lowerTerm);
+                    const colorMatch = item.color?.toLowerCase().includes(lowerTerm);
+                    
                     const matches = [
-                        item.category?.toLowerCase().includes(lowerTerm),
-                        item.subcategory?.toLowerCase().includes(lowerTerm),
-                        item.subcategory2?.toLowerCase().includes(lowerTerm),
-                        item.brand?.toLowerCase().includes(lowerTerm),
-                        item.size?.toLowerCase().includes(lowerTerm),
-                        (item.sizeRegion || item.size_region)?.toLowerCase().includes(lowerTerm),
-                        item.tags?.toLowerCase().includes(lowerTerm),
-                        item.color?.toLowerCase().includes(lowerTerm),
+                        categoryMatch,
+                        subcategoryMatch,
+                        subcategory2Match,
+                        brandMatch,
+                        sizeMatch,
+                        sizeRegionMatch,
+                        tagsMatch,
+                        colorMatch,
                         // Season 처리는 별도로 진행
                     ];
                     
-                    // Season 특별 처리: "all" season은 모든 검색에 포함, "!all"로 제외 가능
+                    // Season 특별 처리: season 관련 검색어에만 매치
                     const seasonMatch = (() => {
                         const itemSeason = item.season?.toLowerCase() || '';
                         // "!all" 검색의 경우: "all"이 아닌 season만 매치
                         if (lowerTerm === '!all') {
                             return itemSeason !== 'all' && itemSeason !== '';
                         }
-                        // "all" season은 항상 매치 (단, "!all" 검색이 아닌 경우)
+                        // season 관련 검색어들만 확인
+                        const seasonKeywords = ['spring', 'summer', 'fall', 'autumn', 'winter', 'all'];
+                        if (!seasonKeywords.includes(lowerTerm)) {
+                            return false; // season 관련 검색어가 아니면 매치하지 않음
+                        }
+                        // "all" season은 season 관련 검색어에만 매치
                         if (itemSeason === 'all') {
-                            return true;
+                            return lowerTerm === 'all';
                         }
                         // 일반 season 매치
                         return itemSeason.includes(lowerTerm);
@@ -1031,6 +1081,33 @@ function performSearchOptimized(query) {
                     const regionSizeCombinationNoSpace = `${item.sizeRegion || item.size_region || ''}${item.size || ''}`.toLowerCase();
                     matches.push(regionSizeCombinationSpaced.includes(lowerTerm));
                     matches.push(regionSizeCombinationNoSpace.includes(lowerTerm));
+                    
+                    // 'dress' 검색 시 어떤 필드가 매치되는지 디버깅
+                    if (lowerTerm === 'dress') {
+                        const anyMatch = matches.some(match => match);
+                        if (anyMatch) {
+                            const matchingFields = matches.map((match, index) => ({
+                                field: ['category', 'subcategory', 'subcategory2', 'brand', 'size', 'sizeRegion', 'tags', 'color', 'season', 'regionSizeSpaced', 'regionSizeNoSpace'][index],
+                                match
+                            })).filter(f => f.match);
+                            
+                            // 잘못된 매치 상세 로그 (dress가 아닌 카테고리)
+                            if (item.category !== 'dress') {
+                                console.warn(`❌ 잘못된 매치! ${item.category} 아이템이 dress 검색에 매치됨:`, {
+                                    item_id: item.item_id,
+                                    category: item.category,
+                                    brand: item.brand,
+                                    subcategory: item.subcategory,
+                                    size: item.size,
+                                    sizeRegion: item.sizeRegion || item.size_region,
+                                    tags: item.tags,
+                                    color: item.color,
+                                    season: item.season,
+                                    매치된필드들: matchingFields.map(f => `${f.field}: ${f.match}`).join(', ')
+                                });
+                            }
+                        }
+                    }
                     
                     return matches.some(match => match);
                 });
@@ -1085,10 +1162,12 @@ function initializeSearchForAll() {
         if (query.length > 0) {
             // 디바운싱 적용: 300ms 후에 검색 실행
             searchDebounceTimer = setTimeout(() => {
+                isSearchMode = true; // 검색 모드 설정
                 performSearchForAllOptimized(query);
             }, SEARCH_DEBOUNCE_DELAY);
         } else {
             // 검색어가 없으면 즉시 모든 아이템 표시
+            isSearchMode = false; // 검색 모드 해제
             displayAllItems();
         }
     });
@@ -1103,6 +1182,7 @@ function initializeSearchForAll() {
                 if (searchDebounceTimer) {
                     clearTimeout(searchDebounceTimer);
                 }
+                isSearchMode = true; // 검색 모드 설정
                 performSearchForAllOptimized(query);
             }
         }
@@ -1154,29 +1234,54 @@ function performSearchForAllOptimized(query) {
                 const generalValid = generalTerms.every(term => {
                     const lowerTerm = term.toLowerCase();
                     
-                    // 기본 필드 검색
+                    // 카테고리는 정확한 매치를 위해 별도 처리
+                    const categoryMatch = (() => {
+                        const itemCategory = item.category?.toLowerCase() || '';
+                        // 카테고리명에 대한 정확한 매치
+                        if (lowerTerm === itemCategory) {
+                            return true;
+                        }
+                        // 단어 경계를 고려한 매치 (카테고리가 복합어인 경우)
+                        const categoryWords = itemCategory.split(/[\s_-]+/);
+                        return categoryWords.includes(lowerTerm);
+                    })();
+                    
+                    // 기본 필드 검색 (category 제외) - 디버그 로그 추가
+                    const subcategoryMatch = item.subcategory?.toLowerCase().includes(lowerTerm);
+                    const subcategory2Match = item.subcategory2?.toLowerCase().includes(lowerTerm);
+                    const brandMatch = item.brand?.toLowerCase().includes(lowerTerm);
+                    const sizeMatch = item.size?.toLowerCase().includes(lowerTerm);
+                    const sizeRegionMatch = (item.sizeRegion || item.size_region)?.toLowerCase().includes(lowerTerm);
+                    const tagsMatch = item.tags?.toLowerCase().includes(lowerTerm);
+                    const colorMatch = item.color?.toLowerCase().includes(lowerTerm);
+                    
                     const matches = [
-                        item.category?.toLowerCase().includes(lowerTerm),
-                        item.subcategory?.toLowerCase().includes(lowerTerm),
-                        item.subcategory2?.toLowerCase().includes(lowerTerm),
-                        item.brand?.toLowerCase().includes(lowerTerm),
-                        item.size?.toLowerCase().includes(lowerTerm),
-                        (item.sizeRegion || item.size_region)?.toLowerCase().includes(lowerTerm),
-                        item.tags?.toLowerCase().includes(lowerTerm),
-                        item.color?.toLowerCase().includes(lowerTerm),
+                        categoryMatch,
+                        subcategoryMatch,
+                        subcategory2Match,
+                        brandMatch,
+                        sizeMatch,
+                        sizeRegionMatch,
+                        tagsMatch,
+                        colorMatch,
                         // Season 처리는 별도로 진행
                     ];
                     
-                    // Season 특별 처리: "all" season은 모든 검색에 포함, "!all"로 제외 가능
+                    // Season 특별 처리: season 관련 검색어에만 매치
                     const seasonMatch = (() => {
                         const itemSeason = item.season?.toLowerCase() || '';
                         // "!all" 검색의 경우: "all"이 아닌 season만 매치
                         if (lowerTerm === '!all') {
                             return itemSeason !== 'all' && itemSeason !== '';
                         }
-                        // "all" season은 항상 매치 (단, "!all" 검색이 아닌 경우)
+                        // season 관련 검색어들만 확인
+                        const seasonKeywords = ['spring', 'summer', 'fall', 'autumn', 'winter', 'all'];
+                        if (!seasonKeywords.includes(lowerTerm)) {
+                            return false; // season 관련 검색어가 아니면 매치하지 않음
+                        }
+                        // "all" season은 season 관련 검색어에만 매치
                         if (itemSeason === 'all') {
-                            return true;
+                            return lowerTerm === 'all';
                         }
                         // 일반 season 매치
                         return itemSeason.includes(lowerTerm);
@@ -1189,6 +1294,33 @@ function performSearchForAllOptimized(query) {
                     const regionSizeCombinationNoSpace = `${item.sizeRegion || item.size_region || ''}${item.size || ''}`.toLowerCase();
                     matches.push(regionSizeCombinationSpaced.includes(lowerTerm));
                     matches.push(regionSizeCombinationNoSpace.includes(lowerTerm));
+                    
+                    // 'dress' 검색 시 어떤 필드가 매치되는지 디버깅
+                    if (lowerTerm === 'dress') {
+                        const anyMatch = matches.some(match => match);
+                        if (anyMatch) {
+                            const matchingFields = matches.map((match, index) => ({
+                                field: ['category', 'subcategory', 'subcategory2', 'brand', 'size', 'sizeRegion', 'tags', 'color', 'season', 'regionSizeSpaced', 'regionSizeNoSpace'][index],
+                                match
+                            })).filter(f => f.match);
+                            
+                            // 잘못된 매치 상세 로그 (dress가 아닌 카테고리)
+                            if (item.category !== 'dress') {
+                                console.warn(`❌ 잘못된 매치! ${item.category} 아이템이 dress 검색에 매치됨:`, {
+                                    item_id: item.item_id,
+                                    category: item.category,
+                                    brand: item.brand,
+                                    subcategory: item.subcategory,
+                                    size: item.size,
+                                    sizeRegion: item.sizeRegion || item.size_region,
+                                    tags: item.tags,
+                                    color: item.color,
+                                    season: item.season,
+                                    매치된필드들: matchingFields.map(f => `${f.field}: ${f.match}`).join(', ')
+                                });
+                            }
+                        }
+                    }
                     
                     return matches.some(match => match);
                 });
@@ -1319,6 +1451,8 @@ function displaySearchResultsForAll(items, query) {
     // 헤더 업데이트
     if (subheader) {
         subheader.textContent = `search results for "${query}"`;
+        // 400px 이하에서 검색 결과 헤더 숨김을 위한 클래스 추가
+        subheader.closest('.subheader')?.classList.add('search-results');
     }
     
     // 기존 내용 제거
@@ -1338,8 +1472,16 @@ function displaySearchResultsForAll(items, query) {
     // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
+        console.log('🔍 검색결과 표시 - Load More 버튼 숨기기 시도');
         loadMoreBtn.classList.remove('show', 'inline-block');
         loadMoreBtn.classList.add('hide');
+        loadMoreBtn.style.display = 'none'; // 강제로 숨기기
+        console.log('🔍 Load More 버튼 숨김 완료:', {
+            classList: Array.from(loadMoreBtn.classList),
+            style: loadMoreBtn.style.display
+        });
+    } else {
+        console.log('🔍 Load More 버튼을 찾을 수 없음');
     }
     
     // 검색 결과 아이템들 표시
@@ -1649,6 +1791,8 @@ function displaySearchResults(items, query) {
     // 헤더 업데이트
     if (subheader) {
         subheader.textContent = `search results for "${query}"`;
+        // 400px 이하에서 검색 결과 헤더 숨김을 위한 클래스 추가
+        subheader.closest('.subheader')?.classList.add('search-results');
     }
     
     // 기존 내용 제거
@@ -1668,8 +1812,16 @@ function displaySearchResults(items, query) {
     // 검색 모드에서는 Load More 버튼 숨기기 (검색 결과는 한번에 모두 표시)
     const loadMoreBtn = document.getElementById('load_more_btn');
     if (loadMoreBtn) {
+        console.log('🔍 검색결과 표시 - Load More 버튼 숨기기 시도');
         loadMoreBtn.classList.remove('show', 'inline-block');
         loadMoreBtn.classList.add('hide');
+        loadMoreBtn.style.display = 'none'; // 강제로 숨기기
+        console.log('🔍 Load More 버튼 숨김 완료:', {
+            classList: Array.from(loadMoreBtn.classList),
+            style: loadMoreBtn.style.display
+        });
+    } else {
+        console.log('🔍 Load More 버튼을 찾을 수 없음');
     }
     
     // 검색 결과 아이템들 표시
