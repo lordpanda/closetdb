@@ -1,0 +1,119 @@
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
+    <script src="{{ url_for('static', filename='js/db.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exifr/lite.umd.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ootd.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;600&display=swap" rel="stylesheet">
+    <title>closetDB - OOTD</title>
+</head>
+
+<body>
+    <section class="header">
+        <script>displayGlobalMenu(0);</script>
+        <div class="intro">
+            <span class="main">OOTD</span>
+            <span class="sub">outfit of the day</span>
+        </div>
+    </section>
+    
+    <div id="bg"></div>
+    <div class="overlay"></div>
+    
+    <section class="content narrow" id="ootd_content">
+        <!-- Tab Navigation -->
+        <div class="tab_navigation">
+            <button class="tab_button active" data-tab="log">LOG</button>
+            <button class="tab_button" data-tab="view">VIEW</button>
+            <button class="tab_button" data-tab="items">ITEMS</button>
+        </div>
+
+        <!-- LOG Tab -->
+        <div class="tab_content active" id="log_tab">
+            <!-- Date Selection -->
+            <div class="date_section">
+                <h2>Date</h2>
+                <div class="date_picker_container">
+                    <input type="date" id="ootd_date" class="date_input">
+                    <div class="date_nav">
+                        <button class="date_nav_btn" id="prev_day">←</button>
+                        <button class="date_nav_btn" id="next_day">→</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div class="location_section">
+                <h2>Location</h2>
+                <div class="location_display" id="location_display">
+                    <span id="location_text">SEOCHO-GU, SEOUL</span>
+                    <button class="edit_btn" id="edit_location_btn">✏️</button>
+                </div>
+                <input type="text" id="location_input" class="location_input hidden">
+            </div>
+
+            <!-- Weather Section -->
+            <div class="weather_section">
+                <h2>Weather</h2>
+                <div class="weather_info">
+                    <div class="weather_display">
+                        <span class="weather_icon" id="weather_display">☀️</span>
+                        <span class="temp_range" id="temp_display">16-24°</span>
+                        <span class="precipitation" id="precipitation_display">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search & Items Section -->
+            <div class="items_section">
+                <h2>Items</h2>
+                <div class="search_container">
+                    <input type="text" class="search_input" id="item_search" placeholder="search items...">
+                </div>
+                
+                <div class="search_results_container" id="search_results"></div>
+                
+                <div class="pinned_items_container" id="pinned_items">
+                    <!-- Pinned items will be displayed here -->
+                </div>
+
+                <!-- Image Upload -->
+                <div class="image_upload_section">
+                    <h3>Upload OOTD Photo</h3>
+                    <div class="upload_container">
+                        <input type="file" accept="image/*" id="ootd_image_upload" class="hidden">
+                        <label for="ootd_image_upload" class="upload_btn">
+                            📷 Add Photo
+                        </label>
+                        <div class="uploaded_image_preview" id="image_preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="save_section">
+                <button class="button main_button" id="save_ootd_btn">SAVE OOTD</button>
+            </div>
+        </div>
+
+        <!-- VIEW Tab -->
+        <div class="tab_content" id="view_tab">
+            <h2>Saved OOTDs</h2>
+            <div class="ootd_history_container" id="ootd_history">
+                <!-- Saved OOTDs will be displayed here -->
+            </div>
+        </div>
+
+        <!-- ITEMS Tab -->
+        <div class="tab_content" id="items_tab">
+            <h2>Browse ClosetDB Items</h2>
+            <div class="items_grid" id="items_grid">
+                <!-- Items from ClosetDB will be displayed here -->
+            </div>
+        </div>
+    </section>
+
+    <script src="{{ url_for('static', filename='js/ootd.js') }}"></script>
+</body>

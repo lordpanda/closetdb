@@ -1,0 +1,350 @@
+/* OOTD Specific Styles */
+
+.tab_navigation {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--lightgray);
+}
+
+.tab_button {
+    background: none;
+    border: none;
+    padding: 1rem 2rem;
+    font-family: var(--menu-link);
+    font-size: 1rem;
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab_button.active {
+    color: var(--black);
+    border-bottom-color: var(--purple);
+}
+
+.tab_button:hover {
+    color: var(--black);
+}
+
+.tab_content {
+    display: none;
+}
+
+.tab_content.active {
+    display: block;
+}
+
+/* Date Section */
+.date_section {
+    margin-bottom: 2rem;
+}
+
+.date_picker_container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.date_input {
+    padding: 0.8rem;
+    border: 2px solid var(--lightgray);
+    border-radius: 8px;
+    font-size: 1rem;
+    flex: 1;
+}
+
+.date_nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.date_nav_btn {
+    width: 40px;
+    height: 40px;
+    border: 2px solid var(--lightgray);
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.date_nav_btn:hover {
+    border-color: var(--purple);
+    background: var(--purple);
+    color: white;
+}
+
+/* Location Section */
+.location_section {
+    margin-bottom: 2rem;
+}
+
+.location_display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem;
+    background: var(--lightgray);
+    border-radius: 8px;
+}
+
+.location_input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid var(--lightgray);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.edit_btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* Weather Section */
+.weather_section {
+    margin-bottom: 2rem;
+}
+
+.weather_info {
+    background: var(--lightgray);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.weather_display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.2rem;
+}
+
+.weather_icon {
+    font-size: 2rem;
+}
+
+/* Items Section */
+.items_section {
+    margin-bottom: 2rem;
+}
+
+.search_container {
+    margin-bottom: 1rem;
+}
+
+.search_input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid var(--lightgray);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.search_results_container {
+    margin-bottom: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.pinned_items_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.item_card {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.item_card:hover {
+    transform: translateY(-2px);
+}
+
+.item_image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.item_placeholder {
+    width: 100%;
+    height: 120px;
+    background: var(--lightgray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--gray);
+}
+
+.remove_button {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Image Upload Section */
+.image_upload_section {
+    margin-bottom: 2rem;
+}
+
+.upload_container {
+    text-align: center;
+}
+
+.upload_btn {
+    display: inline-block;
+    padding: 1rem 2rem;
+    background: var(--main-gradient);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.upload_btn:hover {
+    transform: translateY(-2px);
+}
+
+.uploaded_image_preview {
+    margin-top: 1rem;
+}
+
+.uploaded_image_preview img {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Save Section */
+.save_section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* VIEW Tab Styles */
+.ootd_history_container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.ootd_entry {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.ootd_entry:hover {
+    transform: translateY(-2px);
+}
+
+.ootd_date_header {
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--black);
+    font-size: 1.1rem;
+}
+
+.ootd_items_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+}
+
+.ootd_item_card {
+    background: var(--lightgray);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.ootd_item_image {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+}
+
+.ootd_item_placeholder {
+    width: 100%;
+    height: 80px;
+    background: var(--gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.no_items {
+    text-align: center;
+    color: var(--gray);
+    font-style: italic;
+}
+
+/* ITEMS Tab Styles */
+.items_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .tab_button {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .date_picker_container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .pinned_items_container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    
+    .weather_display {
+        font-size: 1rem;
+    }
+    
+    .weather_icon {
+        font-size: 1.5rem;
+    }
+}

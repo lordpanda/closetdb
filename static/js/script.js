@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function displayGlobalMenu(parm1) {
     var activeItem = [];
-    for(var i = 0; i < 3; i++){
+    for(var i = 0; i < 4; i++){
         if(i == parm1){
             activeItem[parm1] = "menu_selected";
         } else {
@@ -112,9 +112,10 @@ function displayGlobalMenu(parm1) {
     <input type="checkbox" class="toggler">
     <div class="hamburger"><div></div></div>
     <ul class="menu">
-        <li><a class="`+activeItem[0]+`" href="#" id="view_all_link">View all</a></li>
-        <li><a class="`+activeItem[2]+`" href="#" id="add_new_link">Add</a></li>
-        <li><a class="`+activeItem[1]+`" href="#" id="filter_link">Filter</a></li>
+        <li><a class="`+activeItem[0]+`" href="#" id="ootd_link">OOTD</a></li>
+        <li><a class="`+activeItem[1]+`" href="#" id="view_all_link">View all</a></li>
+        <li><a class="`+activeItem[3]+`" href="#" id="add_new_link">Add</a></li>
+        <li><a class="`+activeItem[2]+`" href="#" id="filter_link">Filter</a></li>
     </ul>
     `);
 }
@@ -180,6 +181,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 로고 클릭은 명시적으로 메인으로 이동하려는 의도이므로 검색 상태 삭제
                 clearSearchState();
                 checkLoginAndRedirect('/index.html');
+            });
+        }
+        
+        // OOTD 링크
+        const ootdLink = document.getElementById('ootd_link');
+        if (ootdLink) {
+            ootdLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                // OOTD 페이지로 이동
+                window.location.href = '/ootd.html';
             });
         }
         
