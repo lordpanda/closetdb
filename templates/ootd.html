@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="ko">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1.0, maximum-scale=1.0">
@@ -32,83 +34,69 @@
 
         <!-- LOG Tab -->
         <div class="tab_content active" id="log_tab">
-            <!-- Date Selection -->
-            <div class="date_section">
-                <h2>Date</h2>
-                <div class="date_picker_container">
-                    <input type="date" id="ootd_date" class="date_input">
-                    <div class="date_nav">
-                        <button class="date_nav_btn" id="prev_day">←</button>
-                        <button class="date_nav_btn" id="next_day">→</button>
+            <!-- Date Navigation -->
+            <div class="date_navigation">
+                <button class="nav_button" id="prev_day">◀</button>
+                <div class="date_display" id="current_date_display" onclick="showCalendar()"></div>
+                <button class="nav_button" id="next_day">▶</button>
+            </div>
+
+            <!-- Custom Calendar Modal -->
+            <div class="calendar_modal hidden" id="calendar_modal">
+                <div class="calendar_content">
+                    <div class="calendar_header">
+                        <button class="calendar_nav_btn" id="prev_month">‹</button>
+                        <span class="calendar_title" id="calendar_title"></span>
+                        <button class="calendar_nav_btn" id="next_month">›</button>
                     </div>
+                    <div class="calendar_grid" id="calendar_grid"></div>
+                    <button class="calendar_close_btn" id="calendar_close">Close</button>
                 </div>
             </div>
 
-            <!-- Location Section -->
-            <div class="location_section">
-                <h2>Location</h2>
-                <div class="location_display" id="location_display">
+            <!-- Location Container - ootdLog 방식 -->
+            <div class="location_container">
+                <div class="info_pill location_pill_clickable" id="location_display" onclick="handleLocationClick()">
                     <span id="location_text">SEOCHO-GU, SEOUL</span>
-                    <button class="edit_btn" id="edit_location_btn">✏️</button>
                 </div>
-                <input type="text" id="location_input" class="location_input hidden">
+                <input type="text" id="location_input" class="location_input hidden" placeholder="Enter location..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+                <div class="hidden" id="location_dropdown"></div>
             </div>
 
-            <!-- Weather Section -->
-            <div class="weather_section">
-                <h2>Weather</h2>
-                <div class="weather_info">
-                    <div class="weather_display">
-                        <span class="weather_icon" id="weather_display">☀️</span>
-                        <span class="temp_range" id="temp_display">16-24°</span>
-                        <span class="precipitation" id="precipitation_display">0%</span>
-                    </div>
-                </div>
+            <!-- Weather Info Row -->
+            <div class="info_row">
+                <span class="arrow_separator">→</span>
+                <div class="info_pill" id="weather_display">SUNNY</div>
+                <div class="info_pill" id="precipitation_display">0%</div>
+                <div class="info_pill" id="temp_display">16-24</div>
             </div>
 
             <!-- Search & Items Section -->
-            <div class="items_section">
-                <h2>Items</h2>
-                <div class="search_container">
-                    <input type="text" class="search_input" id="item_search" placeholder="search items...">
-                </div>
-                
-                <div class="search_results_container" id="search_results"></div>
-                
-                <div class="pinned_items_container" id="pinned_items">
-                    <!-- Pinned items will be displayed here -->
-                </div>
-
-                <!-- Image Upload -->
-                <div class="image_upload_section">
-                    <h3>Upload OOTD Photo</h3>
-                    <div class="upload_container">
-                        <input type="file" accept="image/*" id="ootd_image_upload" class="hidden">
-                        <label for="ootd_image_upload" class="upload_btn">
-                            📷 Add Photo
-                        </label>
-                        <div class="uploaded_image_preview" id="image_preview"></div>
-                    </div>
-                </div>
+            <div class="search_container">
+                <input type="text" class="search_input" id="item_search" placeholder="search items...">
             </div>
+            
+            <div class="search_results_container" id="search_results"></div>
+            
+            <div class="ootd_container" id="pinned_items">
+                <!-- Pinned items will be displayed here -->
+            </div>
+
+            <input type="file" accept="image/*" id="ootd_image_upload" class="hidden">
 
             <!-- Save Button -->
-            <div class="save_section">
-                <button class="button main_button" id="save_ootd_btn">SAVE OOTD</button>
-            </div>
+            <button class="save_button" id="save_ootd_btn">SAVE OOTD</button>
         </div>
 
         <!-- VIEW Tab -->
         <div class="tab_content" id="view_tab">
-            <h2>Saved OOTDs</h2>
-            <div class="ootd_history_container" id="ootd_history">
+            <div class="ootd_history" id="ootd_history">
                 <!-- Saved OOTDs will be displayed here -->
             </div>
         </div>
 
         <!-- ITEMS Tab -->
         <div class="tab_content" id="items_tab">
-            <h2>Browse ClosetDB Items</h2>
             <div class="items_grid" id="items_grid">
                 <!-- Items from ClosetDB will be displayed here -->
             </div>
@@ -117,3 +105,4 @@
 
     <script src="{{ url_for('static', filename='js/ootd.js') }}"></script>
 </body>
+</html>

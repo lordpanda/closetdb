@@ -265,6 +265,90 @@ class SupabaseDB:
         except Exception as e:
             print(f"Error updating item {item_id}: {e}")
             raise e
+    
+    def get_ootds(self):
+        """Get all saved OOTDs from Supabase"""
+        try:
+            response = requests.get(
+                f'{self.url}/rest/v1/ootd?select=*&order=date.desc',
+                headers=self.headers
+            )
+            
+            if response.status_code == 200:
+                ootds = response.json()
+                print(f"✅ Retrieved {len(ootds)} OOTDs from Supabase")
+                return ootds
+            else:
+                print(f"❌ Failed to get OOTDs: {response.status_code} - {response.text}")
+                return []
+                
+        except Exception as e:
+            print(f"❌ Error getting OOTDs: {e}")
+            return []
+    
+    def get_ootd_by_date(self, date):
+        """Get OOTD for specific date from Supabase"""
+        try:
+            response = requests.get(
+                f'{self.url}/rest/v1/ootd?date=eq.{date}&select=*',
+                headers=self.headers
+            )
+            
+            if response.status_code == 200:
+                ootds = response.json()
+                if ootds:
+                    ootd = ootds[0]  # Should be only one per date
+                    print(f"✅ Retrieved OOTD for {date}: {ootd}")
+                    return ootd
+                else:
+                    print(f"📅 No OOTD found for date: {date}")
+                    return None
+            else:
+                print(f"❌ Failed to get OOTD for {date}: {response.status_code} - {response.text}")
+                return None
+                
+        except Exception as e:
+            print(f"❌ Error getting OOTD for {date}: {e}")
+            return None
+    
+    def save_ootd(self, ootd_data):
+        """Save OOTD data to Supabase"""
+        try:
+            # Prepare data for Supabase
+            data = {
+                'date': ootd_data.get('date'),
+                'location': ootd_data.get('location'),
+                'weather': ootd_data.get('weather'),
+                'temp_min': ootd_data.get('temp_min'),
+                'temp_max': ootd_data.get('temp_max'),
+                'precipitation': ootd_data.get('precipitation'),
+                'items': ootd_data.get('items', []),
+                'uploaded_image': ootd_data.get('uploaded_image'),
+                'created_at': ootd_data.get('created_at')
+            }
+            
+            # Remove None values
+            data = {k: v for k, v in data.items() if v is not None}
+            
+            print(f"💾 Saving OOTD to Supabase: {data}")
+            
+            # Use upsert to handle conflicts
+            response = requests.post(
+                f'{self.url}/rest/v1/ootd',
+                headers={**self.headers, 'Prefer': 'resolution=merge-duplicates'},
+                json=data
+            )
+            
+            if response.status_code in [200, 201]:
+                print("✅ OOTD saved successfully to Supabase")
+                return response.json()
+            else:
+                print(f"❌ Failed to save OOTD: {response.status_code} - {response.text}")
+                raise Exception(f"Failed to save OOTD: {response.text}")
+                
+        except Exception as e:
+            print(f"❌ Error saving OOTD: {e}")
+            raise e
 
 # 전역 인스턴스
 db = SupabaseDB()

@@ -34,6 +34,10 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour
 
+# Supabase configuration for frontend
+app.config['SUPABASE_URL'] = os.getenv('SUPABASE_URL')
+app.config['SUPABASE_ANON_KEY'] = os.getenv('SUPABASE_KEY')
+
 # Force HTTPS for production
 if os.getenv('FLASK_ENV') == 'production':
     app.config['PREFERRED_URL_SCHEME'] = 'https'
@@ -225,6 +229,71 @@ def get_items():
         print(f"Error fetching items: {e}")
         import traceback
         traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ootd', methods=['GET'])
+def get_ootds():
+    """Get all saved OOTDs or specific date OOTD"""
+    logging.info("=== OOTD GET API CALLED ===")
+    try:
+        if db is None:
+            logging.error("DB object is None")
+            return jsonify({'ootds': []}), 200
+        
+        # Check if specific date is requested
+        date = request.args.get('date')
+        if date:
+            # Get OOTD for specific date
+            ootd = db.get_ootd_by_date(date)
+            logging.info(f"Retrieved OOTD for date {date}: {ootd is not None}")
+            return jsonify({'ootd': ootd}), 200
+        else:
+            # Get all OOTDs
+            ootds = db.get_ootds()
+            logging.info(f"Retrieved {len(ootds)} OOTDs")
+            return jsonify({'ootds': ootds}), 200
+        
+    except Exception as e:
+        logging.error(f"Error fetching OOTDs: {e}")
+        return jsonify({'ootds': []}), 200  # Return empty array instead of error
+
+@app.route('/api/ootd', methods=['POST'])
+def save_ootd_post():
+    """Save OOTD data"""
+    try:
+        # Check authentication manually
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        token = auth_header[7:]  # Remove "Bearer "
+        if not token or not (token.startswith('google_auth_') or token.startswith('logged_in_')):
+            return jsonify({'error': 'Invalid token'}), 401
+        
+        # More robust JSON parsing
+        if not request.is_json:
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+        
+        try:
+            data = request.get_json()
+            if data is None:
+                return jsonify({'error': 'Invalid JSON data'}), 400
+        except Exception as json_error:
+            logging.error(f"JSON parsing error: {json_error}")
+            return jsonify({'error': f'JSON parsing error: {str(json_error)}'}), 400
+        
+        logging.info(f"Saving OOTD: {data}")
+        
+        if db is None:
+            return jsonify({'error': 'Database not available'}), 500
+        
+        # Save to Supabase using db connection
+        result = db.save_ootd(data)
+        
+        return jsonify({'success': True, 'message': 'OOTD saved successfully', 'data': result}), 200
+        
+    except Exception as e:
+        logging.error(f"Error saving OOTD: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/upload-ootd-image', methods=['POST'])

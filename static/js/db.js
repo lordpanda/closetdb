@@ -3,7 +3,7 @@ var indexCount = 0;
 const categoryList = ["top", "dress", "outer", "skirt", "pants", "shoes", "jewerly", "etc."];
 const subCategoryList = ["mini", "midi", "long", "short sleeve", "long sleeve", "short", "long", "bag", "socks", "belt", "hat", "sneakers", "boots", "sandals", "heels", "etc"];
 const sizeRegionList = ["WW", "US", "EU", "FR", "IT", "DE", "UK", "KR", "JP", "Kids", "Ring", "etc"];
-const compositionList = ["cotton", "linen", "silk", "wool", "cashmere", "alpaca", "leather", "viscose", "rayon", "polyesther","polyurethane", "polyamide", 
+const compositionList = ["cotton", "linen", "silk", "wool", "cashmere", "alpaca", "leather", "synthetic leather", "viscose", "rayon", "polyesther","polyurethane", "polyamide", 
 "elastane", "nylon", "lyocell", "acryl", "acetate", "tri-acetate", "cupro", "spandex",  "metallic", "brass", "rubber", "mother of pearl", "sterling silver", "gold 14K", "gold 18K"];
 const tagsList = [
     "occasion",

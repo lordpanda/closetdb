@@ -36,197 +36,524 @@
     display: block;
 }
 
-/* Date Section */
-.date_section {
-    margin-bottom: 2rem;
+/* Date Navigation */
+.date_navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+}
+.date_display {
+    background-color: var(--white);
+    border-radius: 30px;
+    padding: 10px 32px;
+    border: 2px solid var(--black);
+    font-family: 'Sequel55';
+    font-size: 1.3em;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
+.date_section {
+    margin-bottom: 0;
+}
+
+.nav_button {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: var(--black);
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+}
+
+/* date picker */
 .date_picker_container {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.date_input {
-    padding: 0.8rem;
-    border: 2px solid var(--lightgray);
-    border-radius: 8px;
-    font-size: 1rem;
-    flex: 1;
+.current_date_display {
+    background: white;
+    border: 2px solid var(--black);
+    border-radius: 24px;
+    padding: 8px 32px;
+    font-size: 18px;
+    font-family: 'Sequel55', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.current_date_display:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .date_nav {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
 }
 
 .date_nav_btn {
-    width: 40px;
-    height: 40px;
-    border: 2px solid var(--lightgray);
-    border-radius: 50%;
-    background: white;
+    background: none;
+    border: none;
+    font-size: 32px;
     cursor: pointer;
-    font-size: 1.2rem;
+    color: var(--black);
+    padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: opacity 0.2s;
 }
 
 .date_nav_btn:hover {
-    border-color: var(--purple);
-    background: var(--purple);
-    color: white;
+    opacity: 0.7;
 }
 
-/* Location Section */
-.location_section {
-    margin-bottom: 2rem;
-}
-
-.location_display {
+/* Calendar Modal */
+.calendar_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.8rem;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.calendar_content {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 350px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.calendar_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.calendar_nav_btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.calendar_nav_btn:hover {
     background: var(--lightgray);
+}
+
+.calendar_title {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.calendar_grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+
+.calendar_day_header {
+    text-align: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: var(--gray);
+    padding: 0.5rem;
+}
+
+.calendar_day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.calendar_day:hover {
+    background: var(--lightgray);
+}
+
+.calendar_day.other_month {
+    color: var(--gray);
+    opacity: 0.5;
+}
+
+.calendar_day.today {
+    background: var(--purple);
+    color: white;
+    font-weight: bold;
+}
+
+.calendar_day.selected {
+    background: var(--purple);
+    color: white;
+    border: 2px solid var(--purple);
+}
+
+.calendar_day.has_ootd {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    font-weight: bold;
+}
+
+.calendar_day.has_ootd:after {
+    content: '•';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+}
+
+.calendar_close_btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--purple);
+    color: white;
+    border: none;
     border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s ease;
+}
+
+.calendar_close_btn:hover {
+    background: var(--purple-dark);
+}
+
+/* Location Container - ootdLog style */
+.location_section {
+    margin-bottom: 0;
+}
+
+.location_container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+    position: relative;
+    width: 100%;
+}
+
+.location_pill_clickable {
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    cursor: pointer;
+    background: white;
+    border: 2px solid var(--black);
+    border-radius: 24px;
+    padding: 10px 20px;
+    font-size: 14px;
+    white-space: nowrap;
+    box-sizing: border-box;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'LeferiPointBlack', sans-serif;
+}
+
+/* Location Input Container */
+.location_input_container {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    justify-content: center;
 }
 
 .location_input {
     width: 100%;
-    padding: 0.8rem;
-    border: 2px solid var(--lightgray);
-    border-radius: 8px;
-    font-size: 1rem;
+    max-width: 500px;
+    min-width: 300px;
+    background: white;
+    border: 2px solid var(--black);
+    border-radius: 24px;
+    padding: 10px 20px;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    box-sizing: border-box;
+    font-family: 'LeferiPointBlack', sans-serif;
+    height: 42px;
+    resize: none;
+    overflow: hidden;
 }
 
-.edit_btn {
-    background: none;
-    border: none;
+.location_input::placeholder {
+    color: #888;
+}
+
+/* 브라우저 자동완성 완전 제거 */
+.location_input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    background-color: white !important;
+}
+
+.location_input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    background-color: white !important;
+}
+
+/* Location Dropdown */
+.location_dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 500px !important;
+    background: white !important;
+    border-top: none !important;
+    border-radius: 24px;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    z-index: 9999 !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.location_dropdown.hidden {
+    display: none !important;
+}
+
+.location_dropdown_item {
+    padding: 12px 20px;
     cursor: pointer;
-    font-size: 1.2rem;
+    border-bottom: 1px solid var(--lightgray);
+    font-size: 14px;
+    text-align: left;
+    transition: background-color 0.2s;
 }
 
-/* Weather Section */
-.weather_section {
-    margin-bottom: 2rem;
+.location_dropdown_item:hover,
+.location_dropdown_item.selected {
+    background-color: var(--lightgray);
 }
 
-.weather_info {
-    background: var(--lightgray);
-    border-radius: 8px;
-    padding: 1rem;
+.location_dropdown_item:last-child {
+    border-bottom: none;
 }
 
-.weather_display {
+.location_dropdown_item.loading {
+    text-align: center;
+    color: var(--gray);
+    font-style: italic;
+}
+
+.location_dropdown_item.no_results {
+    text-align: center;
+    color: var(--gray);
+    font-style: italic;
+}
+
+/* Weather and Info Row - ootdLog style */
+.info_row {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    font-size: 1.2rem;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
 }
 
-.weather_icon {
-    font-size: 2rem;
+.info_pill {
+    background: white;
+    border: 2px solid var(--black);
+    border-radius: 24px;
+    padding: 10px 20px;
+    font-size: 14px;
+    white-space: nowrap;
 }
 
-/* Items Section */
-.items_section {
-    margin-bottom: 2rem;
+.arrow_separator {
+    font-size: 20px;
+    color: var(--black);
 }
 
+/* Search Section - ootdLog style */
 .search_container {
-    margin-bottom: 1rem;
+    margin-bottom: 24px;
 }
 
 .search_input {
     width: 100%;
-    padding: 0.8rem;
-    border: 2px solid var(--lightgray);
-    border-radius: 8px;
-    font-size: 1rem;
-}
-
-.search_results_container {
-    margin-bottom: 1rem;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.pinned_items_container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.item_card {
-    position: relative;
     background: white;
-    border-radius: 8px;
+    border: 2px solid var(--black);
+    border-radius: 24px;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 16px;
+    outline: none;
+    text-align: center;
+    font-family: 'Sequel45';
+}
+
+.search_input::placeholder {
+    font-family: 'Sequel45';
+    color: var(--black);
+    text-align: center;
+}
+
+/* Search Results Container - ootdLog style */
+.search_results_container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .search_results_container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.no_results {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    padding: 32px;
+}
+
+/* OOTD Container - match ootdLog grid layout */
+.ootd_container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    min-height: 200px;
+}
+
+@media (max-width: 768px) {
+    .ootd_container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Item Cards - ootdLog style */
+.item_card {
+    background: var(--white);
+    border: 2px solid var(--black);
+    border-radius: 24px;
+    aspect-ratio: 3/4;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
     cursor: pointer;
-    transition: transform 0.3s ease;
+    transition: all 0.2s;
+    width: 100%;
+    height: auto;
 }
 
 .item_card:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.item_card.search_result {
+    cursor: pointer;
+    border: none;
+}
+
+.item_card.search_result:hover {
+    border: 2px solid #6a5d9a;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(124, 111, 176, 0.3);
+}
+
+.item_card.search_result.pinned_item {
+    border: 3px solid var(--purple) !important;
+    box-shadow: 0 4px 12px rgba(124, 111, 176, 0.3) !important;
+}
+
+.item_card.search_result.pinned_item:hover {
+    border: 3px solid var(--purple) !important;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(124, 111, 176, 0.5) !important;
+}
+
+.item_card.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: rgba(74, 74, 74, 0.2);
 }
 
 .item_image {
     width: 100%;
-    height: 120px;
+    height: 100%;
     object-fit: cover;
 }
 
 .item_placeholder {
     width: 100%;
-    height: 120px;
+    height: 100%;
     background: var(--lightgray);
+    border: 1px solid #e0e0e0;
+    border-radius: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
-    color: var(--gray);
+    font-size: 48px;
+    text-transform: uppercase;
 }
 
 .remove_button {
     position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 25px;
-    height: 25px;
-    border-radius: 50%;
-    background: rgba(255, 0, 0, 0.8);
-    color: white;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.9);
     border: none;
-    cursor: pointer;
-    font-size: 16px;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
 }
 
-/* Image Upload Section */
-.image_upload_section {
-    margin-bottom: 2rem;
+.remove_button:hover {
+    background: white;
+    transform: scale(1.1);
 }
 
+/* Upload Section - ootdLog style - HIDDEN */
 .upload_container {
-    text-align: center;
+    display: none !important;
 }
 
 .upload_btn {
-    display: inline-block;
-    padding: 1rem 2rem;
-    background: var(--main-gradient);
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: transform 0.3s ease;
+    display: none !important;
 }
 
 .upload_btn:hover {
@@ -244,10 +571,33 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* Save Section */
-.save_section {
+/* Save Button - ootdLog style */
+.save_button {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+    display: block;
+    background: var(--purple);
+    color: var(--white);
+    border: none;
+    border-radius: 24px;
+    padding: 18px 48px;
+    font-size: 20px;
     text-align: center;
-    margin-top: 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.save_button:hover {
+    background: #6a5d9a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 111, 176, 0.3);
+}
+
+.save_button:active {
+    transform: translateY(0);
 }
 
 /* VIEW Tab Styles */
@@ -281,23 +631,26 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: 0.5rem;
+    max-width: 100%;
 }
 
 .ootd_item_card {
     background: var(--lightgray);
     border-radius: 6px;
     overflow: hidden;
+    aspect-ratio: 1;
+    min-width: 80px;
 }
 
 .ootd_item_image {
     width: 100%;
-    height: 80px;
+    height: 100%;
     object-fit: cover;
 }
 
 .ootd_item_placeholder {
     width: 100%;
-    height: 80px;
+    height: 100%;
     background: var(--gray);
     display: flex;
     align-items: center;
