@@ -293,8 +293,8 @@ function displayRecentlyAdded() {
                 allItems = data.items; // 전체 아이템 저장
                 currentOffset = 0; // 초기화
                 
-                // 첫 36개 표시
-                const maxItems = Math.min(data.items.length, 36);
+                // 첫 24개 표시
+                const maxItems = Math.min(data.items.length, 24);
                 
                 for (let index = 0; index < maxItems; index++) {
                     const item = data.items[index];
@@ -377,24 +377,22 @@ function createAndAppendGridItem(item, grid) {
         this.classList.add('image_placeholder');
     };
     
-    // 다중 이미지가 있는 경우 2번째 이미지 요소 추가
+    // 다중 이미지가 있는 경우 hover 이벤트 추가
     if (hasMultipleImages && secondImageSrc) {
-        // 첫 번째 이미지에 클래스 추가
-        img.classList.add('first_image');
+        // 2번째 이미지 미리 로드
+        const preloadImg = new Image();
+        preloadImg.src = secondImageSrc;
         
-        // 2번째 이미지 요소 생성
-        const secondImg = document.createElement('img');
-        secondImg.src = secondImageSrc;
-        secondImg.alt = img.alt;
-        secondImg.loading = 'lazy';
-        secondImg.classList.add('second_image');
+        gridItem.addEventListener('mouseenter', () => {
+            img.src = secondImageSrc;
+        });
         
-        // 이미지 순서대로 추가
-        link.appendChild(img);
-        link.appendChild(secondImg);
-    } else {
-        link.appendChild(img);
+        gridItem.addEventListener('mouseleave', () => {
+            img.src = imageSrc;
+        });
     }
+    
+    link.appendChild(img);
     gridItem.appendChild(link);
     grid.appendChild(gridItem);
 }
@@ -434,7 +432,7 @@ function loadMoreItems() {
     }
     
     const grid = document.querySelector('.grid_container');
-    const nextBatch = allItems.slice(currentOffset, currentOffset + 48);
+    const nextBatch = allItems.slice(currentOffset, currentOffset + 12);
     
     
     // 약간의 딜레이로 로딩 상태 표시
@@ -474,7 +472,38 @@ function displayAllItems() {
                                     if (data.items && data.items.length > 0) {
                 // 모든 아이템 표시 (제한 없음)
                 data.items.forEach((item, index) => {
-                    createAndAppendGridItem(item, grid);
+                    const gridItem = document.createElement('div');
+                    gridItem.className = 'grid_item clickable';
+                    
+                    // a 태그로 감싸서 기본 브라우저 동작(Shift+Click, 우클릭) 지원
+                    const link = document.createElement('a');
+                    link.href = './item.html?id=supabase_' + item.item_id;
+                    link.className = 'grid_item_link';
+                    
+                    const img = document.createElement('img');
+                    img.loading = 'lazy'; // 브라우저 네이티브 lazy loading
+                    
+                    // 썸네일이 있으면 썸네일 사용, 없으면 원본 이미지, 그것도 없으면 기본 이미지
+                    if (item.thumbnail_url) {
+                        img.src = item.thumbnail_url;
+                                    } else if (item.images && item.images.length > 0) {
+                        img.src = item.images[0];
+                                    } else {
+                        // 기본 이미지 (short sleeve top measurement)
+                        img.src = "/static/src/img/measurement/measurement_top.svg";
+                        img.classList.add('image_placeholder');
+                                    }
+                    
+                    img.onerror = function() {
+                        // 이미지 로드 실패시 기본 이미지
+                                        this.src = "/static/src/img/measurement/measurement_top.svg";
+                        this.classList.add('image_placeholder');
+                    };
+                    
+                    link.appendChild(img);
+                    gridItem.appendChild(link);
+                    
+                    grid.appendChild(gridItem);
                 });
             }
         })
@@ -1501,50 +1530,20 @@ function displaySearchResultsForAll(items, query) {
         
         const img = document.createElement('img');
         
-        // 이미지 개수 확인 및 hover 효과 설정
-        let hasMultipleImages = false;
-        let imageSrc = '';
-        let secondImageSrc = '';
-        
         // 이미지 URL 결정
         if (item.thumbnail_url) {
-            imageSrc = item.thumbnail_url;
+            img.src = item.thumbnail_url;
         } else if (item.images && item.images.length > 0) {
-            imageSrc = item.images[0];
-            hasMultipleImages = item.images.length > 1;
-            if (hasMultipleImages) {
-                secondImageSrc = item.images[1];
-            }
+            img.src = item.images[0];
         } else {
-            imageSrc = '/static/src/img/measurement/measurement_top.svg';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
         }
         
-        img.src = imageSrc;
         img.alt = item.brand || 'Item';
         img.loading = 'lazy';
         
-        // 이미지 개수에 따라 CSS 클래스 추가
-        if (hasMultipleImages) {
-            gridItem.classList.add('has_multiple_images');
-            
-            // 첫 번째 이미지에 클래스 추가
-            img.classList.add('first_image');
-            
-            // 2번째 이미지 요소 생성
-            const secondImg = document.createElement('img');
-            secondImg.src = secondImageSrc;
-            secondImg.alt = img.alt;
-            secondImg.loading = 'lazy';
-            secondImg.classList.add('second_image');
-            
-            // 이미지 순서대로 추가
-            link.appendChild(img);
-            link.appendChild(secondImg);
-        } else {
-            gridItem.classList.add('single_image');
-            link.appendChild(img);
-        }
+        link.appendChild(img);
         gridItem.appendChild(link);
         container.appendChild(gridItem);
     });
@@ -1901,50 +1900,20 @@ function displaySearchResults(items, query) {
         
         const img = document.createElement('img');
         
-        // 이미지 개수 확인 및 hover 효과 설정
-        let hasMultipleImages = false;
-        let imageSrc = '';
-        let secondImageSrc = '';
-        
         // 이미지 URL 결정
         if (item.thumbnail_url) {
-            imageSrc = item.thumbnail_url;
+            img.src = item.thumbnail_url;
         } else if (item.images && item.images.length > 0) {
-            imageSrc = item.images[0];
-            hasMultipleImages = item.images.length > 1;
-            if (hasMultipleImages) {
-                secondImageSrc = item.images[1];
-            }
+            img.src = item.images[0];
         } else {
-            imageSrc = '/static/src/img/measurement/measurement_top.svg';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
         }
         
-        img.src = imageSrc;
         img.alt = item.brand || 'Item';
         img.loading = 'lazy';
         
-        // 이미지 개수에 따라 CSS 클래스 추가
-        if (hasMultipleImages) {
-            gridItem.classList.add('has_multiple_images');
-            
-            // 첫 번째 이미지에 클래스 추가
-            img.classList.add('first_image');
-            
-            // 2번째 이미지 요소 생성
-            const secondImg = document.createElement('img');
-            secondImg.src = secondImageSrc;
-            secondImg.alt = img.alt;
-            secondImg.loading = 'lazy';
-            secondImg.classList.add('second_image');
-            
-            // 이미지 순서대로 추가
-            link.appendChild(img);
-            link.appendChild(secondImg);
-        } else {
-            gridItem.classList.add('single_image');
-            link.appendChild(img);
-        }
+        link.appendChild(img);
         gridItem.appendChild(link);
         container.appendChild(gridItem);
     });
@@ -4589,24 +4558,22 @@ function createGridItem(item) {
         }
     };
     
-    // 다중 이미지가 있는 경우 2번째 이미지 요소 추가
+    // 다중 이미지가 있는 경우 hover 이벤트 추가
     if (hasMultipleImages && secondImageSrc) {
-        // 첫 번째 이미지에 클래스 추가
-        img.classList.add('first_image');
+        // 2번째 이미지 미리 로드
+        const preloadImg = new Image();
+        preloadImg.src = secondImageSrc;
         
-        // 2번째 이미지 요소 생성
-        const secondImg = document.createElement('img');
-        secondImg.src = secondImageSrc;
-        secondImg.alt = img.alt;
-        secondImg.loading = 'lazy';
-        secondImg.classList.add('second_image');
+        gridItem.addEventListener('mouseenter', () => {
+            img.src = secondImageSrc;
+        });
         
-        // 이미지 순서대로 추가
-        gridItem.appendChild(img);
-        gridItem.appendChild(secondImg);
-    } else {
-        gridItem.appendChild(img);
+        gridItem.addEventListener('mouseleave', () => {
+            img.src = imageSrc;
+        });
     }
+    
+    gridItem.appendChild(img);
     
     // Add click handler - fix item ID
     gridItem.addEventListener('click', () => {
@@ -7792,51 +7759,20 @@ function displayFilterResults(items, count) {
         
         const img = document.createElement('img');
         
-        // 이미지 개수 확인 및 hover 효과 설정
-        let hasMultipleImages = false;
-        let imageSrc = '';
-        let secondImageSrc = '';
-        
         // 이미지 URL 결정
         if (item.thumbnail_url) {
-            imageSrc = item.thumbnail_url;
+            img.src = item.thumbnail_url;
         } else if (item.images && item.images.length > 0) {
-            imageSrc = item.images[0];
-            hasMultipleImages = item.images.length > 1;
-            if (hasMultipleImages) {
-                secondImageSrc = item.images[1];
-            }
+            img.src = item.images[0];
         } else {
-            imageSrc = '/static/src/img/measurement/measurement_top.svg';
+            img.src = '/static/src/img/measurement/measurement_top.svg';
             img.classList.add('image_placeholder');
         }
         
-        img.src = imageSrc;
         img.alt = item.brand || 'Item';
         img.loading = 'lazy';
         
-        // 이미지 개수에 따라 CSS 클래스 추가
-        if (hasMultipleImages) {
-            gridItem.classList.add('has_multiple_images');
-            
-            // 첫 번째 이미지에 클래스 추가
-            img.classList.add('first_image');
-            
-            // 2번째 이미지 요소 생성
-            const secondImg = document.createElement('img');
-            secondImg.src = secondImageSrc;
-            secondImg.alt = img.alt;
-            secondImg.loading = 'lazy';
-            secondImg.classList.add('second_image');
-            
-            // 이미지 순서대로 추가
-            link.appendChild(img);
-            link.appendChild(secondImg);
-        } else {
-            gridItem.classList.add('single_image');
-            link.appendChild(img);
-        }
-        
+        link.appendChild(img);
         gridItem.appendChild(link);
         resultsGrid.appendChild(gridItem);
     });

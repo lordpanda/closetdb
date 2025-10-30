@@ -585,6 +585,9 @@
         max-height: none !important;
         padding: 0 20px !important;
     }
+    .horizontal_carousel {
+        padding-left: 0;
+    }
     
     /* 모바일에서 carousel 내부 컨테이너도 조정 */
     .view_item_image > div > div {
