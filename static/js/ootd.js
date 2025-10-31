@@ -1,4 +1,4 @@
-// OOTD JavaScript - Integrated with ClosetDB
+// OOTD JavaScript - Integrated with ClosetDB - NO MOCK DATA v2025.10.31
 
 // Global variables
 let currentDate = new Date();
@@ -1441,8 +1441,10 @@ async function getLocationAndWeather() {
         }
     } catch (error) {
         console.error('Error getting location and weather:', error);
-        currentLocation = 'SEOCHO-GU, SEOUL';
-        currentCoords = { lat: 37.5665, lon: 126.9780 };
+        // Do not set fallback coordinates - use only real geolocation or EXIF GPS
+        console.log('⚠️ Geolocation failed - no fallback coordinates set');
+        currentLocation = 'Location Unknown';
+        currentCoords = null;
         updateLocationDisplay();
     }
 }
