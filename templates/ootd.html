@@ -310,19 +310,9 @@
                                 console.log('⚠️ No date data found in EXIF');
                             }
                             
-                            // 파싱된 데이터가 없으면 mock 데이터 사용
+                            // EXIF 데이터가 없으면 null 반환 (mock 데이터 제거)
                             if (!exifData.latitude && !exifData.DateTimeOriginal) {
-                                console.log('⚠️ No EXIF data found, using mock data for testing');
-                                // Mock GPS data for testing (Seoul coordinates)
-                                exifData.latitude = 37.5665;
-                                exifData.longitude = 126.9780;
-                                
-                                // Mock date data (current time)
-                                const mockDate = new Date();
-                                exifData.DateTimeOriginal = mockDate.toISOString().replace('T', ' ').slice(0, 19);
-                                
-                                console.log('📍 Mock GPS added:', exifData.latitude, exifData.longitude);
-                                console.log('📅 Mock date added:', exifData.DateTimeOriginal);
+                                console.log('⚠️ No EXIF data found in image');
                             }
                             
                             resolve(exifData);
