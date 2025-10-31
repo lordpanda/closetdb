@@ -422,24 +422,13 @@ function updateDropdownSelection(selectedIndex) {
 let locationSearchTimeout;
 let currentLocationSuggestions = [];
 
-// 공통 주소 파싱 함수 - 우편번호와 국가명 제외
+// 공통 주소 파싱 함수 - 표시용 (마지막 2개만)
 function parseLocationAddress(address) {
     if (!address) return null;
     
-    // 우편번호 패턴 (한국: 5자리, 미국: 5자리 또는 5-4자리, 기타 등등)
-    const postalCodePattern = /^\d{5}(-\d{4})?$|^\d{5}$/;
-    
-    // 제외할 국가명들
-    const countryNames = [
-        'South Korea', 'Korea', '대한민국', '한국',
-        'United States', 'USA', 'US', '미국',
-        'Japan', '일본', 'China', '중국',
-        'Canada', '캐나다'
-    ];
-    
     const locationFields = [
         address.neighbourhood,
-        address.suburb, 
+        address.suburb,
         address.quarter,
         address.city_district,
         address.borough,
@@ -454,16 +443,9 @@ function parseLocationAddress(address) {
     
     const validFields = locationFields
         .filter(field => field && field.trim())
-        .filter((field, index, arr) => arr.indexOf(field) === index)
-        // 우편번호 제외
-        .filter(field => !postalCodePattern.test(field.trim()))
-        // 국가명 제외
-        .filter(field => !countryNames.some(country => 
-            field.toLowerCase().includes(country.toLowerCase())
-        ))
-        // 숫자만 있는 필드 제외 (우편번호 등)
-        .filter(field => !/^\d+$/.test(field.trim()));
+        .filter((field, index, arr) => arr.indexOf(field) === index);
     
+    // 가장 관련성 높은 하위 2개만 선택 (원래대로)
     return validFields.slice(0, 2);
 }
 
@@ -1188,9 +1170,6 @@ function handleImageUpload(event) {
         reader.readAsDataURL(file);
     } catch (error) {
         console.error('❌ readAsDataURL failed:', error);
-        // 실패시 기본 placeholder 표시
-        uploadedImage = null;
-        updatePinnedItemsDisplay();
     }
     
     // EXIF 데이터 추출
