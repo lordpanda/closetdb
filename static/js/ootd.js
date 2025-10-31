@@ -1115,9 +1115,9 @@ function handleImageUpload(event) {
     console.log('🔧 Starting EXIF extraction...');
     extractEXIFData(file);
     
-    // R2 업로드 (일시적으로 비활성화 - 500 에러 해결 후 재활성화)
-    console.log('⚠️ R2 upload temporarily disabled due to 500 error');
-    // uploadImageToR2(file);
+    // R2 업로드 (에러 디버깅을 위해 재활성화)
+    console.log('🔧 Starting R2 upload with enhanced error handling...');
+    uploadImageToR2(file);
     
     console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
@@ -1132,8 +1132,17 @@ function uploadImageToR2(file) {
         method: 'POST',
         body: formData
     })
-    .then(response => {
+    .then(async response => {
         console.log('📡 R2 upload response status:', response.status);
+        console.log('📡 R2 upload response headers:', response.headers);
+        
+        if (!response.ok) {
+            // 에러 응답의 내용을 텍스트로 읽기
+            const errorText = await response.text();
+            console.error('❌ Server error response:', errorText);
+            throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 200)}...`);
+        }
+        
         return response.json();
     })
     .then(data => {
@@ -1150,7 +1159,7 @@ function uploadImageToR2(file) {
         }
     })
     .catch(error => {
-        console.error('❌ Upload error:', error);
+        console.error('❌ Upload error details:', error);
         // 네트워크 오류 시에도 로컬 이미지는 유지
         console.log('🔄 Upload failed, using local preview');
     });

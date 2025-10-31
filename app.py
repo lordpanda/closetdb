@@ -300,11 +300,17 @@ def save_ootd_post():
 def upload_ootd_image():
     """ootdLog용 이미지 업로드 API"""
     try:
+        logging.info("📤 OOTD image upload request received")
+        
         if 'image' not in request.files:
+            logging.error("❌ No image file in request")
             return jsonify({'error': 'No image file provided'}), 400
         
         file = request.files['image']
+        logging.info(f"📁 Received file: {file.filename}, content_type: {file.content_type}")
+        
         if file.filename == '':
+            logging.error("❌ Empty filename")
             return jsonify({'error': 'No file selected'}), 400
         
         # 고유한 파일명 생성 (타임스탬프 기반)
@@ -315,9 +321,17 @@ def upload_ootd_image():
             file_extension = '.jpg'  # 기본 확장자
         
         filename = f"ootd_{timestamp}{file_extension}"
+        logging.info(f"🔧 Generated filename: {filename}")
+        
+        # R2 설정 확인
+        logging.info(f"🔧 R2 instance check: {r2 is not None}")
+        if hasattr(r2, 'bucket_name'):
+            logging.info(f"🔧 R2 bucket: {r2.bucket_name}")
         
         # R2에 업로드
+        logging.info("🚀 Starting R2 upload...")
         url = r2.upload_image(file, filename)
+        logging.info(f"🔧 R2 upload result: {url}")
         
         if url:
             logging.info(f"✅ OOTD image uploaded successfully: {url}")
@@ -327,9 +341,9 @@ def upload_ootd_image():
             return jsonify({'error': 'Failed to upload image'}), 500
             
     except Exception as e:
-        logging.error(f"Error uploading OOTD image: {e}")
+        logging.error(f"❌ Error uploading OOTD image: {e}")
         import traceback
-        traceback.print_exc()
+        logging.error(f"❌ Full traceback:\n{traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/items/<item_id>')
