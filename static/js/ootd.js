@@ -1115,9 +1115,9 @@ function handleImageUpload(event) {
     console.log('🔧 Starting EXIF extraction...');
     extractEXIFData(file);
     
-    // R2 업로드 (에러 디버깅을 위해 재활성화, 실패해도 로컬 프리뷰는 유지)
-    console.log('🔧 Starting R2 upload with enhanced error handling...');
-    uploadImageToR2(file);
+    // R2 업로드 일시 비활성화 - 프리뷰와 날짜 기능에 집중
+    console.log('⚠️ R2 upload temporarily disabled - focusing on preview and date functionality');
+    // uploadImageToR2(file);
     
     console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
@@ -1274,13 +1274,31 @@ function reverseGeocode(lat, lon) {
             
             if (data && data.address) {
                 const addr = data.address;
+                console.log('📍 Full address data:', addr);
+                
                 const locationParts = [];
                 
-                if (addr.city) locationParts.push(addr.city);
-                if (addr.state) locationParts.push(addr.state);
+                // 더 구체적인 지역 정보를 우선적으로 선택
+                if (addr.neighbourhood) locationParts.push(addr.neighbourhood);
+                else if (addr.suburb) locationParts.push(addr.suburb);
+                else if (addr.quarter) locationParts.push(addr.quarter);
+                else if (addr.city_district) locationParts.push(addr.city_district);
+                else if (addr.borough) locationParts.push(addr.borough);
                 
-                if (locationParts.length > 0) {
-                    const newLocation = locationParts.join(', ').toUpperCase();
+                // 시/도 정보 추가
+                if (addr.city && !locationParts.includes(addr.city)) {
+                    locationParts.push(addr.city);
+                } else if (addr.town && !locationParts.includes(addr.town)) {
+                    locationParts.push(addr.town);
+                } else if (addr.state && !locationParts.includes(addr.state)) {
+                    locationParts.push(addr.state);
+                }
+                
+                // 최대 2개 지역명만 사용
+                const selectedParts = locationParts.slice(0, 2);
+                
+                if (selectedParts.length > 0) {
+                    const newLocation = selectedParts.join(', ').toUpperCase();
                     console.log('✅ Updated location to:', newLocation);
                     currentLocation = newLocation;
                     currentCoords = { lat, lon };
@@ -1288,6 +1306,8 @@ function reverseGeocode(lat, lon) {
                     
                     // 새 위치의 날씨 업데이트
                     updateWeatherForLocation(lat, lon);
+                } else {
+                    console.log('⚠️ No suitable location parts found, keeping current location');
                 }
             }
         })
@@ -1863,13 +1883,12 @@ function updateDateDisplay() {
     console.log('🔍 current_date_display element found:', !!display);
     
     if (display) {
-        const options = { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric',
-            weekday: 'short'
-        };
-        const newText = currentDate.toLocaleDateString('en-US', options);
+        // YYYY.MM.DD 포맷으로 표시
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const newText = `${year}.${month}.${day}`;
+        
         console.log('📅 Setting date display to:', newText);
         display.textContent = newText;
         console.log('✅ Date display updated');
