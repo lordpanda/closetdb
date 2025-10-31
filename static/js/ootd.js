@@ -1142,23 +1142,33 @@ function handleImageUpload(event) {
         console.log('📱 Preview data type:', typeof e.target.result);
         console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
         
-        uploadedImage = e.target.result;
-        console.log('📷 Setting uploadedImage variable');
-        console.log('🔄 Calling updatePinnedItemsDisplay...');
-        updatePinnedItemsDisplay();
-        console.log('✅ updatePinnedItemsDisplay called');
-        
-        // 모바일에서 강제 DOM 업데이트
-        if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-            console.log('📱 Mobile detected, forcing DOM update...');
-            setTimeout(() => {
-                updatePinnedItemsDisplay();
-            }, 100);
+        // 이미지 데이터 유효성 검사
+        if (e.target.result && e.target.result.startsWith('data:image/')) {
+            uploadedImage = e.target.result;
+            console.log('📷 Valid image data set');
+            console.log('🔄 Calling updatePinnedItemsDisplay...');
+            updatePinnedItemsDisplay();
+            console.log('✅ updatePinnedItemsDisplay called');
+            
+            // 모바일에서 강제 DOM 업데이트
+            if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                console.log('📱 Mobile detected, forcing DOM update...');
+                setTimeout(() => {
+                    updatePinnedItemsDisplay();
+                }, 100);
+            }
+        } else {
+            console.error('❌ Invalid image data format:', e.target.result?.substring(0, 100));
         }
     };
     reader.onerror = function(e) {
         console.error('❌ FileReader error:', e);
         console.error('❌ Error details:', e.target.error);
+        console.error('❌ File info:', {
+            name: file.name,
+            size: file.size,
+            type: file.type
+        });
     };
     
     try {
@@ -1664,12 +1674,20 @@ async function loadDateData() {
             // 저장된 전체 주소에서 표시용 주소 추출
             if (ootd.location) {
                 fullCurrentLocation = ootd.location; // 전체 주소 저장
-                // 전체 주소에서 마지막 2개 부분만 표시용으로 사용
+                // 간단한 파싱으로 마지막 2개 지역명만 추출
                 const locationParts = ootd.location.split(',').map(part => part.trim());
-                if (locationParts.length >= 2) {
-                    currentLocation = locationParts.slice(-2).join(', ').toUpperCase();
+                // 우편번호와 국가명 제외하고 마지막 2개
+                const filteredParts = locationParts.filter(part => 
+                    part && 
+                    !/^\d+$/.test(part) && // 숫자만 있는 것 제외 (우편번호)
+                    !/(Korea|한국|대한민국|South Korea|USA|United States|Japan|일본|China|중국)$/i.test(part) // 국가명 제외
+                );
+                if (filteredParts.length >= 2) {
+                    currentLocation = filteredParts.slice(-2).join(', ').toUpperCase();
+                } else if (filteredParts.length > 0) {
+                    currentLocation = filteredParts[filteredParts.length - 1].toUpperCase();
                 } else {
-                    currentLocation = ootd.location.toUpperCase();
+                    currentLocation = "UNKNOWN LOCATION";
                 }
             }
             weatherData = {
