@@ -545,7 +545,7 @@ class SupabaseDB:
             min_temp = ootd_data.get('temp_min')
             max_temp = ootd_data.get('temp_max')
             ootd_image_url = ootd_data.get('uploaded_image')
-            location = ootd_data.get('location')
+            location = ootd_data.get('full_location') or ootd_data.get('location')  # 착용 로그용은 전체 주소 사용
             items = ootd_data.get('items', [])
             
             if not wear_date or not items:

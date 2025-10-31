@@ -1431,7 +1431,7 @@ async function saveOOTD() {
     // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
         date: dateString,
-        location: fullCurrentLocation || currentLocation || 'SEOCHO-GU, SEOUL',
+        location: currentLocation || 'SEOCHO-GU, SEOUL', // OOTD 테이블에는 짧은 주소 저장
         weather: weatherData.weather || 'SUNNY',
         temp_min: weatherData.tempMin || 16,
         temp_max: weatherData.tempMax || 24,
@@ -1443,7 +1443,9 @@ async function saveOOTD() {
             images: item.images
         })),
         uploaded_image: uploadedImage,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        // 착용 로그용 전체 주소 (별도 필드)
+        full_location: fullCurrentLocation || currentLocation || 'SEOCHO-GU, SEOUL'
     };
     
     console.log('💾 Saving OOTD data:', ootdData);
@@ -1671,24 +1673,10 @@ async function loadDateData() {
             console.log(`✅ Found OOTD data for ${dateString}:`, ootd);
             
             // Load existing OOTD data
-            // 저장된 전체 주소에서 표시용 주소 추출
+            // OOTD에는 이미 짧은 주소가 저장되어 있음
             if (ootd.location) {
-                fullCurrentLocation = ootd.location; // 전체 주소 저장
-                // 간단한 파싱으로 마지막 2개 지역명만 추출
-                const locationParts = ootd.location.split(',').map(part => part.trim());
-                // 우편번호와 국가명 제외하고 마지막 2개
-                const filteredParts = locationParts.filter(part => 
-                    part && 
-                    !/^\d+$/.test(part) && // 숫자만 있는 것 제외 (우편번호)
-                    !/(Korea|한국|대한민국|South Korea|USA|United States|Japan|일본|China|중국)$/i.test(part) // 국가명 제외
-                );
-                if (filteredParts.length >= 2) {
-                    currentLocation = filteredParts.slice(-2).join(', ').toUpperCase();
-                } else if (filteredParts.length > 0) {
-                    currentLocation = filteredParts[filteredParts.length - 1].toUpperCase();
-                } else {
-                    currentLocation = "UNKNOWN LOCATION";
-                }
+                currentLocation = ootd.location; // 이미 파싱된 짧은 주소
+                fullCurrentLocation = ootd.location; // 동일하게 설정
             }
             weatherData = {
                 weather: ootd.weather || weatherData.weather,
