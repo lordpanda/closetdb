@@ -75,12 +75,18 @@ logging.basicConfig(
 #     print(f"========================")
 #     sys.stdout.flush()
 
-# Security Headers
+# Security Headers and Cache Control
 @app.after_request
 def set_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # Disable caching for all responses (development)
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    
     if os.getenv('FLASK_ENV') == 'production':
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
@@ -150,7 +156,8 @@ def filter_items():
 
 @app.route('/login.html')
 def login_page():
-    return render_template('login.html')
+    # Redirect to landing page instead of login page
+    return redirect('/')
 
 @app.route('/all.html')  # New route for all.html
 def view_all():
@@ -257,8 +264,10 @@ def get_ootds():
             return jsonify({'ootd': ootd}), 200
         else:
             # Get all OOTDs
+            logging.info("🔍 Calling db.get_ootds()...")
             ootds = db.get_ootds()
-            logging.info(f"Retrieved {len(ootds)} OOTDs")
+            logging.info(f"📊 Raw ootds from DB: {ootds}")
+            logging.info(f"📊 Retrieved {len(ootds)} OOTDs")
             return jsonify({'ootds': ootds}), 200
         
     except Exception as e:
@@ -271,11 +280,17 @@ def save_ootd_post():
     try:
         # Check authentication manually
         auth_header = request.headers.get('Authorization')
+        logging.info(f"Auth header: {auth_header}")
+        
         if not auth_header or not auth_header.startswith('Bearer '):
+            logging.error("Missing or invalid Authorization header")
             return jsonify({'error': 'Authentication required'}), 401
         
         token = auth_header[7:]  # Remove "Bearer "
-        if not token or not (token.startswith('google_auth_') or token.startswith('logged_in_')):
+        logging.info(f"Extracted token: {token[:20] if token else 'None'}...")
+        
+        if not token or not (token.startswith('google_auth_') or token.startswith('logged_in_') or token.startswith('authenticated_')):
+            logging.error(f"Invalid token format. Token starts with: {token[:20] if token else 'None'}")
             return jsonify({'error': 'Invalid token'}), 401
         
         # More robust JSON parsing
@@ -293,10 +308,29 @@ def save_ootd_post():
         logging.info(f"Saving OOTD: {data}")
         
         if db is None:
+            logging.error("Database object is None")
             return jsonify({'error': 'Database not available'}), 500
         
         # Save to Supabase using db connection
-        result = db.save_ootd(data)
+        logging.info("Calling db.save_ootd...")
+        try:
+            result = db.save_ootd(data)
+            logging.info(f"db.save_ootd returned: {result}")
+            
+            # 아이템 착용 로그도 함께 기록 (임시 비활성화)
+            try:
+                logging.info("Logging item wear data...")
+                wear_log_success = db.log_ootd_items_wear(data)
+                if wear_log_success:
+                    logging.info("✅ Item wear logs recorded successfully")
+                else:
+                    logging.warning("⚠️ Some item wear logs failed to record")
+            except Exception as wear_log_error:
+                logging.error(f"⚠️ Wear log failed but continuing: {wear_log_error}")
+                
+        except Exception as db_error:
+            logging.error(f"db.save_ootd failed: {db_error}")
+            raise db_error
         
         return jsonify({'success': True, 'message': 'OOTD saved successfully', 'data': result}), 200
         
@@ -497,7 +531,7 @@ def google_callback():
             """
         else:
             logging.error(f"No email in user info: {user_info}")
-            return redirect('/login.html?error=no_email')
+            return redirect('/')
     except Exception as e:
         logging.error(f"Google OAuth error: {str(e)}")
         import traceback
@@ -520,12 +554,12 @@ def google_callback():
                 <p><strong>Error:</strong> {str(e)}</p>
                 <p><strong>Type:</strong> {type(e).__name__}</p>
             </div>
-            <p><a href="/login.html">Try Again</a> | <a href="/">Home</a></p>
+            <p><a href="/">Try Again</a> | <a href="/">Home</a></p>
             <script>
                 console.error('OAuth Error:', '{str(e)}');
                 // 5초 후 로그인 페이지로 리다이렉트
                 setTimeout(() => {{
-                    window.location.href = '/login.html?error=oauth_failed';
+                    window.location.href = '/';
                 }}, 5000);
             </script>
         </body>
@@ -564,7 +598,7 @@ def require_auth(f):
             return jsonify({'error': 'Authentication required'}), 401
         
         # 일반 요청인 경우 로그인 페이지로 리다이렉트
-        return redirect('/login.html')
+        return redirect('/')
     decorated_function.__name__ = f.__name__
     return decorated_function
 

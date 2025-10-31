@@ -332,16 +332,69 @@ class SupabaseDB:
             
             print(f"💾 Saving OOTD to Supabase: {data}")
             
-            # Use upsert to handle conflicts
+            # Use Supabase's built-in upsert with proper syntax
+            date_to_save = data.get('date')
+            print(f"🔍 Attempting upsert for date: {date_to_save}")
+            
+            # Supabase upsert: POST with Prefer header and on_conflict
+            upsert_headers = {
+                **self.headers,
+                'Prefer': 'resolution=merge-duplicates'
+            }
+            
             response = requests.post(
                 f'{self.url}/rest/v1/ootd',
-                headers={**self.headers, 'Prefer': 'resolution=merge-duplicates'},
+                headers=upsert_headers,
                 json=data
             )
             
+            print(f"📡 Upsert response status: {response.status_code}")
+            print(f"📡 Upsert response headers: {dict(response.headers)}")
+            
+            # If upsert fails with duplicate key, delete and recreate
+            if response.status_code == 409 or (response.status_code == 500 and "23505" in response.text):
+                print(f"🔄 Upsert failed with duplicate key, deleting and recreating...")
+                
+                # Delete existing record
+                delete_response = requests.delete(
+                    f'{self.url}/rest/v1/ootd',
+                    headers=self.headers,
+                    params={'date': f'eq.{date_to_save}'}
+                )
+                print(f"📡 Delete response status: {delete_response.status_code}")
+                
+                if delete_response.status_code in [200, 204]:
+                    # Insert new record
+                    response = requests.post(
+                        f'{self.url}/rest/v1/ootd',
+                        headers=self.headers,
+                        json=data
+                    )
+                    print(f"📡 Insert response status: {response.status_code}")
+                else:
+                    print(f"❌ Failed to delete existing record: {delete_response.text}")
+                    # Try update anyway
+                    response = requests.patch(
+                        f'{self.url}/rest/v1/ootd',
+                        headers=self.headers,
+                        json=data,
+                        params={'date': f'eq.{date_to_save}'}
+                    )
+                    print(f"📡 Fallback update response status: {response.status_code}")
+            
             if response.status_code in [200, 201]:
                 print("✅ OOTD saved successfully to Supabase")
-                return response.json()
+                try:
+                    # Supabase may return empty response for successful upserts
+                    response_text = response.text
+                    if response_text:
+                        return response.json()
+                    else:
+                        print("📝 Empty response from Supabase (normal for upserts)")
+                        return {'success': True, 'message': 'OOTD saved'}
+                except ValueError as json_error:
+                    print(f"⚠️ Non-JSON response: {response_text}")
+                    return {'success': True, 'message': 'OOTD saved', 'response': response_text}
             else:
                 print(f"❌ Failed to save OOTD: {response.status_code} - {response.text}")
                 raise Exception(f"Failed to save OOTD: {response.text}")
@@ -349,6 +402,180 @@ class SupabaseDB:
         except Exception as e:
             print(f"❌ Error saving OOTD: {e}")
             raise e
+    
+    def add_item_wear_log(self, item_id, wear_date, min_temp=None, max_temp=None, ootd_image_url=None, location=None):
+        """아이템 착용 로그 추가"""
+        try:
+            data = {
+                'item_id': item_id,
+                'wear_date': wear_date,
+                'min_temp': min_temp,
+                'max_temp': max_temp,
+                'ootd_image_url': ootd_image_url,
+                'location': location
+            }
+            
+            # None 값 제거
+            data = {k: v for k, v in data.items() if v is not None}
+            
+            print(f"💾 Adding wear log: item {item_id} on {wear_date}")
+            
+            # Upsert을 사용해서 같은 날짜에 착용 기록이 있으면 업데이트
+            upsert_headers = {
+                **self.headers,
+                'Prefer': 'resolution=merge-duplicates'
+            }
+            
+            response = requests.post(
+                f'{self.url}/rest/v1/item_wear_logs',
+                headers=upsert_headers,
+                json=data
+            )
+            
+            # 중복 키 에러가 발생하면 기존 레코드 업데이트
+            if response.status_code == 409 or (response.status_code == 500 and "23505" in response.text):
+                print(f"🔄 Duplicate wear log found, updating existing record...")
+                response = requests.patch(
+                    f'{self.url}/rest/v1/item_wear_logs',
+                    headers=self.headers,
+                    json=data,
+                    params={'item_id': f'eq.{item_id}', 'wear_date': f'eq.{wear_date}'}
+                )
+            
+            if response.status_code in [200, 201, 204]:
+                print(f"✅ Wear log added/updated for item {item_id}")
+                return True
+            else:
+                print(f"❌ Failed to add wear log: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error adding wear log: {e}")
+            return False
+    
+    def get_item_wear_logs(self, item_id):
+        """특정 아이템의 착용 로그 조회"""
+        try:
+            response = requests.get(
+                f'{self.url}/rest/v1/item_wear_logs?item_id=eq.{item_id}&order=wear_date.desc',
+                headers=self.headers
+            )
+            
+            if response.status_code == 200:
+                logs = response.json()
+                print(f"✅ Retrieved {len(logs)} wear logs for item {item_id}")
+                return logs
+            else:
+                print(f"❌ Failed to get wear logs: {response.status_code} - {response.text}")
+                return []
+                
+        except Exception as e:
+            print(f"❌ Error getting wear logs: {e}")
+            return []
+    
+    def get_item_wear_stats(self, item_id):
+        """아이템 착용 통계 분석"""
+        try:
+            logs = self.get_item_wear_logs(item_id)
+            
+            if not logs:
+                return {
+                    'total_wears': 0,
+                    'last_worn': None,
+                    'avg_temp_range': None,
+                    'most_common_temp_range': None,
+                    'yearly_wears': {},
+                    'ootd_images': []
+                }
+            
+            # 기본 통계
+            total_wears = len(logs)
+            last_worn = logs[0]['wear_date']  # 이미 내림차순 정렬됨
+            
+            # 기온 관련 통계
+            temp_data = [(log['min_temp'], log['max_temp']) for log in logs 
+                        if log.get('min_temp') is not None and log.get('max_temp') is not None]
+            
+            avg_temp_range = None
+            most_common_temp_range = None
+            
+            if temp_data:
+                avg_min = sum(t[0] for t in temp_data) / len(temp_data)
+                avg_max = sum(t[1] for t in temp_data) / len(temp_data)
+                avg_temp_range = (round(avg_min, 1), round(avg_max, 1))
+                
+                # 가장 많이 입었던 기온대 (5도 단위로 그룹화)
+                temp_ranges = {}
+                for min_t, max_t in temp_data:
+                    avg_temp = (min_t + max_t) / 2
+                    temp_group = round(avg_temp / 5) * 5  # 5도 단위로 그룹화
+                    temp_ranges[temp_group] = temp_ranges.get(temp_group, 0) + 1
+                
+                if temp_ranges:
+                    most_common_temp = max(temp_ranges.keys(), key=lambda k: temp_ranges[k])
+                    most_common_temp_range = (most_common_temp - 2, most_common_temp + 2)
+            
+            # 연도별 착용 횟수
+            yearly_wears = {}
+            for log in logs:
+                year = log['wear_date'][:4]  # YYYY 추출
+                yearly_wears[year] = yearly_wears.get(year, 0) + 1
+            
+            # OOTD 이미지들
+            ootd_images = [log['ootd_image_url'] for log in logs 
+                          if log.get('ootd_image_url')]
+            
+            return {
+                'total_wears': total_wears,
+                'last_worn': last_worn,
+                'avg_temp_range': avg_temp_range,
+                'most_common_temp_range': most_common_temp_range,
+                'yearly_wears': yearly_wears,
+                'ootd_images': ootd_images
+            }
+            
+        except Exception as e:
+            print(f"❌ Error getting wear stats: {e}")
+            return {}
+    
+    def log_ootd_items_wear(self, ootd_data):
+        """OOTD 저장 시 각 아이템의 착용 로그 기록"""
+        try:
+            wear_date = ootd_data.get('date')
+            min_temp = ootd_data.get('temp_min')
+            max_temp = ootd_data.get('temp_max')
+            ootd_image_url = ootd_data.get('uploaded_image')
+            location = ootd_data.get('location')
+            items = ootd_data.get('items', [])
+            
+            if not wear_date or not items:
+                print("⚠️ Missing date or items for wear logging")
+                return False
+            
+            success_count = 0
+            
+            for item in items:
+                # item이 문자열(item_id)인지 딕셔너리인지 확인
+                if isinstance(item, str):
+                    item_id = item
+                elif isinstance(item, dict):
+                    item_id = item.get('item_id') or item.get('id')
+                else:
+                    print(f"⚠️ Unknown item format: {item}")
+                    continue
+                
+                if item_id:
+                    if self.add_item_wear_log(item_id, wear_date, min_temp, max_temp, ootd_image_url, location):
+                        success_count += 1
+                    else:
+                        print(f"❌ Failed to log wear for item {item_id}")
+            
+            print(f"✅ Logged wear for {success_count}/{len(items)} items")
+            return success_count == len(items)
+            
+        except Exception as e:
+            print(f"❌ Error logging OOTD items wear: {e}")
+            return False
 
 # 전역 인스턴스
 db = SupabaseDB()

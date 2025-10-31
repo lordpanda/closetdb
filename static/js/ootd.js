@@ -1,10 +1,11 @@
-// OOTD JavaScript - Integrated with ClosetDB - NO MOCK DATA v2025.10.31
+// OOTD JavaScript - ZERO MOCK DATA - VERSION 2025.10.31.FINAL - NO FAKE DATA GENERATION
 
 // Global variables
 let currentDate = new Date();
 let pinnedItems = [];
 let uploadedImage = null;
-let currentLocation = 'SEOCHO-GU, SEOUL';
+let currentLocation = 'SEOCHO-GU, SEOUL'; // 표시용 (간단한 주소)
+let fullCurrentLocation = 'SEOCHO-GU, SEOUL'; // 저장용 (전체 주소)
 let weatherData = {
     weather: 'SUNNY',
     tempMin: 16,
@@ -36,7 +37,18 @@ function waitForExifr(callback, attempts = 0) {
 
 // Initialize OOTD functionality
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DOM loaded, waiting for exifr...');
+    console.log('🚀 DOM loaded, checking authentication...');
+    
+    // Check authentication before proceeding
+    const token = localStorage.getItem('userToken');
+    if (!token || (!token.startsWith('authenticated_') && !token.startsWith('google_auth_') && !token.startsWith('logged_in_'))) {
+        console.log('❌ Not authenticated, redirecting to login');
+        localStorage.setItem('redirectAfterLogin', '/ootd.html');
+        window.location.href = '/';
+        return;
+    }
+    
+    console.log('✅ Authentication verified, proceeding with OOTD initialization');
     
     // Wait for exifr to load before initializing
     waitForExifr(() => {
@@ -239,7 +251,8 @@ async function saveLocation() {
                     ? selectedParts.join(', ').toUpperCase()
                     : result.display_name.split(',')[0].toUpperCase();
                 
-                currentLocation = cleanLocationName;
+                currentLocation = cleanLocationName; // 표시용
+                fullCurrentLocation = result.display_name; // 저장용 (전체 주소)
                 currentCoords = { lat: parseFloat(result.lat), lon: parseFloat(result.lon) };
                 updateLocationDisplay();
                 
@@ -319,7 +332,8 @@ async function updateLocationAndWeather(locationQuery) {
           console.log('Final cleanLocationName:', cleanLocationName);
           console.log('=============================');
           
-          currentLocation = cleanLocationName;
+          currentLocation = cleanLocationName; // 표시용
+          fullCurrentLocation = result.display_name; // 저장용 (전체 주소)  
           currentCoords = { lat, lon };
           updateLocationDisplay();
           
@@ -696,13 +710,34 @@ async function selectLocationSuggestion(suggestion) {
     
     console.log('🎯 Selecting suggestion:', suggestion.display_name);
     
-    // dropdown에 표시된 이름을 그대로 사용 (이미 파싱된 결과)
-    const cleanLocationName = suggestion.display_name.toUpperCase();
+    // 표시용: dropdown에 표시된 이름 (간단히)
+    const displayLocationName = suggestion.display_name.toUpperCase();
     
-    console.log('📍 Setting location to:', cleanLocationName);
+    // 저장용: 전체 주소 사용 (suggestion의 원본 데이터에서)
+    let fullLocationName = displayLocationName; // 기본값
     
-    // 선택된 위치로 설정
-    currentLocation = cleanLocationName;
+    // 원래 Nominatim API 응답에서 전체 주소 가져오기
+    if (suggestion.full_address) {
+        fullLocationName = suggestion.full_address;
+    } else {
+        // API 재호출해서 전체 주소 가져오기
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`);
+            const data = await response.json();
+            if (data && data.display_name) {
+                fullLocationName = data.display_name;
+            }
+        } catch (error) {
+            console.warn('📍 Could not get full address, using display name');
+        }
+    }
+    
+    console.log('📍 Display location:', displayLocationName);
+    console.log('💾 Full location for storage:', fullLocationName);
+    
+    // 표시용과 저장용 분리
+    currentLocation = displayLocationName; // 표시용 (간단한 주소)
+    fullCurrentLocation = fullLocationName; // 저장용 (전체 주소)
     currentCoords = { lat, lon };
     
     updateLocationDisplay();
@@ -758,7 +793,7 @@ function updateLocationDisplay() {
 
 function updateWeatherDisplay() {
     document.getElementById('weather_display').textContent = weatherData.weather;
-    document.getElementById('temp_display').textContent = `${weatherData.tempMin}-${weatherData.tempMax}°`;
+    document.getElementById('temp_display').textContent = `${weatherData.tempMin}-${weatherData.tempMax}`;
     document.getElementById('precipitation_display').textContent = `${weatherData.precipitation}%`;
 }
 
@@ -1042,7 +1077,7 @@ function updatePinnedItemsDisplay() {
                     ? `<img src="${item.images[0]}" alt="${item.brand}" class="item_image">`
                     : `<div class="item_placeholder">${(item.category || '?').charAt(0).toUpperCase()}</div>`
                 }
-                <button class="remove_button" onclick="unpinItem('${item.item_id}')">×</button>
+                <button class="remove_item_btn" onclick="event.stopPropagation(); unpinItem('${item.item_id}')" title="Unpin item">×</button>
             </div>
         `;
     });
@@ -1053,6 +1088,7 @@ function updatePinnedItemsDisplay() {
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image">
+                <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
             </div>
         `;
     } else {
@@ -1115,9 +1151,9 @@ function handleImageUpload(event) {
     console.log('🔧 Starting EXIF extraction...');
     extractEXIFData(file);
     
-    // R2 업로드 일시 비활성화 - 프리뷰와 날짜 기능에 집중
-    console.log('⚠️ R2 upload temporarily disabled - focusing on preview and date functionality');
-    // uploadImageToR2(file);
+    // R2 업로드 활성화
+    console.log('📤 Starting R2 upload...');
+    uploadImageToR2(file);
     
     console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
@@ -1300,7 +1336,8 @@ function reverseGeocode(lat, lon) {
                 if (selectedParts.length > 0) {
                     const newLocation = selectedParts.join(', ').toUpperCase();
                     console.log('✅ Updated location to:', newLocation);
-                    currentLocation = newLocation;
+                    currentLocation = newLocation; // 표시용
+                    fullCurrentLocation = result.display_name; // 저장용 (전체 주소)
                     currentCoords = { lat, lon };
                     updateLocationDisplay();
                     
@@ -1331,7 +1368,7 @@ async function saveOOTD() {
     // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
         date: dateString,
-        location: currentLocation || 'SEOCHO-GU, SEOUL',
+        location: fullCurrentLocation || currentLocation || 'SEOCHO-GU, SEOUL',
         weather: weatherData.weather || 'SUNNY',
         temp_min: weatherData.tempMin || 16,
         temp_max: weatherData.tempMax || 24,
@@ -1347,7 +1384,11 @@ async function saveOOTD() {
     };
     
     console.log('💾 Saving OOTD data:', ootdData);
+    console.log('📋 Items for wear logging:', ootdData.items.map(item => ({id: item.id, item_id: item.item_id})));
     console.log('📋 Serialized JSON:', JSON.stringify(ootdData));
+    
+    const token = localStorage.getItem('userToken');
+    console.log('🔑 Using token:', token ? `${token.substring(0, 20)}...` : 'null');
     
     try {
         // Flask API 사용 (원래대로)
@@ -1355,7 +1396,7 @@ async function saveOOTD() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(ootdData)
         });
@@ -1398,7 +1439,8 @@ async function getLocationAndWeather() {
           ? locationParts.join(', ').toUpperCase()
           : 'SEOCHO-GU, SEOUL';
 
-        currentLocation = detailedLocation;
+        currentLocation = detailedLocation; // 표시용
+        fullCurrentLocation = `${locationParts.join(', ')}, 서울, 대한민국`; // 저장용 (상세 주소)
         updateLocationDisplay();
 
         // Get weather for current date
@@ -1454,7 +1496,18 @@ async function updateWeatherForSelectedDate() {
     if (!currentCoords) return;
     
     try {
-        const dateString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+        // 날짜 검증: 미래 날짜인 경우 현재 날짜로 제한
+        const today = new Date();
+        const targetDate = new Date(currentDate);
+        
+        // 미래 날짜인 경우 오늘 날짜로 설정
+        if (targetDate > today) {
+            console.log('⚠️ Future date detected, using current date for weather');
+            targetDate.setTime(today.getTime());
+        }
+        
+        const dateString = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+        console.log('🌤️ Fetching weather for date:', dateString);
         
         // 선택된 날짜의 날씨 정보 가져오기
         const weatherResponse = await fetch(
@@ -1514,10 +1567,17 @@ async function updateWeatherForSelectedDate() {
               tempMin: minTemp,
               precipitation: precipitation
             });
+          } else {
+            console.log('⚠️ No weather data in API response');
           }
+        } else {
+          console.error('❌ Weather API failed:', weatherResponse.status, weatherResponse.statusText);
+          const errorText = await weatherResponse.text();
+          console.error('❌ Error response:', errorText);
         }
     } catch (error) {
-        console.error('선택된 날짜의 날씨 정보 가져오기 실패:', error);
+        console.error('❌ Weather fetch error:', error);
+        console.log('🔄 Using default weather data');
     }
 }
 
@@ -1548,7 +1608,17 @@ async function loadDateData() {
             console.log(`✅ Found OOTD data for ${dateString}:`, ootd);
             
             // Load existing OOTD data
-            currentLocation = ootd.location || currentLocation;
+            // 저장된 전체 주소에서 표시용 주소 추출
+            if (ootd.location) {
+                fullCurrentLocation = ootd.location; // 전체 주소 저장
+                // 전체 주소에서 마지막 2개 부분만 표시용으로 사용
+                const locationParts = ootd.location.split(',').map(part => part.trim());
+                if (locationParts.length >= 2) {
+                    currentLocation = locationParts.slice(-2).join(', ').toUpperCase();
+                } else {
+                    currentLocation = ootd.location.toUpperCase();
+                }
+            }
             weatherData = {
                 weather: ootd.weather || weatherData.weather,
                 tempMin: ootd.temp_min || weatherData.tempMin,
@@ -1639,6 +1709,8 @@ async function loadSavedOOTDs() {
     container.innerHTML = '<div class="no_items">Loading saved OOTDs...</div>';
     
     try {
+        console.log('🔍 Calling /api/ootd with token:', localStorage.getItem('userToken')?.substring(0, 20));
+        
         // Use Flask API endpoint instead of direct Supabase call
         const response = await fetch('/api/ootd', {
             headers: {
@@ -1646,11 +1718,15 @@ async function loadSavedOOTDs() {
             }
         });
         
+        console.log('📡 API Response status:', response.status);
+        console.log('📡 API Response headers:', Object.fromEntries(response.headers.entries()));
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
+        console.log('📦 Raw API response:', data);
         const savedOOTDs = data.ootds || [];
         console.log('✅ Retrieved OOTDs:', savedOOTDs);
         
@@ -1662,7 +1738,7 @@ async function loadSavedOOTDs() {
         container.innerHTML = savedOOTDs.map(ootd => `
             <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
                 <div class="ootd_date_header">
-                    ${ootd.date} | ${(ootd.weather || 'sunny').toLowerCase()}, ${ootd.precipitation || 0}%, ${ootd.temp_min || 16}-${ootd.temp_max || 24}°
+                    ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
                 </div>
                 <div class="ootd_items_grid">
                     ${ootd.items && ootd.items.length > 0 ? ootd.items.map(item => `
@@ -1688,11 +1764,44 @@ async function loadSavedOOTDs() {
     }
 }
 
+function removeUploadedImage() {
+    console.log('🗑️ Removing uploaded image');
+    uploadedImage = null;
+    
+    // Clear the file input
+    const fileInput = document.getElementById('ootd_image_upload');
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    
+    // Update the display
+    updatePinnedItemsDisplay();
+    console.log('✅ Uploaded image removed');
+}
+
 function loadOOTDForEdit(date) {
+    console.log('📝 Loading OOTD for edit:', date);
+    
+    // Set the current date
     currentDate = new Date(date + 'T00:00:00');
-    document.getElementById('ootd_date').value = date;
+    
+    // Update the date display (OOTD uses current_date_display, not ootd_date)
+    const dateDisplay = document.getElementById('current_date_display');
+    if (dateDisplay) {
+        // Update the date display
+        updateDateDisplay();
+        console.log('✅ Date display updated');
+    } else {
+        console.error('❌ current_date_display element not found');
+    }
+    
+    // Load data for the selected date
     loadDateData();
+    
+    // Switch to LOG tab
     switchTab('log');
+    
+    console.log('📝 Switched to LOG tab for editing');
 }
 
 function loadAllItems() {
