@@ -1052,15 +1052,14 @@ function handleImageUpload(event) {
         // R2 업로드 활성화
         uploadImageToR2(file);
         
-        // 로컬 프리뷰도 함께 표시 (업로드 대기 중)
+        // 즉시 로컬 프리뷰 표시 (업로드와 병렬 처리)
         const reader = new FileReader();
         reader.onload = function(e) {
             console.log('✅ FileReader completed, data length:', e.target.result.length);
-            // R2 업로드가 실패할 경우를 대비한 로컬 백업
-            if (!uploadedImage) {
-                uploadedImage = e.target.result;
-                updatePinnedItemsDisplay();
-            }
+            // 즉시 로컬 이미지 설정하여 프리뷰 표시
+            uploadedImage = e.target.result;
+            console.log('📷 Setting local preview image');
+            updatePinnedItemsDisplay();
         };
         reader.onerror = function(e) {
             console.error('❌ FileReader error:', e);
@@ -1088,12 +1087,14 @@ function uploadImageToR2(file) {
     .then(data => {
         if (data.success || data.url) {
             console.log('✅ Image uploaded to R2:', data.url);
+            // R2 업로드 성공 시 URL 교체
             uploadedImage = data.url;
+            console.log('🔄 Updating preview with R2 URL');
             updatePinnedItemsDisplay(); // R2 URL로 업데이트
         } else {
             console.error('❌ Upload failed:', data.error);
-            // 실패 시에도 로컬 이미지는 유지
-            console.log('🔄 Falling back to local preview');
+            // 실패 시 로컬 이미지 유지 (이미 설정됨)
+            console.log('🔄 Keeping local preview');
         }
     })
     .catch(error => {
@@ -1142,20 +1143,37 @@ function extractEXIFData(file) {
             for (const field of dateFields) {
                 if (exifData[field]) {
                     console.log(`📅 Found date field ${field}:`, exifData[field]);
-                    imageDate = new Date(exifData[field]);
+                    
+                    // Handle different date formats
+                    let dateString = exifData[field];
+                    if (typeof dateString === 'string') {
+                        // Convert EXIF format "2023:10:31 14:30:00" to standard format
+                        dateString = dateString.replace(/:/g, '-', 2).replace(/ /, 'T');
+                        console.log('📅 Converted date string:', dateString);
+                    }
+                    
+                    imageDate = new Date(dateString);
+                    console.log('📅 Parsed date object:', imageDate);
+                    
                     if (!isNaN(imageDate.getTime())) {
+                        console.log('✅ Valid date found, breaking loop');
                         break;
+                    } else {
+                        console.log('❌ Invalid date, trying next field');
                     }
                 }
             }
             
             if (imageDate && !isNaN(imageDate.getTime())) {
                 console.log('📅 Before update - currentDate:', currentDate);
-                currentDate = imageDate;
+                currentDate = new Date(imageDate); // Create new date object to avoid reference issues
                 console.log('📅 After update - currentDate:', currentDate);
                 console.log('📅 Calling updateDateDisplay...');
                 updateDateDisplay(); // HTML 날짜 표시 업데이트
                 console.log('✅ Date display should be updated');
+                
+                // Also update weather for the new date
+                updateWeatherForSelectedDate();
             } else {
                 console.log('⚠️ No valid date information in EXIF');
             }

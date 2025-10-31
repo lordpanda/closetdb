@@ -313,13 +313,12 @@
                             // 파싱된 데이터가 없으면 mock 데이터 사용
                             if (!exifData.latitude && !exifData.DateTimeOriginal) {
                                 console.log('⚠️ No EXIF data found, using mock data for testing');
-                                // Mock GPS data for testing
+                                // Mock GPS data for testing (Seoul coordinates)
                                 exifData.latitude = 37.5665;
                                 exifData.longitude = 126.9780;
                                 
-                                // Mock date data
+                                // Mock date data (current time)
                                 const mockDate = new Date();
-                                mockDate.setDate(mockDate.getDate() - 3);
                                 exifData.DateTimeOriginal = mockDate.toISOString().replace('T', ' ').slice(0, 19);
                                 
                                 console.log('📍 Mock GPS added:', exifData.latitude, exifData.longitude);
