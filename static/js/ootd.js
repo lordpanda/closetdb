@@ -1357,7 +1357,7 @@ function reverseGeocode(lat, lon) {
                     const newLocation = selectedParts.join(', ').toUpperCase();
                     console.log('✅ Updated location to:', newLocation);
                     currentLocation = newLocation; // 표시용
-                    fullCurrentLocation = result.display_name; // 저장용 (전체 주소)
+                    fullCurrentLocation = data.display_name; // 저장용 (전체 주소) - result 대신 data 사용
                     currentCoords = { lat, lon };
                     updateLocationDisplay();
                     
