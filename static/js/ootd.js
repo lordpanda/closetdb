@@ -1281,16 +1281,36 @@ function extractEXIFData(file) {
                 console.log('⚠️ No valid date information in EXIF');
             }
             
-            // Extract location with more field options
-            const lat = exifData.latitude || exifData.GPSLatitude;
-            const lon = exifData.longitude || exifData.GPSLongitude;
+            // Extract location with comprehensive GPS field checking
+            console.log('🔍 Checking GPS fields in EXIF data...');
+            console.log('📋 All EXIF fields:', Object.keys(exifData));
             
-            if (lat && lon) {
-                console.log('📍 GPS coordinates found:', lat, lon);
+            // Check multiple possible GPS field names
+            let lat = exifData.latitude || exifData.GPSLatitude || 
+                     exifData.GPS?.GPSLatitude || exifData.gps?.latitude;
+            let lon = exifData.longitude || exifData.GPSLongitude || 
+                     exifData.GPS?.GPSLongitude || exifData.gps?.longitude;
+            
+            // Log specific GPS fields for debugging
+            console.log('🧭 GPS fields check:');
+            console.log('  - latitude:', exifData.latitude);
+            console.log('  - longitude:', exifData.longitude);
+            console.log('  - GPSLatitude:', exifData.GPSLatitude);
+            console.log('  - GPSLongitude:', exifData.GPSLongitude);
+            console.log('  - GPS object:', exifData.GPS);
+            console.log('  - gps object:', exifData.gps);
+            console.log('  - Final lat:', lat);
+            console.log('  - Final lon:', lon);
+            
+            if (lat && lon && !isNaN(lat) && !isNaN(lon)) {
+                console.log('✅ Valid GPS coordinates found:', lat, lon);
                 reverseGeocode(lat, lon);
             } else {
-                console.log('⚠️ No GPS coordinates in EXIF');
-                console.log('Available EXIF fields:', Object.keys(exifData));
+                console.log('⚠️ No valid GPS coordinates found in EXIF data');
+                console.log('📱 This might be due to:');
+                console.log('   - GPS disabled in camera app');
+                console.log('   - Location permission not granted');
+                console.log('   - Privacy settings removing location data');
             }
         } else {
             console.log('⚠️ No EXIF data found');
