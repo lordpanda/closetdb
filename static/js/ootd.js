@@ -1115,9 +1115,9 @@ function handleImageUpload(event) {
     console.log('🔧 Starting EXIF extraction...');
     extractEXIFData(file);
     
-    // R2 업로드
-    console.log('🔧 Starting R2 upload...');
-    uploadImageToR2(file);
+    // R2 업로드 (일시적으로 비활성화 - 500 에러 해결 후 재활성화)
+    console.log('⚠️ R2 upload temporarily disabled due to 500 error');
+    // uploadImageToR2(file);
     
     console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
