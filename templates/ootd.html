@@ -278,6 +278,7 @@
         window.exifr = {
             parse: function(file, options = {}) {
                 console.log('🔍 EXIFR parse called for:', file.name);
+                console.log('🚫 NO MOCK DATA WILL BE GENERATED - VERSION 2025.10.31');
                 
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
@@ -286,43 +287,46 @@
                         try {
                             const arrayBuffer = e.target.result;
                             const dataView = new DataView(arrayBuffer);
-                            const exifData = {};
+                            const exifData = {}; // Start with empty object
                             
                             console.log('📋 File loaded, size:', arrayBuffer.byteLength);
                             
-                            // Parse real EXIF data
-                            console.log('🔧 Starting EXIF parsing...');
+                            // Parse real EXIF data ONLY
+                            console.log('🔧 Starting REAL EXIF parsing...');
                             const parsed = parseEXIF(dataView);
-                            console.log('🔧 EXIF parsing result:', parsed);
+                            console.log('🔧 REAL EXIF parsing result:', parsed);
                             
-                            // Only add REAL EXIF data, NO mock data generation
+                            // Only add REAL EXIF data found in the file
                             if (parsed.gps.latitude && parsed.gps.longitude) {
                                 exifData.latitude = parsed.gps.latitude;
                                 exifData.longitude = parsed.gps.longitude;
-                                console.log('📍 Real GPS found:', exifData.latitude, exifData.longitude);
+                                console.log('📍 REAL GPS found:', exifData.latitude, exifData.longitude);
                             } else {
-                                console.log('⚠️ No GPS data found in EXIF');
+                                console.log('⚠️ No GPS data found in EXIF - NOT ADDING ANY GPS');
                             }
                             
                             if (parsed.dateTime) {
                                 exifData.DateTimeOriginal = parsed.dateTime;
-                                console.log('📅 Real date found:', exifData.DateTimeOriginal);
+                                console.log('📅 REAL date found:', exifData.DateTimeOriginal);
                             } else {
-                                console.log('⚠️ No date data found in EXIF');
+                                console.log('⚠️ No date data found in EXIF - NOT ADDING ANY DATE');
                             }
                             
-                            // DO NOT generate any mock data - return only real EXIF data
-                            console.log('📋 Final EXIF data (no mock):', exifData);
+                            console.log('📋 Final REAL EXIF data (absolutely no mock):', exifData);
+                            console.log('🔒 Returning data with', Object.keys(exifData).length, 'fields');
                             
+                            // Return only real data, never generate fake data
                             resolve(exifData);
                             
                         } catch (error) {
-                            console.error('❌ Error in mock EXIF parsing:', error);
-                            resolve(null);
+                            console.error('❌ Error parsing REAL EXIF:', error);
+                            console.log('🔒 Returning empty object due to error');
+                            resolve({}); // Return empty object, not null
                         }
                     };
                     
                     reader.onerror = function() {
+                        console.error('❌ FileReader error');
                         reject(new Error('Failed to read file'));
                     };
                     
