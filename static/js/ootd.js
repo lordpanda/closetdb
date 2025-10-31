@@ -1133,19 +1133,38 @@ function handleImageUpload(event) {
     
     // 즉시 로컬 프리뷰 표시 (가장 우선)
     console.log('🔧 Starting FileReader for preview...');
+    console.log('📱 Mobile check:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+    
     const reader = new FileReader();
     reader.onload = function(e) {
         console.log('✅ FileReader completed, data length:', e.target.result.length);
+        console.log('📱 Preview data type:', typeof e.target.result);
+        console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
+        
         uploadedImage = e.target.result;
         console.log('📷 Setting uploadedImage variable');
         console.log('🔄 Calling updatePinnedItemsDisplay...');
         updatePinnedItemsDisplay();
         console.log('✅ updatePinnedItemsDisplay called');
+        
+        // 모바일에서 강제 DOM 업데이트
+        if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            console.log('📱 Mobile detected, forcing DOM update...');
+            setTimeout(() => {
+                updatePinnedItemsDisplay();
+            }, 100);
+        }
     };
     reader.onerror = function(e) {
         console.error('❌ FileReader error:', e);
+        console.error('❌ Error details:', e.target.error);
     };
-    reader.readAsDataURL(file);
+    
+    try {
+        reader.readAsDataURL(file);
+    } catch (error) {
+        console.error('❌ readAsDataURL failed:', error);
+    }
     
     // EXIF 데이터 추출
     console.log('🔧 Starting EXIF extraction...');
@@ -1304,13 +1323,21 @@ function extractEXIFData(file) {
             
             if (lat && lon && !isNaN(lat) && !isNaN(lon)) {
                 console.log('✅ Valid GPS coordinates found:', lat, lon);
-                reverseGeocode(lat, lon);
+                console.log('📍 Calling reverseGeocode...');
+                
+                try {
+                    reverseGeocode(lat, lon);
+                    console.log('📍 reverseGeocode called successfully');
+                } catch (error) {
+                    console.error('❌ reverseGeocode failed:', error);
+                }
             } else {
                 console.log('⚠️ No valid GPS coordinates found in EXIF data');
                 console.log('📱 This might be due to:');
                 console.log('   - GPS disabled in camera app');
                 console.log('   - Location permission not granted');
                 console.log('   - Privacy settings removing location data');
+                console.log('📱 Mobile browsers may strip GPS data automatically');
             }
         } else {
             console.log('⚠️ No EXIF data found');
