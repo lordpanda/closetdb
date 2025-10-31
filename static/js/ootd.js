@@ -1145,18 +1145,9 @@ function handleImageUpload(event) {
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
             uploadedImage = e.target.result;
-            console.log('📷 Valid image data set');
-            console.log('🔄 Calling updatePinnedItemsDisplay...');
+            console.log('✅ Original image data set');
             updatePinnedItemsDisplay();
-            console.log('✅ updatePinnedItemsDisplay called');
-            
-            // 모바일에서 강제 DOM 업데이트
-            if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
-                console.log('📱 Mobile detected, forcing DOM update...');
-                setTimeout(() => {
-                    updatePinnedItemsDisplay();
-                }, 100);
-            }
+            console.log('✅ Image processing completed');
         } else {
             console.error('❌ Invalid image data format:', e.target.result?.substring(0, 100));
         }
@@ -1172,14 +1163,30 @@ function handleImageUpload(event) {
     };
     
     try {
-        // 모바일에서 큰 이미지 파일 처리를 위한 체크
-        if (file.size > 50 * 1024 * 1024) { // 50MB 이상
-            console.warn('⚠️ Large file detected:', file.size, 'bytes');
+        // 파일 크기 및 타입 검증
+        console.log('📊 File validation:', {
+            size: file.size + ' bytes (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)',
+            type: file.type,
+            name: file.name
+        });
+        
+        // 매우 큰 파일 경고 (10MB 이상)
+        if (file.size > 10 * 1024 * 1024) {
+            console.warn('⚠️ Very large file detected:', file.size, 'bytes - may cause issues on mobile');
         }
         
+        // 이미지 타입 검증
+        if (!file.type.startsWith('image/')) {
+            console.error('❌ Not an image file:', file.type);
+            return;
+        }
+        
+        // 더 안전한 방식으로 readAsDataURL 호출
+        console.log('📱 Starting FileReader.readAsDataURL...');
         reader.readAsDataURL(file);
+        
     } catch (error) {
-        console.error('❌ readAsDataURL failed:', error);
+        console.error('❌ readAsDataURL setup failed:', error);
     }
     
     // EXIF 데이터 추출
@@ -1192,6 +1199,7 @@ function handleImageUpload(event) {
     
     console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
+
 
 function uploadImageToR2(file) {
     console.log('📤 Starting R2 upload for:', file.name);
