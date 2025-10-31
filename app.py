@@ -21,7 +21,15 @@ except Exception as e:
     traceback.print_exc()
     db = None
 
-from r2_utils import r2
+try:
+    from r2_utils import r2
+    print("Successfully imported r2:", type(r2))
+except Exception as e:
+    print("Error importing r2_utils:", e)
+    import traceback
+    traceback.print_exc()
+    r2 = None
+
 from image_utils import ImageProcessor
 
 app = Flask(__name__)
@@ -325,6 +333,11 @@ def upload_ootd_image():
         
         # R2 설정 확인
         logging.info(f"🔧 R2 instance check: {r2 is not None}")
+        
+        if r2 is None:
+            logging.error("❌ R2 not available - configuration error")
+            return jsonify({'error': 'R2 storage not configured'}), 500
+            
         if hasattr(r2, 'bucket_name'):
             logging.info(f"🔧 R2 bucket: {r2.bucket_name}")
         

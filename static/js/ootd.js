@@ -1115,7 +1115,7 @@ function handleImageUpload(event) {
     console.log('🔧 Starting EXIF extraction...');
     extractEXIFData(file);
     
-    // R2 업로드 (에러 디버깅을 위해 재활성화)
+    // R2 업로드 (에러 디버깅을 위해 재활성화, 실패해도 로컬 프리뷰는 유지)
     console.log('🔧 Starting R2 upload with enhanced error handling...');
     uploadImageToR2(file);
     
@@ -1207,14 +1207,20 @@ function extractEXIFData(file) {
                     
                     // Handle different date formats
                     let dateString = exifData[field];
+                    console.log('📅 Raw date value:', dateString, 'Type:', typeof dateString);
+                    
                     if (typeof dateString === 'string') {
                         // Convert EXIF format "2023:10:31 14:30:00" to standard format
-                        dateString = dateString.replace(/:/g, '-', 2).replace(/ /, 'T');
+                        if (dateString.includes(':')) {
+                            // Replace first two colons with dashes for year-month-day
+                            dateString = dateString.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
+                        }
                         console.log('📅 Converted date string:', dateString);
                     }
                     
                     imageDate = new Date(dateString);
                     console.log('📅 Parsed date object:', imageDate);
+                    console.log('📅 Date validity check:', !isNaN(imageDate.getTime()));
                     
                     if (!isNaN(imageDate.getTime())) {
                         console.log('✅ Valid date found, breaking loop');
