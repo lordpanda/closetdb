@@ -141,11 +141,25 @@ function setupEventListeners() {
     // Image upload
     const imageUploadInput = document.getElementById('ootd_image_upload');
     console.log('🔗 Image upload input found:', !!imageUploadInput);
+    console.log('🔗 Image upload input element:', imageUploadInput);
     if (imageUploadInput) {
+        // Test click functionality
+        console.log('🧪 Testing file input click...');
         imageUploadInput.addEventListener('change', handleImageUpload);
         console.log('✅ Image upload event listener attached');
+        
+        // Add test click handler
+        imageUploadInput.addEventListener('click', () => {
+            console.log('🖱️ File input clicked!');
+        });
     } else {
         console.error('❌ ootd_image_upload element not found!');
+        // Search for it manually
+        const allInputs = document.querySelectorAll('input[type="file"]');
+        console.log('🔍 All file inputs found:', allInputs.length);
+        allInputs.forEach((input, i) => {
+            console.log(`File input ${i}:`, input.id, input.className);
+        });
     }
     
     // Save OOTD
@@ -998,8 +1012,21 @@ function unpinItem(itemId) {
 }
 
 function updatePinnedItemsDisplay() {
+    console.log('🔄 === updatePinnedItemsDisplay called ===');
+    
     const container = document.getElementById('pinned_items');
-    if (!container) return;
+    console.log('📦 Container found:', !!container);
+    if (!container) {
+        console.error('❌ pinned_items container not found!');
+        return;
+    }
+    
+    console.log('📌 Pinned items count:', pinnedItems.length);
+    console.log('📷 uploadedImage status:', !!uploadedImage);
+    if (uploadedImage) {
+        console.log('📷 uploadedImage type:', typeof uploadedImage);
+        console.log('📷 uploadedImage length:', uploadedImage.length);
+    }
     
     // pin된 아이템들과 photo upload 슬롯 표시
     container.innerHTML = '';
@@ -1007,7 +1034,8 @@ function updatePinnedItemsDisplay() {
     let html = '';
     
     // Add pinned items first
-    pinnedItems.forEach(item => {
+    pinnedItems.forEach((item, index) => {
+        console.log(`📌 Adding pinned item ${index}:`, item.item_id);
         html += `
             <div class="item_card search_result pinned_item">
                 ${item.images && item.images.length > 0 
@@ -1021,12 +1049,14 @@ function updatePinnedItemsDisplay() {
     
     // Add single photo upload slot
     if (uploadedImage) {
+        console.log('✅ Adding uploaded photo to display');
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image">
             </div>
         `;
     } else {
+        console.log('📷 Adding empty photo upload slot');
         html += `
             <div class="item_card empty photo_upload" onclick="document.getElementById('ootd_image_upload').click()">
                 📷
@@ -1034,40 +1064,62 @@ function updatePinnedItemsDisplay() {
         `;
     }
     
+    console.log('📝 Generated HTML length:', html.length);
     container.innerHTML = html;
+    console.log('✅ Container updated with new HTML');
+    console.log('🔄 === updatePinnedItemsDisplay complete ===');
 }
 
 function handleImageUpload(event) {
-    console.log('📱 Image upload event triggered');
-    console.log('📁 Files:', event.target.files);
-    console.log('📁 File count:', event.target.files.length);
+    console.log('🚨 === IMAGE UPLOAD EVENT TRIGGERED ===');
+    console.log('📁 Event:', event);
+    console.log('📁 Target:', event.target);
+    console.log('📁 Files object:', event.target.files);
+    console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES');
+    
+    if (!event.target.files || event.target.files.length === 0) {
+        console.error('❌ No files found in event');
+        return;
+    }
     
     const file = event.target.files[0];
-    if (file) {
-        console.log('📷 File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
-        
-        // EXIF 데이터 추출 (지오로케이션, 날짜)
-        extractEXIFData(file);
-        
-        // R2 업로드 활성화
-        uploadImageToR2(file);
-        
-        // 즉시 로컬 프리뷰 표시 (업로드와 병렬 처리)
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            console.log('✅ FileReader completed, data length:', e.target.result.length);
-            // 즉시 로컬 이미지 설정하여 프리뷰 표시
-            uploadedImage = e.target.result;
-            console.log('📷 Setting local preview image');
-            updatePinnedItemsDisplay();
-        };
-        reader.onerror = function(e) {
-            console.error('❌ FileReader error:', e);
-        };
-        reader.readAsDataURL(file);
-    } else {
-        console.log('⚠️ No file selected');
+    if (!file) {
+        console.error('❌ First file is null/undefined');
+        return;
     }
+    
+    console.log('📷 File selected:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+    });
+    
+    // 즉시 로컬 프리뷰 표시 (가장 우선)
+    console.log('🔧 Starting FileReader for preview...');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        console.log('✅ FileReader completed, data length:', e.target.result.length);
+        uploadedImage = e.target.result;
+        console.log('📷 Setting uploadedImage variable');
+        console.log('🔄 Calling updatePinnedItemsDisplay...');
+        updatePinnedItemsDisplay();
+        console.log('✅ updatePinnedItemsDisplay called');
+    };
+    reader.onerror = function(e) {
+        console.error('❌ FileReader error:', e);
+    };
+    reader.readAsDataURL(file);
+    
+    // EXIF 데이터 추출
+    console.log('🔧 Starting EXIF extraction...');
+    extractEXIFData(file);
+    
+    // R2 업로드
+    console.log('🔧 Starting R2 upload...');
+    uploadImageToR2(file);
+    
+    console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
 
 function uploadImageToR2(file) {
