@@ -15,12 +15,33 @@ let currentCoords = null;
 let savedDates = []; // Array of dates that have saved OOTDs
 let calendarDate = new Date(); // Current calendar view date
 
+// Wait for exifr to load before initializing
+function waitForExifr(callback, attempts = 0) {
+    const maxAttempts = 10;
+    
+    if (typeof exifr !== 'undefined' || typeof window.exifr !== 'undefined') {
+        console.log('✅ exifr library loaded, initializing OOTD');
+        callback();
+        return;
+    }
+    
+    if (attempts < maxAttempts) {
+        console.log(`⏳ Waiting for exifr... attempt ${attempts + 1}/${maxAttempts}`);
+        setTimeout(() => waitForExifr(callback, attempts + 1), 500);
+    } else {
+        console.warn('⚠️ exifr not loaded after 10 attempts, proceeding without EXIF');
+        callback();
+    }
+}
+
 // Initialize OOTD functionality
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DOM loaded, checking elements');
+    console.log('🚀 DOM loaded, waiting for exifr...');
     
-    // 직접 input 찾기 테스트
-    setTimeout(() => {
+    // Wait for exifr to load before initializing
+    waitForExifr(() => {
+        console.log('📚 Final exifr check:', typeof exifr !== 'undefined' || typeof window.exifr !== 'undefined' ? '✅ Loaded' : '❌ Not loaded');
+        
         const input = document.getElementById('location_input');
         console.log('🔍 Direct input search:', !!input);
         
@@ -38,11 +59,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(`Input ${i}: id="${inp.id}", class="${inp.className}"`);
             });
         }
-    }, 1000);
-    
-    initializeOOTD();
-    setupEventListeners();
-    loadTodayData();
+        
+        initializeOOTD();
+        setupEventListeners();
+        loadTodayData();
+    });
 });
 
 function initializeOOTD() {
@@ -118,7 +139,14 @@ function setupEventListeners() {
     document.getElementById('edit_location_btn')?.addEventListener('click', toggleLocationEdit);
     
     // Image upload
-    document.getElementById('ootd_image_upload')?.addEventListener('change', handleImageUpload);
+    const imageUploadInput = document.getElementById('ootd_image_upload');
+    console.log('🔗 Image upload input found:', !!imageUploadInput);
+    if (imageUploadInput) {
+        imageUploadInput.addEventListener('change', handleImageUpload);
+        console.log('✅ Image upload event listener attached');
+    } else {
+        console.error('❌ ootd_image_upload element not found!');
+    }
     
     // Save OOTD
     document.getElementById('save_ootd_btn')?.addEventListener('click', saveOOTD);
@@ -1010,26 +1038,42 @@ function updatePinnedItemsDisplay() {
 }
 
 function handleImageUpload(event) {
+    console.log('📱 Image upload event triggered');
+    console.log('📁 Files:', event.target.files);
+    console.log('📁 File count:', event.target.files.length);
+    
     const file = event.target.files[0];
     if (file) {
+        console.log('📷 File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
+        
         // EXIF 데이터 추출 (지오로케이션, 날짜)
         extractEXIFData(file);
         
-        // R2에 이미지 업로드
+        // R2 업로드 활성화
         uploadImageToR2(file);
         
-        // 임시로 local preview 표시
+        // 로컬 프리뷰도 함께 표시 (업로드 대기 중)
         const reader = new FileReader();
         reader.onload = function(e) {
-            uploadedImage = e.target.result;
-            console.log('📷 Image uploaded');
-            updatePinnedItemsDisplay(); // pinned items 영역 업데이트
+            console.log('✅ FileReader completed, data length:', e.target.result.length);
+            // R2 업로드가 실패할 경우를 대비한 로컬 백업
+            if (!uploadedImage) {
+                uploadedImage = e.target.result;
+                updatePinnedItemsDisplay();
+            }
+        };
+        reader.onerror = function(e) {
+            console.error('❌ FileReader error:', e);
         };
         reader.readAsDataURL(file);
+    } else {
+        console.log('⚠️ No file selected');
     }
 }
 
 function uploadImageToR2(file) {
+    console.log('📤 Starting R2 upload for:', file.name);
+    
     const formData = new FormData();
     formData.append('image', file);
     
@@ -1037,32 +1081,52 @@ function uploadImageToR2(file) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('📡 R2 upload response status:', response.status);
+        return response.json();
+    })
     .then(data => {
-        if (data.success) {
+        if (data.success || data.url) {
             console.log('✅ Image uploaded to R2:', data.url);
             uploadedImage = data.url;
             updatePinnedItemsDisplay(); // R2 URL로 업데이트
         } else {
             console.error('❌ Upload failed:', data.error);
+            // 실패 시에도 로컬 이미지는 유지
+            console.log('🔄 Falling back to local preview');
         }
     })
     .catch(error => {
         console.error('❌ Upload error:', error);
+        // 네트워크 오류 시에도 로컬 이미지는 유지
+        console.log('🔄 Upload failed, using local preview');
     });
 }
 
 function extractEXIFData(file) {
     console.log('🔍 Extracting EXIF data from:', file.name);
     
-    // Check if exifr is loaded
-    if (typeof exifr === 'undefined') {
-        console.error('❌ exifr library not loaded!');
+    // Check if exifr is loaded with multiple checks
+    if (typeof exifr === 'undefined' && typeof window.exifr === 'undefined') {
+        console.error('❌ exifr library not loaded! Waiting 2 seconds and retrying...');
+        
+        // Retry after 2 seconds
+        setTimeout(() => {
+            if (typeof exifr !== 'undefined' || typeof window.exifr !== 'undefined') {
+                console.log('✅ exifr found after delay, extracting EXIF data');
+                extractEXIFData(file);
+            } else {
+                console.error('❌ exifr still not loaded after retry. EXIF extraction skipped.');
+            }
+        }, 2000);
         return;
     }
     
+    // Use window.exifr if exifr is not in global scope
+    const exifrLib = typeof exifr !== 'undefined' ? exifr : window.exifr;
+    
     // Try with more detailed options
-    exifr.parse(file, {
+    exifrLib.parse(file, {
         gps: true,
         exif: true,
         ifd0: true,
@@ -1086,9 +1150,12 @@ function extractEXIFData(file) {
             }
             
             if (imageDate && !isNaN(imageDate.getTime())) {
+                console.log('📅 Before update - currentDate:', currentDate);
                 currentDate = imageDate;
-                console.log('✅ Updated currentDate to:', currentDate);
+                console.log('📅 After update - currentDate:', currentDate);
+                console.log('📅 Calling updateDateDisplay...');
                 updateDateDisplay(); // HTML 날짜 표시 업데이트
+                console.log('✅ Date display should be updated');
             } else {
                 console.log('⚠️ No valid date information in EXIF');
             }
@@ -1146,14 +1213,17 @@ function reverseGeocode(lat, lon) {
 
 function removeUploadedImage() {
     uploadedImage = null;
-    document.getElementById('image_preview').innerHTML = '';
+    const imagePreview = document.getElementById('image_preview');
+    if (imagePreview) {
+        imagePreview.innerHTML = '';
+    }
     document.getElementById('ootd_image_upload').value = '';
 }
 
 async function saveOOTD() {
     const dateString = formatDateForInput(currentDate);
     
-    // 간단한 테스트 데이터로 시작
+    // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
         date: dateString,
         location: currentLocation || 'SEOCHO-GU, SEOUL',
@@ -1161,8 +1231,13 @@ async function saveOOTD() {
         temp_min: weatherData.tempMin || 16,
         temp_max: weatherData.tempMax || 24,
         precipitation: weatherData.precipitation || 0,
-        items: [],
-        uploaded_image: null,
+        items: pinnedItems.map(item => ({
+            id: item.item_id,
+            brand: item.brand,
+            category: item.category,
+            images: item.images
+        })),
+        uploaded_image: uploadedImage,
         created_at: new Date().toISOString()
     };
     
@@ -1411,12 +1486,18 @@ async function loadDateData() {
             updatePinnedItemsDisplay();
             
             if (uploadedImage) {
-                document.getElementById('image_preview').innerHTML = `
-                    <img src="${uploadedImage}" alt="OOTD">
-                    <button class="remove_button" onclick="removeUploadedImage()" style="position: relative; margin-top: 0.5rem;">Remove</button>
-                `;
+                const imagePreview = document.getElementById('image_preview');
+                if (imagePreview) {
+                    imagePreview.innerHTML = `
+                        <img src="${uploadedImage}" alt="OOTD">
+                        <button class="remove_button" onclick="removeUploadedImage()" style="position: relative; margin-top: 0.5rem;">Remove</button>
+                    `;
+                }
             } else {
-                document.getElementById('image_preview').innerHTML = '';
+                const imagePreview = document.getElementById('image_preview');
+    if (imagePreview) {
+        imagePreview.innerHTML = '';
+    }
             }
         } else {
             console.log(`📅 No OOTD found for ${dateString} - resetting to defaults`);
@@ -1425,7 +1506,10 @@ async function loadDateData() {
             pinnedItems = [];
             uploadedImage = null;
             updatePinnedItemsDisplay();
-            document.getElementById('image_preview').innerHTML = '';
+            const imagePreview = document.getElementById('image_preview');
+            if (imagePreview) {
+                imagePreview.innerHTML = '';
+            }
         }
     } catch (error) {
         console.error('❌ Error loading OOTD data:', error);
@@ -1434,7 +1518,10 @@ async function loadDateData() {
         pinnedItems = [];
         uploadedImage = null;
         updatePinnedItemsDisplay();
-        document.getElementById('image_preview').innerHTML = '';
+        const imagePreview = document.getElementById('image_preview');
+        if (imagePreview) {
+            imagePreview.innerHTML = '';
+        }
     }
 }
 
@@ -1686,7 +1773,10 @@ function checkColorSearch(term, item) {
 
 // Calendar Functions
 function updateDateDisplay() {
+    console.log('🔄 updateDateDisplay called with currentDate:', currentDate);
     const display = document.getElementById('current_date_display');
+    console.log('🔍 current_date_display element found:', !!display);
+    
     if (display) {
         const options = { 
             year: 'numeric', 
@@ -1694,7 +1784,12 @@ function updateDateDisplay() {
             day: 'numeric',
             weekday: 'short'
         };
-        display.textContent = currentDate.toLocaleDateString('en-US', options);
+        const newText = currentDate.toLocaleDateString('en-US', options);
+        console.log('📅 Setting date display to:', newText);
+        display.textContent = newText;
+        console.log('✅ Date display updated');
+    } else {
+        console.error('❌ current_date_display element not found in DOM');
     }
 }
 
