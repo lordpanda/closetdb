@@ -102,9 +102,9 @@
         </div>
     </section>
 
-    <!-- Inline simple EXIFR -->
+    <!-- Inline simple EXIFR - NO MOCK DATA VERSION 2025-10-31 -->
     <script>
-        console.log('🔧 Loading inline EXIFR...');
+        console.log('🔧 Loading inline EXIFR - NO MOCK DATA VERSION...');
         
         // Real EXIF parsing function
         function parseEXIF(dataView) {
@@ -295,6 +295,7 @@
                             const parsed = parseEXIF(dataView);
                             console.log('🔧 EXIF parsing result:', parsed);
                             
+                            // Only add REAL EXIF data, NO mock data generation
                             if (parsed.gps.latitude && parsed.gps.longitude) {
                                 exifData.latitude = parsed.gps.latitude;
                                 exifData.longitude = parsed.gps.longitude;
@@ -310,10 +311,8 @@
                                 console.log('⚠️ No date data found in EXIF');
                             }
                             
-                            // EXIF 데이터가 없으면 null 반환 (mock 데이터 제거)
-                            if (!exifData.latitude && !exifData.DateTimeOriginal) {
-                                console.log('⚠️ No EXIF data found in image');
-                            }
+                            // DO NOT generate any mock data - return only real EXIF data
+                            console.log('📋 Final EXIF data (no mock):', exifData);
                             
                             resolve(exifData);
                             
