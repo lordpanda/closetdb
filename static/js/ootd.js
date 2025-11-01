@@ -159,12 +159,10 @@ function setupEventListeners() {
         console.log('🧪 Testing file input click...');
         imageUploadInput.addEventListener('change', handleImageUpload);
         console.log('✅ Image upload event listener attached');
-        alert('📱 이벤트 리스너 설정 완료!');
         
         // Add test click handler
         imageUploadInput.addEventListener('click', () => {
             console.log('🖱️ File input clicked!');
-            alert('📱 파일 입력 클릭됨!');
         });
     } else {
         console.error('❌ ootd_image_upload element not found!');
@@ -1098,6 +1096,9 @@ function updatePinnedItemsDisplay() {
             preview: uploadedImage?.substring(0, 50) + '...'
         });
         
+        // 프리뷰 표시 전 uploadedImage 재확인
+        alert(`🖼️ 프리뷰 표시 직전!\nuploadedImage 길이: ${uploadedImage.length}자\n타입: ${typeof uploadedImage}\n시작: ${uploadedImage.substring(0, 50)}...`);
+        
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
@@ -1109,7 +1110,7 @@ function updatePinnedItemsDisplay() {
     } else {
         console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="alert('📱 사진 업로드 버튼 클릭됨!'); console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); alert('📱 Input 요소: ' + (!!input ? '찾음' : '못찾음')); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
+            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
@@ -1230,6 +1231,10 @@ function handleImageUpload(event) {
                 console.log('✅ Data URL validation passed - image can be loaded');
                 alert(`✅ 테스트 성공!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n이제 프리뷰에 표시합니다.`);
                 uploadedImage = dataURL;
+                
+                // uploadedImage 저장 확인
+                alert(`💾 변수 저장 확인!\nuploadedImage 길이: ${uploadedImage.length}자\n타입: ${typeof uploadedImage}\n시작: ${uploadedImage.substring(0, 50)}...`);
+                
                 updatePinnedItemsDisplay();
                 console.log('✅ Image processing completed');
             };
