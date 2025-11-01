@@ -1134,16 +1134,29 @@ function handleImageLoadError(imgElement) {
     // 모바일에서 즉시 alert 표시
     alert(`📱 이미지 로드 실패!\n길이: ${imgElement.src?.length || 0}자\n크기: ${sizeInMB.toFixed(1)}MB\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}`);
     
-    // 이미지 숨기고 오류 메시지 표시
+    // 이미지 숨기고 오류 메시지 표시 (삭제 버튼은 유지)
     imgElement.style.display = 'none';
-    imgElement.parentElement.innerHTML = `
-        <div style="padding:20px;text-align:center;color:red;border:2px dashed red;border-radius:12px;">
-            <div style="font-size:24px;margin-bottom:8px;">❌</div>
-            <div style="font-size:14px;font-weight:bold;">Image Load Failed</div>
-            <div style="font-size:12px;margin-top:4px;">${imgElement.src?.length || 0} chars</div>
-            <div style="font-size:12px;">${sizeInMB.toFixed(1)}MB</div>
-        </div>
+    
+    // 기존 삭제 버튼 찾기
+    const existingRemoveBtn = imgElement.parentElement.querySelector('.remove_item_btn');
+    
+    // 오류 메시지 div 생성
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'padding:20px;text-align:center;color:red;border:2px dashed red;border-radius:12px;';
+    errorDiv.innerHTML = `
+        <div style="font-size:24px;margin-bottom:8px;">❌</div>
+        <div style="font-size:14px;font-weight:bold;">Image Load Failed</div>
+        <div style="font-size:12px;margin-top:4px;">${imgElement.src?.length || 0} chars</div>
+        <div style="font-size:12px;">${sizeInMB.toFixed(1)}MB</div>
     `;
+    
+    // 기존 이미지를 오류 메시지로 교체
+    imgElement.parentElement.replaceChild(errorDiv, imgElement);
+    
+    // 삭제 버튼이 있었다면 다시 추가
+    if (existingRemoveBtn) {
+        imgElement.parentElement.appendChild(existingRemoveBtn);
+    }
 }
 
 function handleImageUpload(event) {
@@ -1920,7 +1933,7 @@ async function loadSavedOOTDs() {
                     <div class="ootd_date_header">
                         ${ootd.date}
                         <div class="ootd_weather_header">
-                            ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
+                            ${(ootd.weather)}, ${ootd.precipitation}% | ${ootd.temp_min}-${ootd.temp_max}
                         </div>
                     </div>
                     <div class="ootd_items_grid">
