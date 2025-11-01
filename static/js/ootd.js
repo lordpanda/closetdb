@@ -987,17 +987,14 @@ function displaySearchResults(items) {
         
         // 클릭 이벤트 추가 - pin된 아이템이면 unpin, 아니면 pin
         gridItem.addEventListener('click', () => {
-            console.log('🖱️ Search item clicked:', item.item_id, 'Current isPinned:', isPinned);
             // 실시간으로 pin 상태 확인 (isPinned는 렌더링 시점의 상태이므로)
             const currentlyPinned = pinnedItems.some(p => p.item_id === item.item_id);
-            console.log('🔍 Currently pinned check:', currentlyPinned);
             
             if (currentlyPinned) {
-                console.log('🗑️ Calling unpinItem for:', item.item_id);
                 unpinItem(item.item_id);
             } else {
-                console.log('📌 Calling pinItem for:', item.item_id);
-                pinItem(item.item_id);
+                // API 호출 없이 바로 핀 - 이미 아이템 데이터를 가지고 있음
+                pinItemDirect(item);
             }
         });
         
@@ -1012,8 +1009,22 @@ function clearSearchResults() {
     }
 }
 
+function pinItemDirect(item) {
+    // 중복 방지: item_id로 정확히 비교
+    const alreadyPinned = pinnedItems.find(p => p.item_id === item.item_id);
+    if (!alreadyPinned) {
+        pinnedItems.push(item);
+        
+        // 핀된 아이템 표시 업데이트
+        updatePinnedItemsDisplay();
+        
+        // 검색 결과에서 해당 아이템을 시각적으로 pinned 상태로 변경
+        updateSearchResultPinnedState(item.item_id, true);
+    }
+}
+
 function pinItem(itemId) {
-    console.log('📌 === PINITEM CALLED ===');
+    console.log('📌 === PINITEM CALLED (WITH API) ===');
     console.log('📌 Attempting to pin item:', itemId);
     console.log('📌 Current pinnedItems count:', pinnedItems.length);
     console.log('📌 Current pinnedItems:', pinnedItems.map(p => p.item_id));
@@ -1058,12 +1069,7 @@ function pinItem(itemId) {
 }
 
 function unpinItem(itemId) {
-    console.log('🗑️ Unpinning item:', itemId);
-    const beforeCount = pinnedItems.length;
     pinnedItems = pinnedItems.filter(item => item.item_id !== itemId);
-    const afterCount = pinnedItems.length;
-    
-    console.log(`📌 Unpinned: ${beforeCount} → ${afterCount} items`);
     updatePinnedItemsDisplay();
     
     // 검색 결과에서 해당 아이템의 pinned 상태 제거
@@ -1071,61 +1077,30 @@ function unpinItem(itemId) {
 }
 
 function updateSearchResultPinnedState(itemId, isPinned) {
-    console.log('🔄 === updateSearchResultPinnedState called ===');
-    console.log('🔄 ItemId:', itemId, 'isPinned:', isPinned);
-    
     // 검색 결과 컨테이너에서 해당 아이템 찾기
     const searchResults = document.getElementById('search_results');
-    if (!searchResults) {
-        console.log('❌ search_results container not found');
-        return;
-    }
+    if (!searchResults) return;
     
     // 모든 검색 결과 아이템 확인
     const itemCards = searchResults.querySelectorAll('.item_card.search_result');
-    console.log('🔄 Found search result cards:', itemCards.length);
     
-    let foundCard = false;
-    itemCards.forEach((card, index) => {
+    itemCards.forEach(card => {
         const cardData = card.getAttribute('data-item-id');
-        console.log(`🔄 Card ${index}: data-item-id = "${cardData}"`);
         
         if (cardData === itemId.toString()) {
-            foundCard = true;
-            console.log(`✅ Found matching card for item ${itemId}!`);
-            
             if (isPinned) {
-                console.log('📌 Adding pinned_item class to card');
                 card.classList.add('pinned_item');
             } else {
-                console.log('🗑️ Removing pinned_item class from card');
                 card.classList.remove('pinned_item');
             }
-            
-            console.log('🔄 Card classes after update:', card.className);
         }
     });
-    
-    if (!foundCard) {
-        console.log(`❌ No card found with data-item-id="${itemId}"`);
-    }
 }
 
 function updatePinnedItemsDisplay() {
-    console.log('🔄 === updatePinnedItemsDisplay called ===');
-    
     const container = document.getElementById('pinned_items');
-    console.log('📦 Container found:', !!container);
     if (!container) {
-        console.error('❌ pinned_items container not found!');
         return;
-    }
-    
-    console.log('📌 Pinned items count:', pinnedItems.length);
-    console.log('📷 uploadedImage status:', !!uploadedImage);
-    if (uploadedImage) {
-        console.log('📷 uploadedImage type:', typeof uploadedImage);
-        console.log('📷 uploadedImage length:', uploadedImage.length);
     }
     
     // pin된 아이템들과 photo upload 슬롯 표시
@@ -1135,12 +1110,10 @@ function updatePinnedItemsDisplay() {
     
     // 1. Add uploaded image first (if exists)
     if (uploadedImage) {
-        console.log('✅ Adding uploaded photo to display (first position)');
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
-                     onerror="handleImageLoadError(this);" 
-                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
+                     onerror="handleImageLoadError(this);">
                 <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
             </div>
         `;
@@ -1148,7 +1121,6 @@ function updatePinnedItemsDisplay() {
     
     // 2. Add pinned items after uploaded image
     pinnedItems.forEach((item, index) => {
-        console.log(`📌 Adding pinned item ${index}:`, item.item_id);
         html += `
             <div class="item_card search_result pinned_item">
                 ${item.images && item.images.length > 0 
@@ -1162,18 +1134,14 @@ function updatePinnedItemsDisplay() {
     
     // 3. Add photo upload placeholder only if no uploaded image
     if (!uploadedImage) {
-        console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
+            <div class="item_card empty photo_upload" onclick="const input = document.getElementById('ootd_image_upload'); if(input) { input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
     }
     
-    console.log('📝 Generated HTML length:', html.length);
     container.innerHTML = html;
-    console.log('✅ Container updated with new HTML');
-    console.log('🔄 === updatePinnedItemsDisplay complete ===');
 }
 
 function handleImageLoadError(imgElement) {
