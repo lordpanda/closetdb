@@ -152,8 +152,27 @@ function setupEventListeners() {
     
     // Image upload
     const imageUploadInput = document.getElementById('ootd_image_upload');
+    console.log('🔗 Image upload input found:', !!imageUploadInput);
+    console.log('🔗 Image upload input element:', imageUploadInput);
     if (imageUploadInput) {
+        // Test click functionality
+        console.log('🧪 Testing file input click...');
         imageUploadInput.addEventListener('change', handleImageUpload);
+        console.log('✅ Image upload event listener attached');
+        
+        // Add test click handler
+        imageUploadInput.addEventListener('click', () => {
+            console.log('🖱️ File input clicked!');
+        });
+    } else {
+        console.error('❌ ootd_image_upload element not found!');
+        alert('❌ 파일 업로드 요소를 찾을 수 없습니다!');
+        // Search for it manually
+        const allInputs = document.querySelectorAll('input[type="file"]');
+        console.log('🔍 All file inputs found:', allInputs.length);
+        allInputs.forEach((input, i) => {
+            console.log(`File input ${i}:`, input.id, input.className);
+        });
     }
     
     // Save OOTD
@@ -854,25 +873,15 @@ function searchItems(query) {
                             ((item.size_region || item.sizeRegion) && (item.size_region || item.sizeRegion).toLowerCase().includes(term))
                         );
                         
-                        // Season 특별 처리 - 시즌 검색어에만 적용
+                        // Season 특별 처리
                         const seasonMatch = (() => {
                             const itemSeason = item.season?.toLowerCase() || '';
-                            const seasonTerms = ['spring', 'summer', 'fall', 'autumn', 'winter', 'fw', 'midsummer', 'all', '!all'];
-                            
-                            // 현재 검색어가 시즌 관련이 아니면 season 매치 안함
-                            if (!seasonTerms.includes(term.toLowerCase())) {
-                                return false;
-                            }
-                            
                             if (term === '!all') {
                                 return itemSeason !== 'all' && itemSeason !== '';
                             }
-                            
-                            // "all" season은 모든 시즌 검색어에 매치
                             if (itemSeason === 'all') {
                                 return true;
                             }
-                            
                             const seasonMapping = {
                                 'spring': ['Spring/Fall', 'FW'], 
                                 'fall': ['Spring/Fall', 'FW'],
@@ -978,14 +987,17 @@ function displaySearchResults(items) {
         
         // 클릭 이벤트 추가 - pin된 아이템이면 unpin, 아니면 pin
         gridItem.addEventListener('click', () => {
+            console.log('🖱️ Search item clicked:', item.item_id, 'Current isPinned:', isPinned);
             // 실시간으로 pin 상태 확인 (isPinned는 렌더링 시점의 상태이므로)
             const currentlyPinned = pinnedItems.some(p => p.item_id === item.item_id);
+            console.log('🔍 Currently pinned check:', currentlyPinned);
             
             if (currentlyPinned) {
+                console.log('🗑️ Calling unpinItem for:', item.item_id);
                 unpinItem(item.item_id);
             } else {
-                // API 호출 없이 바로 핀 - 이미 아이템 데이터를 가지고 있음
-                pinItemDirect(item);
+                console.log('📌 Calling pinItem for:', item.item_id);
+                pinItem(item.item_id);
             }
         });
         
@@ -1000,22 +1012,8 @@ function clearSearchResults() {
     }
 }
 
-function pinItemDirect(item) {
-    // 중복 방지: item_id로 정확히 비교
-    const alreadyPinned = pinnedItems.find(p => p.item_id === item.item_id);
-    if (!alreadyPinned) {
-        pinnedItems.push(item);
-        
-        // 핀된 아이템 표시 업데이트
-        updatePinnedItemsDisplay();
-        
-        // 검색 결과에서 해당 아이템을 시각적으로 pinned 상태로 변경
-        updateSearchResultPinnedState(item.item_id, true);
-    }
-}
-
 function pinItem(itemId) {
-    console.log('📌 === PINITEM CALLED (WITH API) ===');
+    console.log('📌 === PINITEM CALLED ===');
     console.log('📌 Attempting to pin item:', itemId);
     console.log('📌 Current pinnedItems count:', pinnedItems.length);
     console.log('📌 Current pinnedItems:', pinnedItems.map(p => p.item_id));
@@ -1060,7 +1058,12 @@ function pinItem(itemId) {
 }
 
 function unpinItem(itemId) {
+    console.log('🗑️ Unpinning item:', itemId);
+    const beforeCount = pinnedItems.length;
     pinnedItems = pinnedItems.filter(item => item.item_id !== itemId);
+    const afterCount = pinnedItems.length;
+    
+    console.log(`📌 Unpinned: ${beforeCount} → ${afterCount} items`);
     updatePinnedItemsDisplay();
     
     // 검색 결과에서 해당 아이템의 pinned 상태 제거
@@ -1074,14 +1077,19 @@ function updateSearchResultPinnedState(itemId, isPinned) {
     
     // 모든 검색 결과 아이템 확인
     const itemCards = searchResults.querySelectorAll('.item_card.search_result');
-    
     itemCards.forEach(card => {
-        const cardData = card.getAttribute('data-item-id');
-        
-        if (cardData === itemId.toString()) {
-            if (isPinned) {
+        // 각 카드의 클릭 이벤트에서 item_id 추출하거나 data 속성 사용
+        // 여기서는 카드를 다시 검색하지 않고 시각적으로만 업데이트
+        if (isPinned) {
+            // 새로 핀된 아이템이라면 pinned_item 클래스 추가
+            const cardData = card.getAttribute('data-item-id');
+            if (cardData === itemId) {
                 card.classList.add('pinned_item');
-            } else {
+            }
+        } else {
+            // 핀 해제된 아이템이라면 pinned_item 클래스 제거
+            const cardData = card.getAttribute('data-item-id');
+            if (cardData === itemId) {
                 card.classList.remove('pinned_item');
             }
         }
@@ -1089,9 +1097,20 @@ function updateSearchResultPinnedState(itemId, isPinned) {
 }
 
 function updatePinnedItemsDisplay() {
+    console.log('🔄 === updatePinnedItemsDisplay called ===');
+    
     const container = document.getElementById('pinned_items');
+    console.log('📦 Container found:', !!container);
     if (!container) {
+        console.error('❌ pinned_items container not found!');
         return;
+    }
+    
+    console.log('📌 Pinned items count:', pinnedItems.length);
+    console.log('📷 uploadedImage status:', !!uploadedImage);
+    if (uploadedImage) {
+        console.log('📷 uploadedImage type:', typeof uploadedImage);
+        console.log('📷 uploadedImage length:', uploadedImage.length);
     }
     
     // pin된 아이템들과 photo upload 슬롯 표시
@@ -1101,10 +1120,12 @@ function updatePinnedItemsDisplay() {
     
     // 1. Add uploaded image first (if exists)
     if (uploadedImage) {
+        console.log('✅ Adding uploaded photo to display (first position)');
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
-                     onerror="handleImageLoadError(this);">
+                     onerror="handleImageLoadError(this);" 
+                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
                 <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
             </div>
         `;
@@ -1112,6 +1133,7 @@ function updatePinnedItemsDisplay() {
     
     // 2. Add pinned items after uploaded image
     pinnedItems.forEach((item, index) => {
+        console.log(`📌 Adding pinned item ${index}:`, item.item_id);
         html += `
             <div class="item_card search_result pinned_item">
                 ${item.images && item.images.length > 0 
@@ -1125,29 +1147,44 @@ function updatePinnedItemsDisplay() {
     
     // 3. Add photo upload placeholder only if no uploaded image
     if (!uploadedImage) {
+        console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="const input = document.getElementById('ootd_image_upload'); if(input) { input.click(); }">
+            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
     }
     
+    console.log('📝 Generated HTML length:', html.length);
     container.innerHTML = html;
+    console.log('✅ Container updated with new HTML');
+    console.log('🔄 === updatePinnedItemsDisplay complete ===');
 }
 
 function handleImageLoadError(imgElement) {
-    // 이미지 로드 실패 시 조용히 처리 - 대체 이미지나 플레이스홀더 표시
+    console.error('❌ === IMAGE LOAD ERROR IN PREVIEW ===');
+    console.error('❌ Image src:', imgElement.src?.substring(0, 100) + '...');
+    console.error('❌ Image src length:', imgElement.src?.length);
+    console.error('❌ Image src type:', typeof imgElement.src);
+    console.error('❌ Starts with data:', imgElement.src?.startsWith('data:'));
+    console.error('❌ Is mobile:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+    
+    const sizeInMB = imgElement.src ? (imgElement.src.length * 0.75) / (1024 * 1024) : 0;
+    console.error('❌ Estimated size:', sizeInMB.toFixed(2), 'MB');
+    
+    // 모바일에서 즉시 alert 표시
+    alert(`📱 이미지 로드 실패!\n길이: ${imgElement.src?.length || 0}자\n크기: ${sizeInMB.toFixed(1)}MB\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}`);
+    
+    // 이미지 숨기고 오류 메시지 표시
     imgElement.style.display = 'none';
-    
-    // 간단한 대체 이미지 표시
-    const placeholder = document.createElement('div');
-    placeholder.className = 'image_placeholder';
-    placeholder.style.cssText = 'width:100%;height:120px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#999;font-size:24px;';
-    placeholder.textContent = '📷';
-    
-    if (imgElement.parentElement) {
-        imgElement.parentElement.appendChild(placeholder);
-    }
+    imgElement.parentElement.innerHTML = `
+        <div style="padding:20px;text-align:center;color:red;border:2px dashed red;border-radius:12px;">
+            <div style="font-size:24px;margin-bottom:8px;">❌</div>
+            <div style="font-size:14px;font-weight:bold;">Image Load Failed</div>
+            <div style="font-size:12px;margin-top:4px;">${imgElement.src?.length || 0} chars</div>
+            <div style="font-size:12px;">${sizeInMB.toFixed(1)}MB</div>
+        </div>
+    `;
 }
 
 function handleImageUpload(event) {
@@ -1159,7 +1196,7 @@ function handleImageUpload(event) {
     console.log('📁 Files object exists:', !!event.target.files);
     console.log('📁 Files object:', event.target.files);
     console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
-    
+       
     // 모바일에서 파일 선택 확인
     if (!event.target.files) {
         console.error('❌ Files object is null - mobile browser issue?');
@@ -1187,6 +1224,8 @@ function handleImageUpload(event) {
         lastModified: file.lastModified
     });
     
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    
     // 즉시 로컬 프리뷰 표시 (가장 우선)
     console.log('🔧 Starting FileReader for preview...');
     console.log('📱 Mobile check:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
@@ -1196,7 +1235,7 @@ function handleImageUpload(event) {
         console.log('✅ FileReader completed, data length:', e.target.result.length);
         console.log('📱 Preview data type:', typeof e.target.result);
         console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
-        
+                
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
             // 데이터 URL 검증
@@ -1221,8 +1260,8 @@ function handleImageUpload(event) {
             const testImg = new Image();
             testImg.onload = function() {
                 console.log('✅ Data URL validation passed - image can be loaded');
-                alert(`✅ 테스트 성공!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n이제 프리뷰에 표시합니다.`);
                 uploadedImage = dataURL;
+                                
                 updatePinnedItemsDisplay();
                 console.log('✅ Image processing completed');
             };
@@ -1248,6 +1287,9 @@ function handleImageUpload(event) {
             size: file.size,
             type: file.type
         });
+        
+        // FileReader 오류 alert
+        alert(`❌ 파일 읽기 실패!\n파일: ${file.name}\n크기: ${(file.size / 1024 / 1024).toFixed(2)}MB\n오류: ${e.target.error || '알 수 없는 오류'}`);
     };
     
     try {
@@ -1545,14 +1587,6 @@ async function saveOOTD() {
     };
     
     console.log('💾 Saving OOTD data:', ootdData);
-    console.log('📌 Current pinnedItems:', pinnedItems);
-    console.log('📌 pinnedItems length:', pinnedItems.length);
-    console.log('📌 pinnedItems mapped:', pinnedItems.map(item => ({
-        id: item.item_id,
-        brand: item.brand,
-        category: item.category,
-        images: item.images
-    })));
     console.log('📋 Items for wear logging:', ootdData.items.map(item => ({id: item.id, item_id: item.item_id})));
     console.log('📋 Serialized JSON:', JSON.stringify(ootdData));
     
@@ -1591,11 +1625,14 @@ async function saveOOTD() {
             await recordItemCombinations(ootdData);
         }
         
+        alert(`저장 완료!\n- PIN된 아이템: ${pinnedItems.length}개\n- 업로드 이미지: ${uploadedImage ? '있음' : '없음'}\n- 날짜: ${dateString}\n- 위치: ${currentLocation}`);
+        
         // 저장 완료 후 VIEW 탭으로 자동 이동
         switchTab('view');
         
     } catch (error) {
-        alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+        console.error('❌ Save error:', error);
+        alert(`저장 중 오류가 발생했습니다:\n${error.message}`);
     }
 }
 
