@@ -180,7 +180,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // 로고 클릭은 명시적으로 메인으로 이동하려는 의도이므로 검색 상태 삭제
                 clearSearchState();
-                checkLoginAndRedirect('/index.html');
+                
+                // 로그인 상태 확인
+                const token = localStorage.getItem('userToken');
+                if (token && (token.startsWith('authenticated_') || token.startsWith('google_auth_') || token.startsWith('logged_in_'))) {
+                    // 로그인된 상태면 index.html로
+                    window.location.href = '/index.html';
+                } else {
+                    // 로그인 안된 상태면 landing 페이지로
+                    window.location.href = '/';
+                }
             });
         }
         
@@ -264,12 +273,12 @@ function checkLoginAndRedirect(targetUrl) {
         } else {
             localStorage.removeItem('userToken');
             localStorage.setItem('redirectAfterLogin', targetUrl);
-            window.location.href = '/login.html';
+            window.location.href = '/';
         }
     } else {
-        // 토큰이 없으면 목표 URL을 저장하고 로그인 페이지로 이동
+        // 토큰이 없으면 목표 URL을 저장하고 랜딩 페이지로 이동
         localStorage.setItem('redirectAfterLogin', targetUrl);
-        window.location.href = '/login.html';
+        window.location.href = '/';
     }
 }
 

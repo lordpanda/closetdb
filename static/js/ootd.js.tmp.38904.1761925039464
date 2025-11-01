@@ -422,7 +422,7 @@ function updateDropdownSelection(selectedIndex) {
 let locationSearchTimeout;
 let currentLocationSuggestions = [];
 
-// 공통 주소 파싱 함수 - 표시용 (마지막 2개만)
+// 공통 주소 파싱 함수
 function parseLocationAddress(address) {
     if (!address) return null;
     
@@ -445,7 +445,6 @@ function parseLocationAddress(address) {
         .filter(field => field && field.trim())
         .filter((field, index, arr) => arr.indexOf(field) === index);
     
-    // 가장 관련성 높은 하위 2개만 선택 (원래대로)
     return validFields.slice(0, 2);
 }
 
@@ -1086,26 +1085,16 @@ function updatePinnedItemsDisplay() {
     // Add single photo upload slot
     if (uploadedImage) {
         console.log('✅ Adding uploaded photo to display');
-        console.log('📷 uploadedImage data check:', {
-            exists: !!uploadedImage,
-            type: typeof uploadedImage,
-            length: uploadedImage?.length,
-            startsWithData: uploadedImage?.startsWith('data:'),
-            preview: uploadedImage?.substring(0, 50) + '...'
-        });
-        
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
-                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
-                     onerror="handleImageLoadError(this);" 
-                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
+                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image">
                 <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
             </div>
         `;
     } else {
         console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
+            <div class="item_card empty photo_upload" onclick="document.getElementById('ootd_image_upload').click()">
                 📷
             </div>
         `;
@@ -1117,59 +1106,21 @@ function updatePinnedItemsDisplay() {
     console.log('🔄 === updatePinnedItemsDisplay complete ===');
 }
 
-function handleImageLoadError(imgElement) {
-    console.error('❌ === IMAGE LOAD ERROR IN PREVIEW ===');
-    console.error('❌ Image src:', imgElement.src?.substring(0, 100) + '...');
-    console.error('❌ Image src length:', imgElement.src?.length);
-    console.error('❌ Image src type:', typeof imgElement.src);
-    console.error('❌ Starts with data:', imgElement.src?.startsWith('data:'));
-    console.error('❌ Is mobile:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
-    
-    const sizeInMB = imgElement.src ? (imgElement.src.length * 0.75) / (1024 * 1024) : 0;
-    console.error('❌ Estimated size:', sizeInMB.toFixed(2), 'MB');
-    
-    // 모바일에서 즉시 alert 표시
-    alert(`📱 이미지 로드 실패!\n길이: ${imgElement.src?.length || 0}자\n크기: ${sizeInMB.toFixed(1)}MB\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}`);
-    
-    // 이미지 숨기고 오류 메시지 표시
-    imgElement.style.display = 'none';
-    imgElement.parentElement.innerHTML = `
-        <div style="padding:20px;text-align:center;color:red;border:2px dashed red;border-radius:12px;">
-            <div style="font-size:24px;margin-bottom:8px;">❌</div>
-            <div style="font-size:14px;font-weight:bold;">Image Load Failed</div>
-            <div style="font-size:12px;margin-top:4px;">${imgElement.src?.length || 0} chars</div>
-            <div style="font-size:12px;">${sizeInMB.toFixed(1)}MB</div>
-        </div>
-    `;
-}
-
 function handleImageUpload(event) {
     console.log('🚨 === IMAGE UPLOAD EVENT TRIGGERED ===');
-    console.log('📱 User agent:', navigator.userAgent);
-    console.log('📁 Event type:', event.type);
-    console.log('📁 Event target:', event.target);
-    console.log('📁 Input element:', event.target.tagName, event.target.type, event.target.accept);
-    console.log('📁 Files object exists:', !!event.target.files);
+    console.log('📁 Event:', event);
+    console.log('📁 Target:', event.target);
     console.log('📁 Files object:', event.target.files);
-    console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
+    console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES');
     
-    // 모바일에서 파일 선택 확인
-    if (!event.target.files) {
-        console.error('❌ Files object is null - mobile browser issue?');
-        alert('파일 선택에 실패했습니다. 브라우저를 새로고침 후 다시 시도해주세요.');
-        return;
-    }
-    
-    if (event.target.files.length === 0) {
-        console.error('❌ No files selected by user');
-        alert('파일이 선택되지 않았습니다.');
+    if (!event.target.files || event.target.files.length === 0) {
+        console.error('❌ No files found in event');
         return;
     }
     
     const file = event.target.files[0];
     if (!file) {
         console.error('❌ First file is null/undefined');
-        alert('선택된 파일을 읽을 수 없습니다.');
         return;
     }
     
@@ -1190,84 +1141,29 @@ function handleImageUpload(event) {
         console.log('📱 Preview data type:', typeof e.target.result);
         console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
         
-        // 이미지 데이터 유효성 검사
-        if (e.target.result && e.target.result.startsWith('data:image/')) {
-            // 데이터 URL 검증
-            const dataURL = e.target.result;
-            const sizeInMB = (dataURL.length * 0.75) / (1024 * 1024); // Base64는 약 1.33배 크므로 0.75로 실제 크기 추정
-            
-            console.log('📊 Data URL validation:', {
-                length: dataURL.length,
-                estimatedMB: sizeInMB.toFixed(2),
-                header: dataURL.substring(0, 50),
-                isValidBase64: /^data:image\/[a-zA-Z]+;base64,/.test(dataURL)
-            });
-            
-            // 모바일에서 너무 큰 데이터 URL 문제 체크 (20MB 이상)
-            if (sizeInMB > 20) {
-                console.error('❌ Data URL too large for mobile:', sizeInMB.toFixed(2), 'MB');
-                alert(`이미지가 너무 큽니다 (${sizeInMB.toFixed(1)}MB). 더 작은 이미지를 선택해주세요.`);
-                return;
-            }
-            
-            // 브라우저 테스트용 작은 이미지 생성
-            const testImg = new Image();
-            testImg.onload = function() {
-                console.log('✅ Data URL validation passed - image can be loaded');
-                alert(`✅ 테스트 성공!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n이제 프리뷰에 표시합니다.`);
-                uploadedImage = dataURL;
+        uploadedImage = e.target.result;
+        console.log('📷 Setting uploadedImage variable');
+        console.log('🔄 Calling updatePinnedItemsDisplay...');
+        updatePinnedItemsDisplay();
+        console.log('✅ updatePinnedItemsDisplay called');
+        
+        // 모바일에서 강제 DOM 업데이트
+        if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+            console.log('📱 Mobile detected, forcing DOM update...');
+            setTimeout(() => {
                 updatePinnedItemsDisplay();
-                console.log('✅ Image processing completed');
-            };
-            testImg.onerror = function() {
-                console.error('❌ Data URL validation failed - image cannot be loaded');
-                console.error('❌ Failed URL length:', dataURL.length, 'Size:', sizeInMB.toFixed(2), 'MB');
-                console.error('❌ Is mobile:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
-                console.error('❌ Data URL header:', dataURL.substring(0, 100));
-                alert(`❌ 테스트 실패!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}\n브라우저가 이 이미지를 표시할 수 없습니다.`);
-            };
-            testImg.src = dataURL;
-            
-        } else {
-            console.error('❌ Invalid image data format:', e.target.result?.substring(0, 100));
-            alert('올바르지 않은 이미지 형식입니다.');
+            }, 100);
         }
     };
     reader.onerror = function(e) {
         console.error('❌ FileReader error:', e);
         console.error('❌ Error details:', e.target.error);
-        console.error('❌ File info:', {
-            name: file.name,
-            size: file.size,
-            type: file.type
-        });
     };
     
     try {
-        // 파일 크기 및 타입 검증
-        console.log('📊 File validation:', {
-            size: file.size + ' bytes (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)',
-            type: file.type,
-            name: file.name
-        });
-        
-        // 매우 큰 파일 경고 (10MB 이상)
-        if (file.size > 10 * 1024 * 1024) {
-            console.warn('⚠️ Very large file detected:', file.size, 'bytes - may cause issues on mobile');
-        }
-        
-        // 이미지 타입 검증
-        if (!file.type.startsWith('image/')) {
-            console.error('❌ Not an image file:', file.type);
-            return;
-        }
-        
-        // 더 안전한 방식으로 readAsDataURL 호출
-        console.log('📱 Starting FileReader.readAsDataURL...');
         reader.readAsDataURL(file);
-        
     } catch (error) {
-        console.error('❌ readAsDataURL setup failed:', error);
+        console.error('❌ readAsDataURL failed:', error);
     }
     
     // EXIF 데이터 추출
@@ -1280,7 +1176,6 @@ function handleImageUpload(event) {
     
     console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
-
 
 function uploadImageToR2(file) {
     console.log('📤 Starting R2 upload for:', file.name);
@@ -1520,7 +1415,7 @@ async function saveOOTD() {
     // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
         date: dateString,
-        location: currentLocation || 'SEOCHO-GU, SEOUL', // OOTD 테이블에는 짧은 주소 저장
+        location: fullCurrentLocation || currentLocation || 'SEOCHO-GU, SEOUL',
         weather: weatherData.weather || 'SUNNY',
         temp_min: weatherData.tempMin || 16,
         temp_max: weatherData.tempMax || 24,
@@ -1532,9 +1427,7 @@ async function saveOOTD() {
             images: item.images
         })),
         uploaded_image: uploadedImage,
-        created_at: new Date().toISOString(),
-        // 착용 로그용 전체 주소 (별도 필드)
-        full_location: fullCurrentLocation || currentLocation || 'SEOCHO-GU, SEOUL'
+        created_at: new Date().toISOString()
     };
     
     console.log('💾 Saving OOTD data:', ootdData);
@@ -1762,10 +1655,16 @@ async function loadDateData() {
             console.log(`✅ Found OOTD data for ${dateString}:`, ootd);
             
             // Load existing OOTD data
-            // OOTD에는 이미 짧은 주소가 저장되어 있음
+            // 저장된 전체 주소에서 표시용 주소 추출
             if (ootd.location) {
-                currentLocation = ootd.location; // 이미 파싱된 짧은 주소
-                fullCurrentLocation = ootd.location; // 동일하게 설정
+                fullCurrentLocation = ootd.location; // 전체 주소 저장
+                // 전체 주소에서 마지막 2개 부분만 표시용으로 사용
+                const locationParts = ootd.location.split(',').map(part => part.trim());
+                if (locationParts.length >= 2) {
+                    currentLocation = locationParts.slice(-2).join(', ').toUpperCase();
+                } else {
+                    currentLocation = ootd.location.toUpperCase();
+                }
             }
             weatherData = {
                 weather: ootd.weather || weatherData.weather,
