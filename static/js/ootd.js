@@ -926,27 +926,16 @@ function displaySearchResults(items) {
         return;
     }
     
-    // 검색 결과 정렬: 핀된 아이템을 맨 앞에 배치
-    const pinnedItemIds = pinnedItems.map(p => p.item_id);
-    const sortedItems = [...items].sort((a, b) => {
-        const aIsPinned = pinnedItemIds.includes(a.item_id);
-        const bIsPinned = pinnedItemIds.includes(b.item_id);
-        
-        if (aIsPinned && !bIsPinned) return -1;
-        if (!aIsPinned && bIsPinned) return 1;
-        return 0;
-    });
-    
-    // closetDB의 정확한 방식으로 검색 결과 표시
+    // closetDB의 정확한 방식으로 검색 결과 표시 (순서 유지)
     container.innerHTML = '';
     
-    sortedItems.slice(0, 20).forEach(item => {
+    items.slice(0, 20).forEach(item => {
         const gridItem = document.createElement('div');
         gridItem.className = 'item_card search_result';
         gridItem.setAttribute('data-item-id', item.item_id); // item_id 추가
         
         // 이미 pin된 아이템인지 확인
-        const isPinned = pinnedItems.find(p => p.item_id === item.item_id);
+        const isPinned = pinnedItems.some(p => p.item_id === item.item_id);
         if (isPinned) {
             gridItem.classList.add('pinned_item');
         }
@@ -1044,8 +1033,8 @@ function pinItem(itemId) {
                     // 핀된 아이템 표시 업데이트 (복제 방지)
                     updatePinnedItemsDisplay();
                     
-                    // 검색 결과 새로고침하여 순서 업데이트
-                    refreshCurrentSearchResults();
+                    // 검색 결과에서 해당 아이템을 시각적으로 pinned 상태로 변경
+                    updateSearchResultPinnedState(item.item_id, true);
                 } else {
                     console.log('⚠️ Item already pinned:', item.item_id);
                 }
@@ -1067,17 +1056,8 @@ function unpinItem(itemId) {
     console.log(`📌 Unpinned: ${beforeCount} → ${afterCount} items`);
     updatePinnedItemsDisplay();
     
-    // 검색 결과 새로고침하여 순서 업데이트
-    refreshCurrentSearchResults();
-}
-
-function refreshCurrentSearchResults() {
-    // 현재 검색 입력값을 다시 검색하여 핀 상태 변경된 순서로 업데이트
-    const searchInput = document.getElementById('item_search');
-    if (searchInput && searchInput.value.trim()) {
-        console.log('🔄 Refreshing search results for:', searchInput.value);
-        searchItems(searchInput.value.trim());
-    }
+    // 검색 결과에서 해당 아이템의 pinned 상태 제거
+    updateSearchResultPinnedState(itemId, false);
 }
 
 function updateSearchResultPinnedState(itemId, isPinned) {
