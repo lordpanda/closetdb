@@ -57,8 +57,10 @@
                 <div class="info_pill location_pill_clickable" id="location_display" onclick="handleLocationClick()">
                     <span id="location_text">SEOCHO-GU, SEOUL</span>
                 </div>
-                <input type="text" id="location_input" class="location_input hidden" placeholder="Enter location..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
-                <div class="hidden" id="location_dropdown"></div>
+                <div class="location_input_container">
+                    <input type="text" id="location_input" class="location_input hidden" placeholder="Enter location..." autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
+                    <div class="location_dropdown hidden" id="location_dropdown"></div>
+                </div>
             </div>
 
             <!-- Weather Info Row -->

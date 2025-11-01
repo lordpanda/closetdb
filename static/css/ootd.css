@@ -285,8 +285,7 @@
     position: relative;
     width: 100%;
     max-width: 500px;
-    display: flex;
-    justify-content: center;
+    display: block;
 }
 
 .location_input {
