@@ -1223,8 +1223,8 @@ function handleImageUpload(event) {
             const testImg = new Image();
             testImg.onload = function() {
                 console.log('✅ Data URL validation passed - image can be loaded');
+                alert(`✅ 테스트 성공!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n이제 프리뷰에 표시합니다.`);
                 uploadedImage = dataURL;
-                                
                 updatePinnedItemsDisplay();
                 console.log('✅ Image processing completed');
             };
