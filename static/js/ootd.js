@@ -1157,10 +1157,7 @@ function handleImageUpload(event) {
     console.log('📁 Files object exists:', !!event.target.files);
     console.log('📁 Files object:', event.target.files);
     console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
-    
-    // 모바일 디버깅용 alert
-    alert(`📱 업로드 시작!\n파일 개수: ${event.target.files ? event.target.files.length : 0}\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}`);
-    
+       
     // 모바일에서 파일 선택 확인
     if (!event.target.files) {
         console.error('❌ Files object is null - mobile browser issue?');
@@ -1190,7 +1187,6 @@ function handleImageUpload(event) {
     
     // 파일 정보 alert 표시
     const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-    alert(`📷 파일 선택됨!\n이름: ${file.name}\n크기: ${fileSizeMB}MB\n타입: ${file.type}`);
     
     // 즉시 로컬 프리뷰 표시 (가장 우선)
     console.log('🔧 Starting FileReader for preview...');
@@ -1201,10 +1197,7 @@ function handleImageUpload(event) {
         console.log('✅ FileReader completed, data length:', e.target.result.length);
         console.log('📱 Preview data type:', typeof e.target.result);
         console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
-        
-        // FileReader 완료 alert
-        alert(`📖 파일 읽기 완료!\n데이터 길이: ${e.target.result.length}자\n타입: ${typeof e.target.result}\n시작: ${e.target.result.substring(0, 30)}...`);
-        
+                
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
             // 데이터 URL 검증
@@ -1593,6 +1586,9 @@ async function saveOOTD() {
         
         alert(`저장 완료!\n- PIN된 아이템: ${pinnedItems.length}개\n- 업로드 이미지: ${uploadedImage ? '있음' : '없음'}\n- 날짜: ${dateString}\n- 위치: ${currentLocation}`);
         
+        // 저장 완료 후 VIEW 탭으로 자동 이동
+        switchTab('view');
+        
     } catch (error) {
         console.error('❌ Save error:', error);
         alert(`저장 중 오류가 발생했습니다:\n${error.message}`);
@@ -1914,6 +1910,11 @@ async function loadSavedOOTDs() {
                     ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
                 </div>
                 <div class="ootd_items_grid">
+                    ${ootd.uploaded_image ? `
+                        <div class="ootd_item_card">
+                            <img src="${ootd.uploaded_image}" alt="OOTD" class="ootd_item_image">
+                        </div>
+                    ` : ''}
                     ${ootd.items && ootd.items.length > 0 ? ootd.items.map(item => `
                         <div class="ootd_item_card">
                             ${item.images && item.images.length > 0 
@@ -1922,11 +1923,6 @@ async function loadSavedOOTDs() {
                             }
                         </div>
                     `).join('') : ''}
-                    ${ootd.uploaded_image ? `
-                        <div class="ootd_item_card">
-                            <img src="${ootd.uploaded_image}" alt="OOTD" class="ootd_item_image">
-                        </div>
-                    ` : ''}
                     ${(!ootd.items || ootd.items.length === 0) && !ootd.uploaded_image ? '<div class="no_items">No items saved</div>' : ''}
                 </div>
             </div>
