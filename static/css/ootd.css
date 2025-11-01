@@ -4,7 +4,7 @@
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
-    border-bottom: 2px solid var(--lightgray);
+    border-bottom: 2px solid var(--white);
 }
 
 .tab_button {
@@ -21,11 +21,11 @@
 
 .tab_button.active {
     color: var(--black);
-    border-bottom-color: var(--purple);
+    border-bottom-color: var(--black);
 }
 
 .tab_button:hover {
-    color: var(--black);
+    color: var(--white);
 }
 
 .tab_content {
@@ -759,7 +759,7 @@
         background: none;
         border: none;
         border-radius: 16px;
-        padding: 8px 16px;
+        padding: 8px;
         cursor: pointer;
         display: flex;
         flex-direction: column;

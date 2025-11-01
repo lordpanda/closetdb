@@ -159,7 +159,6 @@ function setupEventListeners() {
         console.log('🧪 Testing file input click...');
         imageUploadInput.addEventListener('change', handleImageUpload);
         console.log('✅ Image upload event listener attached');
-        alert('📱 이벤트 리스너 설정 완료!');
         
         // Add test click handler
         imageUploadInput.addEventListener('click', () => {
