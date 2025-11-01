@@ -1905,29 +1905,48 @@ async function loadSavedOOTDs() {
             return;
         }
         
-        container.innerHTML = savedOOTDs.map(ootd => `
-            <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
-                <div class="ootd_date_header">
-                    ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
+        container.innerHTML = savedOOTDs.map(ootd => {
+            // 카테고리 우선순위 정의: 1. outer, 2. dress, 3. top, 4. skirt, 5. pants, 6. shoes, 7. 기타
+            const categoryOrder = {
+                'outer': 1,
+                'dress': 2, 
+                'top': 3,
+                'skirt': 4,
+                'pants': 5,
+                'shoes': 6
+            };
+            
+            // 아이템들을 카테고리 순서대로 정렬
+            const sortedItems = (ootd.items || []).sort((a, b) => {
+                const orderA = categoryOrder[a.category?.toLowerCase()] || 999;
+                const orderB = categoryOrder[b.category?.toLowerCase()] || 999;
+                return orderA - orderB;
+            });
+            
+            return `
+                <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
+                    <div class="ootd_date_header">
+                        ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
+                    </div>
+                    <div class="ootd_items_grid">
+                        ${ootd.uploaded_image ? `
+                            <div class="ootd_item_card">
+                                <img src="${ootd.uploaded_image}" alt="OOTD" class="ootd_item_image">
+                            </div>
+                        ` : ''}
+                        ${sortedItems.length > 0 ? sortedItems.map(item => `
+                            <div class="ootd_item_card">
+                                ${item.images && item.images.length > 0 
+                                    ? `<img src="${item.images[0]}" alt="${item.brand}" class="ootd_item_image">`
+                                    : `<div class="ootd_item_placeholder">${(item.category || '?').charAt(0).toUpperCase()}</div>`
+                                }
+                            </div>
+                        `).join('') : ''}
+                        ${(!ootd.items || ootd.items.length === 0) && !ootd.uploaded_image ? '<div class="no_items">No items saved</div>' : ''}
+                    </div>
                 </div>
-                <div class="ootd_items_grid">
-                    ${ootd.items && ootd.items.length > 0 ? ootd.items.map(item => `
-                        <div class="ootd_item_card">
-                            ${item.images && item.images.length > 0 
-                                ? `<img src="${item.images[0]}" alt="${item.brand}" class="ootd_item_image">`
-                                : `<div class="ootd_item_placeholder">${(item.category || '?').charAt(0).toUpperCase()}</div>`
-                            }
-                        </div>
-                    `).join('') : ''}
-                    ${ootd.uploaded_image ? `
-                        <div class="ootd_item_card">
-                            <img src="${ootd.uploaded_image}" alt="OOTD" class="ootd_item_image">
-                        </div>
-                    ` : ''}
-                    ${(!ootd.items || ootd.items.length === 0) && !ootd.uploaded_image ? '<div class="no_items">No items saved</div>' : ''}
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     } catch (error) {
         console.error('❌ Error loading OOTDs:', error);
         container.innerHTML = '<div class="no_items">Error loading OOTDs. Check console for details.</div>';
