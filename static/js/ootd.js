@@ -1520,14 +1520,6 @@ function reverseGeocode(lat, lon) {
         });
 }
 
-function removeUploadedImage() {
-    uploadedImage = null;
-    const imagePreview = document.getElementById('image_preview');
-    if (imagePreview) {
-        imagePreview.innerHTML = '';
-    }
-    document.getElementById('ootd_image_upload').value = '';
-}
 
 async function saveOOTD() {
     const dateString = formatDateForInput(currentDate);
@@ -1926,7 +1918,10 @@ async function loadSavedOOTDs() {
             return `
                 <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
                     <div class="ootd_date_header">
-                        ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
+                        ${ootd.date}
+                        <div class="ootd_weather_header">
+                            ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
+                        </div>
                     </div>
                     <div class="ootd_items_grid">
                         ${ootd.uploaded_image ? `
