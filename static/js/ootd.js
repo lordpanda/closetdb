@@ -1151,46 +1151,152 @@ function handleImageLoadError(imgElement) {
 }
 
 function handleImageUpload(event) {
-    if (!event.target.files || event.target.files.length === 0) {
+    console.log('🚨 === IMAGE UPLOAD EVENT TRIGGERED ===');
+    console.log('📱 User agent:', navigator.userAgent);
+    console.log('📁 Event type:', event.type);
+    console.log('📁 Event target:', event.target);
+    console.log('📁 Input element:', event.target.tagName, event.target.type, event.target.accept);
+    console.log('📁 Files object exists:', !!event.target.files);
+    console.log('📁 Files object:', event.target.files);
+    console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
+       
+    // 모바일에서 파일 선택 확인
+    if (!event.target.files) {
+        console.error('❌ Files object is null - mobile browser issue?');
+        alert('파일 선택에 실패했습니다. 브라우저를 새로고침 후 다시 시도해주세요.');
+        return;
+    }
+    
+    if (event.target.files.length === 0) {
+        console.error('❌ No files selected by user');
+        alert('파일이 선택되지 않았습니다.');
         return;
     }
     
     const file = event.target.files[0];
-    if (!file || !file.type.startsWith('image/')) {
+    if (!file) {
+        console.error('❌ First file is null/undefined');
+        alert('선택된 파일을 읽을 수 없습니다.');
         return;
     }
     
-    // 파일 크기 제한 (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-        alert('이미지 파일이 너무 큽니다. 10MB 이하의 파일을 선택해주세요.');
-        return;
-    }
+    console.log('📷 File selected:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+    });
+    
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
     
     // 즉시 로컬 프리뷰 표시 (가장 우선)
+    console.log('🔧 Starting FileReader for preview...');
+    console.log('📱 Mobile check:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+    
     const reader = new FileReader();
     reader.onload = function(e) {
+        console.log('✅ FileReader completed, data length:', e.target.result.length);
+        console.log('📱 Preview data type:', typeof e.target.result);
+        console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
+                
+        // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
-            // 로컬 이미지 즉시 설정
-            uploadedImage = e.target.result;
-            updatePinnedItemsDisplay();
+            // 데이터 URL 검증
+            const dataURL = e.target.result;
+            const sizeInMB = (dataURL.length * 0.75) / (1024 * 1024); // Base64는 약 1.33배 크므로 0.75로 실제 크기 추정
+            
+            console.log('📊 Data URL validation:', {
+                length: dataURL.length,
+                estimatedMB: sizeInMB.toFixed(2),
+                header: dataURL.substring(0, 50),
+                isValidBase64: /^data:image\/[a-zA-Z]+;base64,/.test(dataURL)
+            });
+            
+            // 모바일에서 너무 큰 데이터 URL 문제 체크 (20MB 이상)
+            if (sizeInMB > 20) {
+                console.error('❌ Data URL too large for mobile:', sizeInMB.toFixed(2), 'MB');
+                alert(`이미지가 너무 큽니다 (${sizeInMB.toFixed(1)}MB). 더 작은 이미지를 선택해주세요.`);
+                return;
+            }
+            
+            // 브라우저 테스트용 작은 이미지 생성
+            const testImg = new Image();
+            testImg.onload = function() {
+                console.log('✅ Data URL validation passed - image can be loaded');
+                uploadedImage = dataURL;
+                                
+                updatePinnedItemsDisplay();
+                console.log('✅ Image processing completed');
+            };
+            testImg.onerror = function() {
+                console.error('❌ Data URL validation failed - image cannot be loaded');
+                console.error('❌ Failed URL length:', dataURL.length, 'Size:', sizeInMB.toFixed(2), 'MB');
+                console.error('❌ Is mobile:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
+                console.error('❌ Data URL header:', dataURL.substring(0, 100));
+                alert(`❌ 테스트 실패!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}\n브라우저가 이 이미지를 표시할 수 없습니다.`);
+            };
+            testImg.src = dataURL;
+            
+        } else {
+            console.error('❌ Invalid image data format:', e.target.result?.substring(0, 100));
+            alert('올바르지 않은 이미지 형식입니다.');
         }
     };
-    
-    reader.onerror = function() {
-        alert('이미지 파일을 읽을 수 없습니다. 다른 파일을 선택해주세요.');
+    reader.onerror = function(e) {
+        console.error('❌ FileReader error:', e);
+        console.error('❌ Error details:', e.target.error);
+        console.error('❌ File info:', {
+            name: file.name,
+            size: file.size,
+            type: file.type
+        });
+        
+        // FileReader 오류 alert
+        alert(`❌ 파일 읽기 실패!\n파일: ${file.name}\n크기: ${(file.size / 1024 / 1024).toFixed(2)}MB\n오류: ${e.target.error || '알 수 없는 오류'}`);
     };
     
-    reader.readAsDataURL(file);
+    try {
+        // 파일 크기 및 타입 검증
+        console.log('📊 File validation:', {
+            size: file.size + ' bytes (' + (file.size / 1024 / 1024).toFixed(2) + ' MB)',
+            type: file.type,
+            name: file.name
+        });
+        
+        // 매우 큰 파일 경고 (10MB 이상)
+        if (file.size > 10 * 1024 * 1024) {
+            console.warn('⚠️ Very large file detected:', file.size, 'bytes - may cause issues on mobile');
+        }
+        
+        // 이미지 타입 검증
+        if (!file.type.startsWith('image/')) {
+            console.error('❌ Not an image file:', file.type);
+            return;
+        }
+        
+        // 더 안전한 방식으로 readAsDataURL 호출
+        console.log('📱 Starting FileReader.readAsDataURL...');
+        reader.readAsDataURL(file);
+        
+    } catch (error) {
+        console.error('❌ readAsDataURL setup failed:', error);
+    }
     
     // EXIF 데이터 추출
+    console.log('🔧 Starting EXIF extraction...');
     extractEXIFData(file);
     
-    // R2 업로드 (백그라운드에서 원본 파일 사용)
+    // R2 업로드 활성화
+    console.log('📤 Starting R2 upload...');
     uploadImageToR2(file);
+    
+    console.log('🚨 === IMAGE UPLOAD PROCESSING COMPLETE ===');
 }
 
 
 function uploadImageToR2(file) {
+    console.log('📤 Starting R2 upload for:', file.name);
+    
     const formData = new FormData();
     formData.append('image', file);
     
@@ -1199,8 +1305,13 @@ function uploadImageToR2(file) {
         body: formData
     })
     .then(async response => {
+        console.log('📡 R2 upload response status:', response.status);
+        console.log('📡 R2 upload response headers:', response.headers);
+        
         if (!response.ok) {
+            // 에러 응답의 내용을 텍스트로 읽기
             const errorText = await response.text();
+            console.error('❌ Server error response:', errorText);
             throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 200)}...`);
         }
         
@@ -1208,14 +1319,21 @@ function uploadImageToR2(file) {
     })
     .then(data => {
         if (data.success || data.url) {
+            console.log('✅ Image uploaded to R2:', data.url);
             // R2 업로드 성공 시 URL 교체
             uploadedImage = data.url;
+            console.log('🔄 Updating preview with R2 URL');
             updatePinnedItemsDisplay(); // R2 URL로 업데이트
+        } else {
+            console.error('❌ Upload failed:', data.error);
+            // 실패 시 로컬 이미지 유지 (이미 설정됨)
+            console.log('🔄 Keeping local preview');
         }
     })
     .catch(error => {
+        console.error('❌ Upload error details:', error);
         // 네트워크 오류 시에도 로컬 이미지는 유지
-        console.error('R2 upload failed, keeping local preview');
+        console.log('🔄 Upload failed, using local preview');
     });
 }
 
@@ -1432,6 +1550,14 @@ async function saveOOTD() {
     };
     
     console.log('💾 Saving OOTD data:', ootdData);
+    console.log('📌 Current pinnedItems:', pinnedItems);
+    console.log('📌 pinnedItems length:', pinnedItems.length);
+    console.log('📌 pinnedItems mapped:', pinnedItems.map(item => ({
+        id: item.item_id,
+        brand: item.brand,
+        category: item.category,
+        images: item.images
+    })));
     console.log('📋 Items for wear logging:', ootdData.items.map(item => ({id: item.id, item_id: item.item_id})));
     console.log('📋 Serialized JSON:', JSON.stringify(ootdData));
     
