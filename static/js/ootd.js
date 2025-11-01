@@ -159,16 +159,20 @@ function setupEventListeners() {
         console.log('🧪 Testing file input click...');
         imageUploadInput.addEventListener('change', handleImageUpload);
         console.log('✅ Image upload event listener attached');
+        alert('📱 이벤트 리스너 설정 완료!');
         
         // Add test click handler
         imageUploadInput.addEventListener('click', () => {
             console.log('🖱️ File input clicked!');
+            alert('📱 파일 입력 클릭됨!');
         });
     } else {
         console.error('❌ ootd_image_upload element not found!');
+        alert('❌ 파일 업로드 요소를 찾을 수 없습니다!');
         // Search for it manually
         const allInputs = document.querySelectorAll('input[type="file"]');
         console.log('🔍 All file inputs found:', allInputs.length);
+        alert(`📁 파일 입력 요소 개수: ${allInputs.length}`);
         allInputs.forEach((input, i) => {
             console.log(`File input ${i}:`, input.id, input.className);
         });
@@ -1105,7 +1109,7 @@ function updatePinnedItemsDisplay() {
     } else {
         console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
+            <div class="item_card empty photo_upload" onclick="alert('📱 사진 업로드 버튼 클릭됨!'); console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); alert('📱 Input 요소: ' + (!!input ? '찾음' : '못찾음')); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
@@ -1529,6 +1533,9 @@ function removeUploadedImage() {
 
 async function saveOOTD() {
     const dateString = formatDateForInput(currentDate);
+    
+    // uploadedImage 상태 확인
+    alert(`💾 OOTD 저장 시작!\n업로드된 이미지: ${uploadedImage ? '있음' : '없음'}\n타입: ${typeof uploadedImage}\n길이: ${uploadedImage?.length || 0}`);
     
     // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
