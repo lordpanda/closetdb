@@ -1588,6 +1588,10 @@ async function saveOOTD() {
         
         alert(`저장 완료!\n- PIN된 아이템: ${pinnedItems.length}개\n- 업로드 이미지: ${uploadedImage ? '있음' : '없음'}\n- 날짜: ${dateString}\n- 위치: ${currentLocation}`);
         
+        // 저장 완료 후 VIEW 탭으로 자동 이동
+        console.log('📋 Switching to VIEW tab after save...');
+        switchTab('view');
+        
     } catch (error) {
         console.error('❌ Save error:', error);
         alert(`저장 중 오류가 발생했습니다:\n${error.message}`);
