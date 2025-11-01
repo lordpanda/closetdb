@@ -1098,11 +1098,11 @@ function updatePinnedItemsDisplay() {
         });
         
         html += `
-            <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
+            <div class="item_card uploaded_photo" onclick="handleUploadedPhotoClick(event)">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
                      onerror="handleImageLoadError(this);" 
                      onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
-                <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
+                <button class="remove_item_btn" onclick="handleRemoveUploadedImage(event)" title="Remove image">×</button>
             </div>
         `;
     } else {
@@ -1961,6 +1961,24 @@ function removeUploadedImage() {
     // Update the display
     updatePinnedItemsDisplay();
     console.log('✅ Uploaded image removed');
+}
+
+function handleRemoveUploadedImage(event) {
+    console.log('🗑️ Remove button clicked');
+    event.preventDefault();
+    event.stopPropagation();
+    removeUploadedImage();
+}
+
+function handleUploadedPhotoClick(event) {
+    // Check if click target is the remove button or its child
+    if (event.target.classList.contains('remove_item_btn') || event.target.closest('.remove_item_btn')) {
+        console.log('🗑️ Remove button area clicked, ignoring photo click');
+        return;
+    }
+    
+    console.log('📱 Uploaded photo clicked, opening file input');
+    document.getElementById('ootd_image_upload').click();
 }
 
 function loadOOTDForEdit(date) {

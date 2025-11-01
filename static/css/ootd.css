@@ -609,7 +609,7 @@
     color: var(--black);
 }
 
-.ootd_weather_info {
+.ootd_weather_header {
     font-family: 'LeferiPointBlack', sans-serif;
     font-size: 1rem;
     color: var(--black);
@@ -703,11 +703,13 @@
 .item_card.pinned_item .remove_item_btn {
     opacity: 0;
     transition: opacity 0.2s ease;
+    pointer-events: none;
 }
 
 .item_card.uploaded_photo:hover .remove_item_btn,
 .item_card.pinned_item:hover .remove_item_btn {
     opacity: 1;
+    pointer-events: auto;
 }
 
 /* Mobile Responsive */
@@ -749,9 +751,9 @@
         background: white;
         border: 2px solid var(--black);
         border-radius: 34px;
-        padding: 8px;
+        padding: 12px 24px;
         display: flex;
-        gap: 8px;
+        gap: 16px;
         margin-bottom: 16px;
         z-index: 100;
     }
@@ -759,12 +761,12 @@
         background: none;
         border: none;
         border-radius: 16px;
-        padding: 8px;
         cursor: pointer;
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 4px;
+        padding: 0;
         transition: all 0.2s;
         font-family: 'Sequel45';
     }
