@@ -170,7 +170,6 @@ function setupEventListeners() {
         // Search for it manually
         const allInputs = document.querySelectorAll('input[type="file"]');
         console.log('🔍 All file inputs found:', allInputs.length);
-        alert(`📁 파일 입력 요소 개수: ${allInputs.length}`);
         allInputs.forEach((input, i) => {
             console.log(`File input ${i}:`, input.id, input.className);
         });
@@ -1095,10 +1094,7 @@ function updatePinnedItemsDisplay() {
             startsWithData: uploadedImage?.startsWith('data:'),
             preview: uploadedImage?.substring(0, 50) + '...'
         });
-        
-        // 프리뷰 표시 전 uploadedImage 재확인
-        alert(`🖼️ 프리뷰 표시 직전!\nuploadedImage 길이: ${uploadedImage.length}자\n타입: ${typeof uploadedImage}\n시작: ${uploadedImage.substring(0, 50)}...`);
-        
+                
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
                 <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
@@ -1185,7 +1181,6 @@ function handleImageUpload(event) {
         lastModified: file.lastModified
     });
     
-    // 파일 정보 alert 표시
     const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
     
     // 즉시 로컬 프리뷰 표시 (가장 우선)
@@ -1222,12 +1217,8 @@ function handleImageUpload(event) {
             const testImg = new Image();
             testImg.onload = function() {
                 console.log('✅ Data URL validation passed - image can be loaded');
-                alert(`✅ 테스트 성공!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n이제 프리뷰에 표시합니다.`);
                 uploadedImage = dataURL;
-                
-                // uploadedImage 저장 확인
-                alert(`💾 변수 저장 확인!\nuploadedImage 길이: ${uploadedImage.length}자\n타입: ${typeof uploadedImage}\n시작: ${uploadedImage.substring(0, 50)}...`);
-                
+                                
                 updatePinnedItemsDisplay();
                 console.log('✅ Image processing completed');
             };
@@ -1531,10 +1522,7 @@ function removeUploadedImage() {
 
 async function saveOOTD() {
     const dateString = formatDateForInput(currentDate);
-    
-    // uploadedImage 상태 확인
-    alert(`💾 OOTD 저장 시작!\n업로드된 이미지: ${uploadedImage ? '있음' : '없음'}\n타입: ${typeof uploadedImage}\n길이: ${uploadedImage?.length || 0}`);
-    
+        
     // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
         date: dateString,
