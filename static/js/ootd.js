@@ -1165,18 +1165,41 @@ function handleImageUpload(event) {
         
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
-            uploadedImage = e.target.result;
-            console.log('✅ Original image data set to uploadedImage variable');
-            console.log('📝 uploadedImage now contains:', uploadedImage.substring(0, 100) + '...');
+            // 데이터 URL 검증
+            const dataURL = e.target.result;
+            const sizeInMB = (dataURL.length * 0.75) / (1024 * 1024); // Base64는 약 1.33배 크므로 0.75로 실제 크기 추정
             
-            // 강제로 전역 변수 설정 확인
-            window.debugUploadedImage = uploadedImage;
-            console.log('🔍 Global debug variable set:', !!window.debugUploadedImage);
+            console.log('📊 Data URL validation:', {
+                length: dataURL.length,
+                estimatedMB: sizeInMB.toFixed(2),
+                header: dataURL.substring(0, 50),
+                isValidBase64: /^data:image\/[a-zA-Z]+;base64,/.test(dataURL)
+            });
             
-            updatePinnedItemsDisplay();
-            console.log('✅ Image processing completed');
+            // 모바일에서 너무 큰 데이터 URL 문제 체크 (20MB 이상)
+            if (sizeInMB > 20) {
+                console.error('❌ Data URL too large for mobile:', sizeInMB.toFixed(2), 'MB');
+                alert(`이미지가 너무 큽니다 (${sizeInMB.toFixed(1)}MB). 더 작은 이미지를 선택해주세요.`);
+                return;
+            }
+            
+            // 브라우저 테스트용 작은 이미지 생성
+            const testImg = new Image();
+            testImg.onload = function() {
+                console.log('✅ Data URL validation passed - image can be loaded');
+                uploadedImage = dataURL;
+                updatePinnedItemsDisplay();
+                console.log('✅ Image processing completed');
+            };
+            testImg.onerror = function() {
+                console.error('❌ Data URL validation failed - image cannot be loaded');
+                alert('이미지 데이터가 손상되었습니다. 다른 이미지를 선택해주세요.');
+            };
+            testImg.src = dataURL;
+            
         } else {
             console.error('❌ Invalid image data format:', e.target.result?.substring(0, 100));
+            alert('올바르지 않은 이미지 형식입니다.');
         }
     };
     reader.onerror = function(e) {
