@@ -7,9 +7,9 @@ let uploadedImage = null;
 let currentLocation = 'SEOCHO-GU, SEOUL'; // 표시용 (간단한 주소)
 let fullCurrentLocation = 'SEOCHO-GU, SEOUL'; // 저장용 (전체 주소)
 let weatherData = {
-    weather: 'SUNNY',
-    tempMin: 16,
-    tempMax: 24,
+    weather: '',
+    tempMin: 1,
+    tempMax: 2,
     precipitation: 0
 };
 let currentCoords = null;
@@ -368,8 +368,8 @@ async function updateLocationAndWeather(locationQuery) {
               if (code >= 85 && code <= 86) return 'SNOWY';
               if (code >= 95 && code <= 99) return 'RAINY';
               
-              console.log('⚠️ Unknown location weather code:', code, 'defaulting to SUNNY');
-              return 'SUNNY';
+              console.log('⚠️ Unknown location weather code:', code, 'defaulting to UNKNOWN');
+              return 'UNKNOWN';
             };
 
             const weatherType = getWeatherType(weatherCode);
@@ -1527,10 +1527,10 @@ async function saveOOTD() {
     const ootdData = {
         date: dateString,
         location: currentLocation || 'SEOCHO-GU, SEOUL', // OOTD 테이블에는 짧은 주소 저장
-        weather: weatherData.weather || 'SUNNY',
-        temp_min: weatherData.tempMin || 16,
-        temp_max: weatherData.tempMax || 24,
-        precipitation: weatherData.precipitation || 0,
+        weather: weatherData.weather,
+        temp_min: weatherData.tempMin,
+        temp_max: weatherData.tempMax,
+        precipitation: weatherData.precipitation,
         items: pinnedItems.map(item => ({
             id: item.item_id,
             brand: item.brand,
@@ -1895,7 +1895,8 @@ async function loadSavedOOTDs() {
         container.innerHTML = savedOOTDs.map(ootd => `
             <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
                 <div class="ootd_date_header">
-                    ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
+                    <span class="ootd_date">${ootd.date}</span>
+                    <span class="ootd_weather_info">${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}</span>
                 </div>
                 <div class="ootd_items_grid">
                     ${ootd.uploaded_image ? `

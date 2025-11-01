@@ -596,6 +596,21 @@
     margin-bottom: 1rem;
     color: var(--black);
     font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ootd_date {
+    font-family: 'Sequel55';
+    font-weight: bold;
+    color: var(--black);
+}
+
+.ootd_weather_info {
+    font-family: 'LeferiPointBlack', sans-serif;
+    font-size: 0.9rem;
+    color: var(--gray);
 }
 
 .ootd_items_grid {
