@@ -282,11 +282,13 @@
 
 /* Location Input Container */
 .location_input_container {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
     width: 100%;
     max-width: 500px;
     display: block;
-    margin: 0 auto;
 }
 
 .location_input {
@@ -313,39 +315,38 @@
 
 /* 브라우저 자동완성 완전 제거 */
 .location_input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    background-color: white !important;
+    -webkit-box-shadow: 0 0 0 1000px white inset;
+    background-color: white;
 }
 
 .location_input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    background-color: white !important;
+    -webkit-box-shadow: 0 0 0 1000px white inset;
+    background-color: white;
 }
 
 /* Location Dropdown */
 .location_dropdown {
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    min-width: 300px !important;
-    max-width: 500px !important;
-    margin: 0 auto !important;
-    background: white !important;
-    border: 2px solid var(--black) !important;
-    border-top: none !important;
-    border-radius: 0 0 24px 24px !important;
-    max-height: 200px !important;
-    overflow-y: auto !important;
-    z-index: 9999 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+    position: absolute;
+    top: 100% ;
+    left: 0 ;
+    right: 0 ;
+    width: 100% ;
+    min-width: 300px;
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    border-top: none;
+    border-radius: 24px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9999;
+    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
 .location_dropdown.hidden {
-    display: none !important;
+    display: none;
 }
 
 .location_dropdown_item {
@@ -556,11 +557,11 @@
 
 /* Upload Section - ootdLog style - HIDDEN */
 .upload_container {
-    display: none !important;
+    display: none;
 }
 
 .upload_btn {
-    display: none !important;
+    display: none;
 }
 
 .upload_btn:hover {
