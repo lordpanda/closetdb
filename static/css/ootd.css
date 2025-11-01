@@ -582,7 +582,7 @@
 }
 
 .ootd_entry {
-    background: rgba(255, 255, 255, 0.363);
+    background: var(--white);
     border-radius: 22px;
     padding: 1rem;
     cursor: pointer;
@@ -734,11 +734,38 @@
         font-size: 1.5rem;
     }
 }
-@media (max-width: 768px) {
+@media (max-width: 400px) {
     .ootd_date {
         font-size: 1rem;
     }
     .item_card.search_result.pinned_item {
         border: 2px solid var(--black);
+    }
+    .tab_navigation {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        border: 2px solid var(--black);
+        border-radius: 34px;
+        padding: 8px;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        z-index: 100;
+    }
+    .tab_button {
+        background: none;
+        border: none;
+        border-radius: 16px;
+        padding: 8px 16px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+        font-family: 'Sequel45';
     }
 }
