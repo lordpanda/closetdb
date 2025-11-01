@@ -488,14 +488,11 @@
 }
 
 .item_card.search_result.pinned_item {
-    border: 3px solid var(--purple) !important;
-    box-shadow: 0 4px 12px rgba(124, 111, 176, 0.3) !important;
+    border: 3px solid var(--black) !important;
 }
 
 .item_card.search_result.pinned_item:hover {
     border: 3px solid var(--purple) !important;
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(124, 111, 176, 0.5) !important;
 }
 
 .item_card.empty {

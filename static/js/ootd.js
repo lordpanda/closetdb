@@ -996,11 +996,13 @@ function displaySearchResults(items) {
             gridItem.appendChild(img);
         }
         
-        // 클릭 이벤트 추가 (검색 결과 유지)
+        // 클릭 이벤트 추가 - pin된 아이템이면 unpin, 아니면 pin
         gridItem.addEventListener('click', () => {
-            pinItem(item.item_id);
-            // pin 성공 시 시각적 피드백
-            gridItem.classList.add('pinned_item');
+            if (isPinned) {
+                unpinItem(item.item_id);
+            } else {
+                pinItem(item.item_id);
+            }
         });
         
         container.appendChild(gridItem);
@@ -1042,8 +1044,8 @@ function pinItem(itemId) {
                     // 핀된 아이템 표시 업데이트 (복제 방지)
                     updatePinnedItemsDisplay();
                     
-                    // 검색 결과에서 해당 아이템을 시각적으로 pinned 상태로 변경
-                    updateSearchResultPinnedState(item.item_id, true);
+                    // 검색 결과 새로고침하여 순서 업데이트
+                    refreshCurrentSearchResults();
                 } else {
                     console.log('⚠️ Item already pinned:', item.item_id);
                 }
@@ -1065,8 +1067,17 @@ function unpinItem(itemId) {
     console.log(`📌 Unpinned: ${beforeCount} → ${afterCount} items`);
     updatePinnedItemsDisplay();
     
-    // 검색 결과에서 해당 아이템의 pinned 상태 제거
-    updateSearchResultPinnedState(itemId, false);
+    // 검색 결과 새로고침하여 순서 업데이트
+    refreshCurrentSearchResults();
+}
+
+function refreshCurrentSearchResults() {
+    // 현재 검색 입력값을 다시 검색하여 핀 상태 변경된 순서로 업데이트
+    const searchInput = document.getElementById('item_search');
+    if (searchInput && searchInput.value.trim()) {
+        console.log('🔄 Refreshing search results for:', searchInput.value);
+        searchItems(searchInput.value.trim());
+    }
 }
 
 function updateSearchResultPinnedState(itemId, isPinned) {
