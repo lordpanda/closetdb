@@ -1153,6 +1153,9 @@ function handleImageUpload(event) {
     console.log('📁 Files object:', event.target.files);
     console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
     
+    // 모바일 디버깅용 alert
+    alert(`📱 업로드 시작!\n파일 개수: ${event.target.files ? event.target.files.length : 0}\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}`);
+    
     // 모바일에서 파일 선택 확인
     if (!event.target.files) {
         console.error('❌ Files object is null - mobile browser issue?');
@@ -1180,6 +1183,10 @@ function handleImageUpload(event) {
         lastModified: file.lastModified
     });
     
+    // 파일 정보 alert 표시
+    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    alert(`📷 파일 선택됨!\n이름: ${file.name}\n크기: ${fileSizeMB}MB\n타입: ${file.type}`);
+    
     // 즉시 로컬 프리뷰 표시 (가장 우선)
     console.log('🔧 Starting FileReader for preview...');
     console.log('📱 Mobile check:', /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent));
@@ -1189,6 +1196,9 @@ function handleImageUpload(event) {
         console.log('✅ FileReader completed, data length:', e.target.result.length);
         console.log('📱 Preview data type:', typeof e.target.result);
         console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
+        
+        // FileReader 완료 alert
+        alert(`📖 파일 읽기 완료!\n데이터 길이: ${e.target.result.length}자\n타입: ${typeof e.target.result}\n시작: ${e.target.result.substring(0, 30)}...`);
         
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
@@ -1241,6 +1251,9 @@ function handleImageUpload(event) {
             size: file.size,
             type: file.type
         });
+        
+        // FileReader 오류 alert
+        alert(`❌ 파일 읽기 실패!\n파일: ${file.name}\n크기: ${(file.size / 1024 / 1024).toFixed(2)}MB\n오류: ${e.target.error || '알 수 없는 오류'}`);
     };
     
     try {
