@@ -926,12 +926,24 @@ function displaySearchResults(items) {
         return;
     }
     
+    // 검색 결과 정렬: 핀된 아이템을 맨 앞에 배치
+    const pinnedItemIds = pinnedItems.map(p => p.item_id);
+    const sortedItems = [...items].sort((a, b) => {
+        const aIsPinned = pinnedItemIds.includes(a.item_id);
+        const bIsPinned = pinnedItemIds.includes(b.item_id);
+        
+        if (aIsPinned && !bIsPinned) return -1;
+        if (!aIsPinned && bIsPinned) return 1;
+        return 0;
+    });
+    
     // closetDB의 정확한 방식으로 검색 결과 표시
     container.innerHTML = '';
     
-    items.slice(0, 20).forEach(item => {
+    sortedItems.slice(0, 20).forEach(item => {
         const gridItem = document.createElement('div');
         gridItem.className = 'item_card search_result';
+        gridItem.setAttribute('data-item-id', item.item_id); // item_id 추가
         
         // 이미 pin된 아이템인지 확인
         const isPinned = pinnedItems.find(p => p.item_id === item.item_id);
@@ -1020,19 +1032,20 @@ function pinItem(itemId) {
             if (data.item) {
                 const item = data.item;
                 console.log('✅ Item found:', item);
-                if (!pinnedItems.find(p => p.item_id === item.item_id)) {
+                
+                // 중복 방지: item_id로 정확히 비교
+                const alreadyPinned = pinnedItems.find(p => p.item_id === item.item_id);
+                if (!alreadyPinned) {
                     pinnedItems.push(item);
                     console.log('📌 Item pinned, total pinned:', pinnedItems.length);
+                    
+                    // 핀된 아이템 표시 업데이트 (복제 방지)
                     updatePinnedItemsDisplay();
                     
-                    // 검색 결과를 다시 표시하여 pinned 상태 업데이트
-                    const searchInput = document.getElementById('item_search');
-                    if (searchInput && searchInput.value.trim()) {
-                        // 현재 검색어로 다시 검색하여 pinned 상태 반영
-                        performSearch(searchInput.value);
-                    }
+                    // 검색 결과에서 해당 아이템을 시각적으로 pinned 상태로 변경
+                    updateSearchResultPinnedState(item.item_id, true);
                 } else {
-                    console.log('⚠️ Item already pinned');
+                    console.log('⚠️ Item already pinned:', item.item_id);
                 }
             } else {
                 console.error('❌ No item in response');
@@ -1044,8 +1057,42 @@ function pinItem(itemId) {
 }
 
 function unpinItem(itemId) {
+    console.log('🗑️ Unpinning item:', itemId);
+    const beforeCount = pinnedItems.length;
     pinnedItems = pinnedItems.filter(item => item.item_id !== itemId);
+    const afterCount = pinnedItems.length;
+    
+    console.log(`📌 Unpinned: ${beforeCount} → ${afterCount} items`);
     updatePinnedItemsDisplay();
+    
+    // 검색 결과에서 해당 아이템의 pinned 상태 제거
+    updateSearchResultPinnedState(itemId, false);
+}
+
+function updateSearchResultPinnedState(itemId, isPinned) {
+    // 검색 결과 컨테이너에서 해당 아이템 찾기
+    const searchResults = document.getElementById('search_results');
+    if (!searchResults) return;
+    
+    // 모든 검색 결과 아이템 확인
+    const itemCards = searchResults.querySelectorAll('.item_card.search_result');
+    itemCards.forEach(card => {
+        // 각 카드의 클릭 이벤트에서 item_id 추출하거나 data 속성 사용
+        // 여기서는 카드를 다시 검색하지 않고 시각적으로만 업데이트
+        if (isPinned) {
+            // 새로 핀된 아이템이라면 pinned_item 클래스 추가
+            const cardData = card.getAttribute('data-item-id');
+            if (cardData === itemId) {
+                card.classList.add('pinned_item');
+            }
+        } else {
+            // 핀 해제된 아이템이라면 pinned_item 클래스 제거
+            const cardData = card.getAttribute('data-item-id');
+            if (cardData === itemId) {
+                card.classList.remove('pinned_item');
+            }
+        }
+    });
 }
 
 function updatePinnedItemsDisplay() {
@@ -1070,7 +1117,20 @@ function updatePinnedItemsDisplay() {
     
     let html = '';
     
-    // Add pinned items first
+    // 1. Add uploaded image first (if exists)
+    if (uploadedImage) {
+        console.log('✅ Adding uploaded photo to display (first position)');
+        html += `
+            <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
+                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
+                     onerror="handleImageLoadError(this);" 
+                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
+                <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
+            </div>
+        `;
+    }
+    
+    // 2. Add pinned items after uploaded image
     pinnedItems.forEach((item, index) => {
         console.log(`📌 Adding pinned item ${index}:`, item.item_id);
         html += `
@@ -1084,26 +1144,8 @@ function updatePinnedItemsDisplay() {
         `;
     });
     
-    // Add single photo upload slot
-    if (uploadedImage) {
-        console.log('✅ Adding uploaded photo to display');
-        console.log('📷 uploadedImage data check:', {
-            exists: !!uploadedImage,
-            type: typeof uploadedImage,
-            length: uploadedImage?.length,
-            startsWithData: uploadedImage?.startsWith('data:'),
-            preview: uploadedImage?.substring(0, 50) + '...'
-        });
-                
-        html += `
-            <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
-                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
-                     onerror="handleImageLoadError(this);" 
-                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
-                <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
-            </div>
-        `;
-    } else {
+    // 3. Add photo upload placeholder only if no uploaded image
+    if (!uploadedImage) {
         console.log('📷 Adding empty photo upload slot');
         html += `
             <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
