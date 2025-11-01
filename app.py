@@ -338,6 +338,65 @@ def save_ootd_post():
         logging.error(f"Error saving OOTD: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/item_wear_logs', methods=['POST'])
+def save_item_wear_logs():
+    """Save item wear logs"""
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        wear_date = data.get('wear_date')
+        min_temp = data.get('min_temp')
+        max_temp = data.get('max_temp')
+        ootd_image_url = data.get('ootd_image_url')
+        location = data.get('location')
+        weather = data.get('weather')
+        precipitation = data.get('precipitation')
+        items = data.get('items', [])
+        
+        if not wear_date or not items:
+            return jsonify({'error': 'Missing required fields: wear_date and items'}), 400
+            
+        success_count = 0
+        errors = []
+        
+        for item_id in items:
+            try:
+                success = db.add_item_wear_log(
+                    item_id=item_id,
+                    wear_date=wear_date,
+                    min_temp=min_temp,
+                    max_temp=max_temp,
+                    ootd_image_url=ootd_image_url,
+                    location=location,
+                    weather=weather,
+                    precipitation=precipitation
+                )
+                if success:
+                    success_count += 1
+                else:
+                    errors.append(f"Failed to log wear for item {item_id}")
+            except Exception as e:
+                errors.append(f"Error logging item {item_id}: {str(e)}")
+        
+        return jsonify({
+            'success': True,
+            'message': f'Logged wear for {success_count}/{len(items)} items',
+            'success_count': success_count,
+            'total_items': len(items),
+            'errors': errors
+        }), 200
+        
+    except Exception as e:
+        logging.error(f"Error saving item wear logs: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/upload-ootd-image', methods=['POST'])
 def upload_ootd_image():
     """ootdLog용 이미지 업로드 API"""

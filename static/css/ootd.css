@@ -580,7 +580,7 @@
 }
 
 .ootd_entry {
-    background: white;
+    background: rgba(255, 255, 255, 0.363);
     border-radius: 22px;
     padding: 1rem;
     cursor: pointer;
@@ -588,7 +588,7 @@
 }
 
 .ootd_entry:hover {
-    transform: translateY(-2px);
+    background: var(--white);
 }
 
 .ootd_date_header {
@@ -608,9 +608,9 @@
 }
 
 .ootd_weather_info {
-    font-family: 'LeferiPointBlack', sans-serif;
-    font-size: 0.9rem;
-    color: var(--gray);
+    font-family: 'LeferiPointOblique', sans-serif;
+    font-size: 1rem;
+    color: var(--black);
 }
 
 .ootd_items_grid {
@@ -622,7 +622,7 @@
 
 .ootd_item_card {
     background: var(--lightgray);
-    border-radius: 6px;
+    border-radius: 16px;
     overflow: hidden;
     aspect-ratio: 3/4;
     min-width: 120px;

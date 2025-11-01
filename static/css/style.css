@@ -127,6 +127,11 @@
     margin: 60px 0 80px 0;
     padding: 20px;
 }
+.submit_button {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 60px;
+}
 
 /* Carousel styles - used across multiple pages */
 .horizontal_carousel {

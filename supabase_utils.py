@@ -403,7 +403,7 @@ class SupabaseDB:
             print(f"❌ Error saving OOTD: {e}")
             raise e
     
-    def add_item_wear_log(self, item_id, wear_date, min_temp=None, max_temp=None, ootd_image_url=None, location=None):
+    def add_item_wear_log(self, item_id, wear_date, min_temp=None, max_temp=None, ootd_image_url=None, location=None, weather=None, precipitation=None):
         """아이템 착용 로그 추가"""
         try:
             data = {
@@ -412,7 +412,9 @@ class SupabaseDB:
                 'min_temp': min_temp,
                 'max_temp': max_temp,
                 'ootd_image_url': ootd_image_url,
-                'location': location
+                'location': location,
+                'weather': weather,
+                'precipitation': precipitation
             }
             
             # None 값 제거
@@ -546,6 +548,8 @@ class SupabaseDB:
             max_temp = ootd_data.get('temp_max')
             ootd_image_url = ootd_data.get('uploaded_image')
             location = ootd_data.get('full_location') or ootd_data.get('location')  # 착용 로그용은 전체 주소 사용
+            weather = ootd_data.get('weather')
+            precipitation = ootd_data.get('precipitation')
             items = ootd_data.get('items', [])
             
             if not wear_date or not items:
@@ -565,7 +569,7 @@ class SupabaseDB:
                     continue
                 
                 if item_id:
-                    if self.add_item_wear_log(item_id, wear_date, min_temp, max_temp, ootd_image_url, location):
+                    if self.add_item_wear_log(item_id, wear_date, min_temp, max_temp, ootd_image_url, location, weather, precipitation):
                         success_count += 1
                     else:
                         print(f"❌ Failed to log wear for item {item_id}")

@@ -1572,6 +1572,12 @@ async function saveOOTD() {
         const result = await response.json();
         console.log('✅ OOTD saved successfully:', result);
         
+        // 착용 로그 기록
+        if (pinnedItems.length > 0) {
+            console.log('📝 Recording item wear logs...');
+            await recordItemWearLogs(dateString, pinnedItems);
+        }
+        
         alert(`저장 완료!\n- PIN된 아이템: ${pinnedItems.length}개\n- 업로드 이미지: ${uploadedImage ? '있음' : '없음'}\n- 날짜: ${dateString}\n- 위치: ${currentLocation}`);
         
         // 저장 완료 후 VIEW 탭으로 자동 이동
@@ -1580,6 +1586,47 @@ async function saveOOTD() {
     } catch (error) {
         console.error('❌ Save error:', error);
         alert(`저장 중 오류가 발생했습니다:\n${error.message}`);
+    }
+}
+
+async function recordItemWearLogs(wearDate, items) {
+    try {
+        console.log('📝 Starting item wear logs recording...');
+        
+        const wearLogData = {
+            wear_date: wearDate,
+            min_temp: weatherData.tempMin,
+            max_temp: weatherData.tempMax,
+            ootd_image_url: uploadedImage,
+            location: fullCurrentLocation || currentLocation,
+            weather: weatherData.weather,
+            precipitation: weatherData.precipitation,
+            items: items.map(item => item.item_id)
+        };
+        
+        console.log('📝 Wear log data:', wearLogData);
+        
+        const response = await fetch('/api/item_wear_logs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+            },
+            body: JSON.stringify(wearLogData)
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Wear log save failed:', response.status, errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Item wear logs saved successfully:', result);
+        
+    } catch (error) {
+        console.error('❌ Error recording item wear logs:', error);
+        // 착용 로그 저장 실패해도 OOTD 저장은 완료된 상태이므로 에러는 로그만 남김
     }
 }
 
@@ -1896,7 +1943,7 @@ async function loadSavedOOTDs() {
             <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
                 <div class="ootd_date_header">
                     <span class="ootd_date">${ootd.date}</span>
-                    <span class="ootd_weather_info">${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}</span>
+                    <span class="ootd_weather_info">${(ootd.weather)}, ${ootd.precipitation}% | ${ootd.temp_min}-${ootd.temp_max}</span>
                 </div>
                 <div class="ootd_items_grid">
                     ${ootd.uploaded_image ? `

@@ -724,11 +724,6 @@ input:checked + .toggle_slider {
     text-align: center;
 }
 
-.submit_button {
-    width: 100%;
-    text-align: center;
-    margin-bottom: 60px;
-}
 
 /* Main button style now defined in style.css - no need to duplicate here */
 .generate_script {
