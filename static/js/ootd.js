@@ -1086,9 +1086,18 @@ function updatePinnedItemsDisplay() {
     // Add single photo upload slot
     if (uploadedImage) {
         console.log('✅ Adding uploaded photo to display');
+        console.log('📷 uploadedImage data check:', {
+            exists: !!uploadedImage,
+            type: typeof uploadedImage,
+            length: uploadedImage?.length,
+            startsWithData: uploadedImage?.startsWith('data:'),
+            preview: uploadedImage?.substring(0, 50) + '...'
+        });
+        
         html += `
             <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
-                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image">
+                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
+                     onerror="console.error('❌ Image failed to load:', this.src?.substring(0, 100)); this.style.display='none'; this.parentElement.innerHTML='<div style=\\'padding:20px;text-align:center;color:red;\\'>Image Load Failed</div>';">
                 <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
             </div>
         `;
@@ -1145,7 +1154,13 @@ function handleImageUpload(event) {
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
             uploadedImage = e.target.result;
-            console.log('✅ Original image data set');
+            console.log('✅ Original image data set to uploadedImage variable');
+            console.log('📝 uploadedImage now contains:', uploadedImage.substring(0, 100) + '...');
+            
+            // 강제로 전역 변수 설정 확인
+            window.debugUploadedImage = uploadedImage;
+            console.log('🔍 Global debug variable set:', !!window.debugUploadedImage);
+            
             updatePinnedItemsDisplay();
             console.log('✅ Image processing completed');
         } else {
