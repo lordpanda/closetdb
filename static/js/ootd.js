@@ -1104,7 +1104,7 @@ function updatePinnedItemsDisplay() {
     } else {
         console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="document.getElementById('ootd_image_upload').click()">
+            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
@@ -1118,19 +1118,31 @@ function updatePinnedItemsDisplay() {
 
 function handleImageUpload(event) {
     console.log('🚨 === IMAGE UPLOAD EVENT TRIGGERED ===');
-    console.log('📁 Event:', event);
-    console.log('📁 Target:', event.target);
+    console.log('📱 User agent:', navigator.userAgent);
+    console.log('📁 Event type:', event.type);
+    console.log('📁 Event target:', event.target);
+    console.log('📁 Input element:', event.target.tagName, event.target.type, event.target.accept);
+    console.log('📁 Files object exists:', !!event.target.files);
     console.log('📁 Files object:', event.target.files);
-    console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES');
+    console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
     
-    if (!event.target.files || event.target.files.length === 0) {
-        console.error('❌ No files found in event');
+    // 모바일에서 파일 선택 확인
+    if (!event.target.files) {
+        console.error('❌ Files object is null - mobile browser issue?');
+        alert('파일 선택에 실패했습니다. 브라우저를 새로고침 후 다시 시도해주세요.');
+        return;
+    }
+    
+    if (event.target.files.length === 0) {
+        console.error('❌ No files selected by user');
+        alert('파일이 선택되지 않았습니다.');
         return;
     }
     
     const file = event.target.files[0];
     if (!file) {
         console.error('❌ First file is null/undefined');
+        alert('선택된 파일을 읽을 수 없습니다.');
         return;
     }
     
