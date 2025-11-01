@@ -257,6 +257,10 @@
     position: relative;
     width: 100%;
 }
+.location_container .info_pill {
+    
+    font-family: 'LeferiPointBlack', sans-serif;
+}
 
 .location_pill_clickable {
     width: 100%;
@@ -274,7 +278,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'LeferiPointBlack', sans-serif;
 }
 
 /* Location Input Container */
@@ -388,6 +391,7 @@
     padding: 10px 20px;
     font-size: 14px;
     white-space: nowrap;
+    font-family: 'LeferiPointBlackOblique';
 }
 
 .arrow_separator {
@@ -399,7 +403,6 @@
 .search_container {
     margin-bottom: 24px;
 }
-/*
 .search_input {
     width: 100%;
     background: white;
@@ -412,7 +415,6 @@
     text-align: center;
     font-family: 'Sequel45';
 }
-*/
 .search_input::placeholder {
     font-family: 'Sequel45';
     color: var(--black);
@@ -472,19 +474,22 @@
 }
 
 .item_card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 3px solid var(--black);
 }
 
 .item_card.search_result {
     cursor: pointer;
     border: none;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: block;  
+    object-fit: cover;
+    transform-origin: center center;
 }
 
 .item_card.search_result:hover {
-    border: 2px solid #6a5d9a;
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(124, 111, 176, 0.3);
 }
 
 .item_card.search_result.pinned_item {
@@ -492,7 +497,7 @@
 }
 
 .item_card.search_result.pinned_item:hover {
-    border: 3px solid var(--purple) !important;
+    border: 3px solid var(--black) !important;
 }
 
 .item_card.empty {
@@ -605,7 +610,7 @@
 }
 
 .ootd_weather_info {
-    font-family: 'LeferiPointOblique', sans-serif;
+    font-family: 'LeferiPointBlack', sans-serif;
     font-size: 1rem;
     color: var(--black);
 }

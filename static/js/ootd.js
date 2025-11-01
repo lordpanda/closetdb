@@ -873,15 +873,25 @@ function searchItems(query) {
                             ((item.size_region || item.sizeRegion) && (item.size_region || item.sizeRegion).toLowerCase().includes(term))
                         );
                         
-                        // Season 특별 처리
+                        // Season 특별 처리 - 시즌 검색어에만 적용
                         const seasonMatch = (() => {
                             const itemSeason = item.season?.toLowerCase() || '';
+                            const seasonTerms = ['spring', 'summer', 'fall', 'autumn', 'winter', 'fw', 'midsummer', 'all', '!all'];
+                            
+                            // 현재 검색어가 시즌 관련이 아니면 season 매치 안함
+                            if (!seasonTerms.includes(term.toLowerCase())) {
+                                return false;
+                            }
+                            
                             if (term === '!all') {
                                 return itemSeason !== 'all' && itemSeason !== '';
                             }
+                            
+                            // "all" season은 모든 시즌 검색어에 매치
                             if (itemSeason === 'all') {
                                 return true;
                             }
+                            
                             const seasonMapping = {
                                 'spring': ['Spring/Fall', 'FW'], 
                                 'fall': ['Spring/Fall', 'FW'],
