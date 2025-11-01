@@ -1071,29 +1071,44 @@ function unpinItem(itemId) {
 }
 
 function updateSearchResultPinnedState(itemId, isPinned) {
+    console.log('🔄 === updateSearchResultPinnedState called ===');
+    console.log('🔄 ItemId:', itemId, 'isPinned:', isPinned);
+    
     // 검색 결과 컨테이너에서 해당 아이템 찾기
     const searchResults = document.getElementById('search_results');
-    if (!searchResults) return;
+    if (!searchResults) {
+        console.log('❌ search_results container not found');
+        return;
+    }
     
     // 모든 검색 결과 아이템 확인
     const itemCards = searchResults.querySelectorAll('.item_card.search_result');
-    itemCards.forEach(card => {
-        // 각 카드의 클릭 이벤트에서 item_id 추출하거나 data 속성 사용
-        // 여기서는 카드를 다시 검색하지 않고 시각적으로만 업데이트
-        if (isPinned) {
-            // 새로 핀된 아이템이라면 pinned_item 클래스 추가
-            const cardData = card.getAttribute('data-item-id');
-            if (cardData === itemId) {
+    console.log('🔄 Found search result cards:', itemCards.length);
+    
+    let foundCard = false;
+    itemCards.forEach((card, index) => {
+        const cardData = card.getAttribute('data-item-id');
+        console.log(`🔄 Card ${index}: data-item-id = "${cardData}"`);
+        
+        if (cardData === itemId.toString()) {
+            foundCard = true;
+            console.log(`✅ Found matching card for item ${itemId}!`);
+            
+            if (isPinned) {
+                console.log('📌 Adding pinned_item class to card');
                 card.classList.add('pinned_item');
-            }
-        } else {
-            // 핀 해제된 아이템이라면 pinned_item 클래스 제거
-            const cardData = card.getAttribute('data-item-id');
-            if (cardData === itemId) {
+            } else {
+                console.log('🗑️ Removing pinned_item class from card');
                 card.classList.remove('pinned_item');
             }
+            
+            console.log('🔄 Card classes after update:', card.className);
         }
     });
+    
+    if (!foundCard) {
+        console.log(`❌ No card found with data-item-id="${itemId}"`);
+    }
 }
 
 function updatePinnedItemsDisplay() {
