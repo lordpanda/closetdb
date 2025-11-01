@@ -1166,14 +1166,13 @@ function handleImageUpload(event) {
         return;
     }
     
+    // 즉시 로컬 프리뷰 표시 (가장 우선)
     const reader = new FileReader();
     reader.onload = function(e) {
         if (e.target.result && e.target.result.startsWith('data:image/')) {
+            // 로컬 이미지 즉시 설정
             uploadedImage = e.target.result;
             updatePinnedItemsDisplay();
-            
-            // R2 업로드 시도 (백그라운드에서 data URL 사용)
-            uploadToR2(e.target.result);
         }
     };
     
@@ -1185,45 +1184,39 @@ function handleImageUpload(event) {
     
     // EXIF 데이터 추출
     extractEXIFData(file);
+    
+    // R2 업로드 (백그라운드에서 원본 파일 사용)
+    uploadImageToR2(file);
 }
 
 
-function uploadToR2(dataURL) {
-    // data URL을 blob으로 변환
-    const base64Data = dataURL.split(',')[1];
-    const mimeType = dataURL.split(';')[0].split(':')[1];
+function uploadImageToR2(file) {
+    const formData = new FormData();
+    formData.append('image', file);
     
-    try {
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+    fetch('/api/upload-ootd-image', {
+        method: 'POST',
+        body: formData
+    })
+    .then(async response => {
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText.slice(0, 200)}...`);
         }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: mimeType });
         
-        const formData = new FormData();
-        formData.append('image', blob, 'ootd-image.jpg');
-        
-        fetch('/api/upload-ootd-image', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success || data.url) {
-                // R2 업로드 성공 시 URL 교체
-                uploadedImage = data.url;
-                updatePinnedItemsDisplay();
-            }
-        })
-        .catch(error => {
-            // 업로드 실패 시 로컬 이미지 유지
-            console.error('R2 upload failed, keeping local image');
-        });
-    } catch (error) {
-        console.error('Failed to convert data URL to blob');
-    }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success || data.url) {
+            // R2 업로드 성공 시 URL 교체
+            uploadedImage = data.url;
+            updatePinnedItemsDisplay(); // R2 URL로 업데이트
+        }
+    })
+    .catch(error => {
+        // 네트워크 오류 시에도 로컬 이미지는 유지
+        console.error('R2 upload failed, keeping local preview');
+    });
 }
 
 function extractEXIFData(file) {
