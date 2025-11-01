@@ -580,6 +580,112 @@ class SupabaseDB:
         except Exception as e:
             print(f"❌ Error logging OOTD items wear: {e}")
             return False
+    
+    def add_item_combinations(self, ootd_data):
+        """OOTD 저장 시 아이템 간의 조합을 기록"""
+        try:
+            items = ootd_data.get('items', [])
+            wear_date = ootd_data.get('date')
+            
+            if len(items) < 2:
+                print("⚠️ Need at least 2 items to create combinations")
+                return True  # 에러는 아니므로 True 반환
+            
+            # 모든 아이템 쌍 조합 생성
+            combinations_added = 0
+            
+            for i in range(len(items)):
+                for j in range(i + 1, len(items)):
+                    item1_id = items[i].get('item_id') if isinstance(items[i], dict) else items[i]
+                    item2_id = items[j].get('item_id') if isinstance(items[j], dict) else items[j]
+                    
+                    if item1_id and item2_id:
+                        # 알파벳 순으로 정렬하여 일관성 유지 (A-B와 B-A가 같은 조합이 되도록)
+                        if item1_id > item2_id:
+                            item1_id, item2_id = item2_id, item1_id
+                        
+                        combination_data = {
+                            'item_a': item1_id,
+                            'item_b': item2_id,
+                            'wear_date': wear_date,
+                            'created_at': ootd_data.get('created_at')
+                        }
+                        
+                        if self._add_single_combination(combination_data):
+                            combinations_added += 1
+            
+            print(f"✅ Added {combinations_added} item combinations")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Error adding item combinations: {e}")
+            return False
+    
+    def _add_single_combination(self, combination_data):
+        """단일 아이템 조합 추가"""
+        try:
+            # REST API 호출
+            url = f"{self.url}/rest/v1/item_combinations"
+            response = requests.post(url, headers=self.headers, json=combination_data)
+            
+            if response.status_code in [200, 201]:
+                return True
+            else:
+                print(f"❌ Failed to add combination: {response.status_code} - {response.text}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error adding single combination: {e}")
+            return False
+    
+    def get_item_recommendations(self, selected_items, limit=10):
+        """선택된 아이템들과 함께 착용된 다른 아이템들 추천"""
+        try:
+            if not selected_items:
+                return []
+            
+            # 선택된 아이템들과 조합된 모든 아이템 찾기
+            recommendations = {}
+            
+            for item_id in selected_items:
+                # item_a 또는 item_b로 저장된 조합 모두 검색
+                url1 = f"{self.url}/rest/v1/item_combinations?item_a=eq.{item_id}&select=item_b,wear_date"
+                url2 = f"{self.url}/rest/v1/item_combinations?item_b=eq.{item_id}&select=item_a,wear_date"
+                
+                response1 = requests.get(url1, headers=self.headers)
+                response2 = requests.get(url2, headers=self.headers)
+                
+                if response1.status_code == 200:
+                    combinations1 = response1.json()
+                    for combo in combinations1:
+                        partner_item = combo['item_b']
+                        if partner_item not in selected_items:
+                            recommendations[partner_item] = recommendations.get(partner_item, 0) + 1
+                
+                if response2.status_code == 200:
+                    combinations2 = response2.json()
+                    for combo in combinations2:
+                        partner_item = combo['item_a']
+                        if partner_item not in selected_items:
+                            recommendations[partner_item] = recommendations.get(partner_item, 0) + 1
+            
+            # 빈도 순으로 정렬하여 상위 추천 아이템 반환
+            sorted_recommendations = sorted(recommendations.items(), key=lambda x: x[1], reverse=True)
+            
+            # 실제 아이템 정보 가져오기
+            recommended_items = []
+            for item_id, frequency in sorted_recommendations[:limit]:
+                item = self.get_item_by_id(item_id)
+                if item:
+                    item['recommendation_frequency'] = frequency
+                    recommended_items.append(item)
+            
+            print(f"✅ Found {len(recommended_items)} recommendations")
+            return recommended_items
+            
+        except Exception as e:
+            print(f"❌ Error getting recommendations: {e}")
+            return []
 
 # 전역 인스턴스
 db = SupabaseDB()

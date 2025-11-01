@@ -397,6 +397,64 @@ def save_item_wear_logs():
         logging.error(f"Error saving item wear logs: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/item_combinations', methods=['POST'])
+def save_item_combinations():
+    """Save item combinations from OOTD"""
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        # Add combinations using the db function
+        success = db.add_item_combinations(data)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Item combinations recorded successfully'
+            }), 200
+        else:
+            return jsonify({'error': 'Failed to record combinations'}), 500
+        
+    except Exception as e:
+        logging.error(f"Error saving item combinations: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/item_recommendations', methods=['POST'])
+def get_item_recommendations():
+    """Get item recommendations based on selected items"""
+    try:
+        # Check authentication
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return jsonify({'error': 'Unauthorized'}), 401
+            
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        selected_items = data.get('selected_items', [])
+        limit = data.get('limit', 10)
+        
+        if not selected_items:
+            return jsonify({'recommendations': []}), 200
+            
+        recommendations = db.get_item_recommendations(selected_items, limit)
+        
+        return jsonify({
+            'success': True,
+            'recommendations': recommendations
+        }), 200
+        
+    except Exception as e:
+        logging.error(f"Error getting item recommendations: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/upload-ootd-image', methods=['POST'])
 def upload_ootd_image():
     """ootdLog용 이미지 업로드 API"""

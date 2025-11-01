@@ -1576,6 +1576,10 @@ async function saveOOTD() {
         if (pinnedItems.length > 0) {
             console.log('📝 Recording item wear logs...');
             await recordItemWearLogs(dateString, pinnedItems);
+            
+            // 아이템 조합 기록
+            console.log('🔗 Recording item combinations...');
+            await recordItemCombinations(ootdData);
         }
         
         alert(`저장 완료!\n- PIN된 아이템: ${pinnedItems.length}개\n- 업로드 이미지: ${uploadedImage ? '있음' : '없음'}\n- 날짜: ${dateString}\n- 위치: ${currentLocation}`);
@@ -1627,6 +1631,34 @@ async function recordItemWearLogs(wearDate, items) {
     } catch (error) {
         console.error('❌ Error recording item wear logs:', error);
         // 착용 로그 저장 실패해도 OOTD 저장은 완료된 상태이므로 에러는 로그만 남김
+    }
+}
+
+async function recordItemCombinations(ootdData) {
+    try {
+        console.log('🔗 Starting item combinations recording...');
+        
+        const response = await fetch('/api/item_combinations', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+            },
+            body: JSON.stringify(ootdData)
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Combinations save failed:', response.status, errorText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Item combinations recorded successfully:', result);
+        
+    } catch (error) {
+        console.error('❌ Error recording item combinations:', error);
+        // 조합 기록 실패해도 OOTD 저장은 완료된 상태이므로 에러는 로그만 남김
     }
 }
 
