@@ -1109,7 +1109,7 @@ function updatePinnedItemsDisplay() {
     } else {
         console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="alert('📱 사진 업로드 버튼 클릭됨!'); console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); alert('📱 Input 요소: ' + (!!input ? '찾음' : '못찾음')); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
+            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); alert('📱 Input 요소: ' + (!!input ? '찾음' : '못찾음')); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
@@ -1325,10 +1325,9 @@ function uploadImageToR2(file) {
     .then(data => {
         if (data.success || data.url) {
             console.log('✅ Image uploaded to R2:', data.url);
-            // R2 업로드 성공 시 URL 교체
-            uploadedImage = data.url;
-            console.log('🔄 Updating preview with R2 URL');
-            updatePinnedItemsDisplay(); // R2 URL로 업데이트
+            // R2 업로드 성공했지만 로컬 미리보기는 data URL 유지
+            console.log('🔄 R2 upload complete, keeping local preview');
+            // uploadedImage는 data URL 그대로 유지 (미리보기용)
         } else {
             console.error('❌ Upload failed:', data.error);
             // 실패 시 로컬 이미지 유지 (이미 설정됨)
