@@ -378,7 +378,7 @@
 .info_row {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 16px;
     margin-bottom: 24px;
     flex-wrap: wrap;
@@ -408,8 +408,8 @@
     background: white;
     border: 2px solid var(--black);
     border-radius: 24px;
-    padding: 12px;
-    font-size: 16px;
+    padding: 10px 20px;
+    font-size: 14px;
     margin-bottom: 16px;
     outline: none;
     text-align: center;
@@ -493,11 +493,11 @@
 }
 
 .item_card.search_result.pinned_item {
-    border: 3px solid var(--black) !important;
+    border: 3px solid var(--black)
 }
 
 .item_card.search_result.pinned_item:hover {
-    border: 3px solid var(--black) !important;
+    border: 3px solid var(--black)
 }
 
 .item_card.empty {
@@ -737,5 +737,8 @@
 @media (max-width: 768px) {
     .ootd_date {
         font-size: 1rem;
+    }
+    .item_card.search_result.pinned_item {
+        border: 2px solid var(--black);
     }
 }
