@@ -7,9 +7,9 @@ let uploadedImage = null;
 let currentLocation = 'SEOCHO-GU, SEOUL'; // 표시용 (간단한 주소)
 let fullCurrentLocation = 'SEOCHO-GU, SEOUL'; // 저장용 (전체 주소)
 let weatherData = {
-    weather: '',
-    tempMin: 1,
-    tempMax: 2,
+    weather: 'SUNNY',
+    tempMin: 16,
+    tempMax: 24,
     precipitation: 0
 };
 let currentCoords = null;
@@ -159,10 +159,12 @@ function setupEventListeners() {
         console.log('🧪 Testing file input click...');
         imageUploadInput.addEventListener('change', handleImageUpload);
         console.log('✅ Image upload event listener attached');
+        alert('📱 이벤트 리스너 설정 완료!');
         
         // Add test click handler
         imageUploadInput.addEventListener('click', () => {
             console.log('🖱️ File input clicked!');
+            alert('📱 파일 입력 클릭됨!');
         });
     } else {
         console.error('❌ ootd_image_upload element not found!');
@@ -170,6 +172,7 @@ function setupEventListeners() {
         // Search for it manually
         const allInputs = document.querySelectorAll('input[type="file"]');
         console.log('🔍 All file inputs found:', allInputs.length);
+        alert(`📁 파일 입력 요소 개수: ${allInputs.length}`);
         allInputs.forEach((input, i) => {
             console.log(`File input ${i}:`, input.id, input.className);
         });
@@ -368,8 +371,8 @@ async function updateLocationAndWeather(locationQuery) {
               if (code >= 85 && code <= 86) return 'SNOWY';
               if (code >= 95 && code <= 99) return 'RAINY';
               
-              console.log('⚠️ Unknown location weather code:', code, 'defaulting to UNKNOWN');
-              return 'UNKNOWN';
+              console.log('⚠️ Unknown location weather code:', code, 'defaulting to SUNNY');
+              return 'SUNNY';
             };
 
             const weatherType = getWeatherType(weatherCode);
@@ -926,16 +929,15 @@ function displaySearchResults(items) {
         return;
     }
     
-    // closetDB의 정확한 방식으로 검색 결과 표시 (순서 유지)
+    // closetDB의 정확한 방식으로 검색 결과 표시
     container.innerHTML = '';
     
     items.slice(0, 20).forEach(item => {
         const gridItem = document.createElement('div');
         gridItem.className = 'item_card search_result';
-        gridItem.setAttribute('data-item-id', item.item_id); // item_id 추가
         
         // 이미 pin된 아이템인지 확인
-        const isPinned = pinnedItems.some(p => p.item_id === item.item_id);
+        const isPinned = pinnedItems.find(p => p.item_id === item.item_id);
         if (isPinned) {
             gridItem.classList.add('pinned_item');
         }
@@ -985,20 +987,11 @@ function displaySearchResults(items) {
             gridItem.appendChild(img);
         }
         
-        // 클릭 이벤트 추가 - pin된 아이템이면 unpin, 아니면 pin
+        // 클릭 이벤트 추가 (검색 결과 유지)
         gridItem.addEventListener('click', () => {
-            console.log('🖱️ Search item clicked:', item.item_id, 'Current isPinned:', isPinned);
-            // 실시간으로 pin 상태 확인 (isPinned는 렌더링 시점의 상태이므로)
-            const currentlyPinned = pinnedItems.some(p => p.item_id === item.item_id);
-            console.log('🔍 Currently pinned check:', currentlyPinned);
-            
-            if (currentlyPinned) {
-                console.log('🗑️ Calling unpinItem for:', item.item_id);
-                unpinItem(item.item_id);
-            } else {
-                console.log('📌 Calling pinItem for:', item.item_id);
-                pinItem(item.item_id);
-            }
+            pinItem(item.item_id);
+            // pin 성공 시 시각적 피드백
+            gridItem.classList.add('pinned_item');
         });
         
         container.appendChild(gridItem);
@@ -1013,10 +1006,7 @@ function clearSearchResults() {
 }
 
 function pinItem(itemId) {
-    console.log('📌 === PINITEM CALLED ===');
     console.log('📌 Attempting to pin item:', itemId);
-    console.log('📌 Current pinnedItems count:', pinnedItems.length);
-    console.log('📌 Current pinnedItems:', pinnedItems.map(p => p.item_id));
     
     // closetDB의 item ID 형식 처리 (supabase_ 접두사 추가)
     const apiItemId = itemId.toString().startsWith('supabase_') ? itemId : `supabase_${itemId}`;
@@ -1033,20 +1023,19 @@ function pinItem(itemId) {
             if (data.item) {
                 const item = data.item;
                 console.log('✅ Item found:', item);
-                
-                // 중복 방지: item_id로 정확히 비교
-                const alreadyPinned = pinnedItems.find(p => p.item_id === item.item_id);
-                if (!alreadyPinned) {
+                if (!pinnedItems.find(p => p.item_id === item.item_id)) {
                     pinnedItems.push(item);
                     console.log('📌 Item pinned, total pinned:', pinnedItems.length);
-                    
-                    // 핀된 아이템 표시 업데이트 (복제 방지)
                     updatePinnedItemsDisplay();
                     
-                    // 검색 결과에서 해당 아이템을 시각적으로 pinned 상태로 변경
-                    updateSearchResultPinnedState(item.item_id, true);
+                    // 검색 결과를 다시 표시하여 pinned 상태 업데이트
+                    const searchInput = document.getElementById('item_search');
+                    if (searchInput && searchInput.value.trim()) {
+                        // 현재 검색어로 다시 검색하여 pinned 상태 반영
+                        performSearch(searchInput.value);
+                    }
                 } else {
-                    console.log('⚠️ Item already pinned:', item.item_id);
+                    console.log('⚠️ Item already pinned');
                 }
             } else {
                 console.error('❌ No item in response');
@@ -1058,42 +1047,8 @@ function pinItem(itemId) {
 }
 
 function unpinItem(itemId) {
-    console.log('🗑️ Unpinning item:', itemId);
-    const beforeCount = pinnedItems.length;
     pinnedItems = pinnedItems.filter(item => item.item_id !== itemId);
-    const afterCount = pinnedItems.length;
-    
-    console.log(`📌 Unpinned: ${beforeCount} → ${afterCount} items`);
     updatePinnedItemsDisplay();
-    
-    // 검색 결과에서 해당 아이템의 pinned 상태 제거
-    updateSearchResultPinnedState(itemId, false);
-}
-
-function updateSearchResultPinnedState(itemId, isPinned) {
-    // 검색 결과 컨테이너에서 해당 아이템 찾기
-    const searchResults = document.getElementById('search_results');
-    if (!searchResults) return;
-    
-    // 모든 검색 결과 아이템 확인
-    const itemCards = searchResults.querySelectorAll('.item_card.search_result');
-    itemCards.forEach(card => {
-        // 각 카드의 클릭 이벤트에서 item_id 추출하거나 data 속성 사용
-        // 여기서는 카드를 다시 검색하지 않고 시각적으로만 업데이트
-        if (isPinned) {
-            // 새로 핀된 아이템이라면 pinned_item 클래스 추가
-            const cardData = card.getAttribute('data-item-id');
-            if (cardData === itemId) {
-                card.classList.add('pinned_item');
-            }
-        } else {
-            // 핀 해제된 아이템이라면 pinned_item 클래스 제거
-            const cardData = card.getAttribute('data-item-id');
-            if (cardData === itemId) {
-                card.classList.remove('pinned_item');
-            }
-        }
-    });
 }
 
 function updatePinnedItemsDisplay() {
@@ -1118,20 +1073,7 @@ function updatePinnedItemsDisplay() {
     
     let html = '';
     
-    // 1. Add uploaded image first (if exists)
-    if (uploadedImage) {
-        console.log('✅ Adding uploaded photo to display (first position)');
-        html += `
-            <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
-                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
-                     onerror="handleImageLoadError(this);" 
-                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
-                <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
-            </div>
-        `;
-    }
-    
-    // 2. Add pinned items after uploaded image
+    // Add pinned items first
     pinnedItems.forEach((item, index) => {
         console.log(`📌 Adding pinned item ${index}:`, item.item_id);
         html += `
@@ -1145,11 +1087,29 @@ function updatePinnedItemsDisplay() {
         `;
     });
     
-    // 3. Add photo upload placeholder only if no uploaded image
-    if (!uploadedImage) {
+    // Add single photo upload slot
+    if (uploadedImage) {
+        console.log('✅ Adding uploaded photo to display');
+        console.log('📷 uploadedImage data check:', {
+            exists: !!uploadedImage,
+            type: typeof uploadedImage,
+            length: uploadedImage?.length,
+            startsWithData: uploadedImage?.startsWith('data:'),
+            preview: uploadedImage?.substring(0, 50) + '...'
+        });
+        
+        html += `
+            <div class="item_card uploaded_photo" onclick="document.getElementById('ootd_image_upload').click()">
+                <img src="${uploadedImage}" alt="Uploaded photo" class="item_image" 
+                     onerror="handleImageLoadError(this);" 
+                     onload="console.log('✅ Image loaded successfully in preview:', this.src?.length, 'chars');">
+                <button class="remove_item_btn" onclick="event.stopPropagation(); removeUploadedImage()" title="Remove image">×</button>
+            </div>
+        `;
+    } else {
         console.log('📷 Adding empty photo upload slot');
         html += `
-            <div class="item_card empty photo_upload" onclick="console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
+            <div class="item_card empty photo_upload" onclick="alert('📱 사진 업로드 버튼 클릭됨!'); console.log('📱 Photo upload clicked'); const input = document.getElementById('ootd_image_upload'); console.log('📱 Input found:', !!input); alert('📱 Input 요소: ' + (!!input ? '찾음' : '못찾음')); if(input) { console.log('📱 Triggering click...'); input.click(); } else { alert('업로드 요소를 찾을 수 없습니다.'); }">
                 📷
             </div>
         `;
@@ -1196,7 +1156,10 @@ function handleImageUpload(event) {
     console.log('📁 Files object exists:', !!event.target.files);
     console.log('📁 Files object:', event.target.files);
     console.log('📁 File count:', event.target.files ? event.target.files.length : 'NO FILES OBJECT');
-       
+    
+    // 모바일 디버깅용 alert
+    alert(`📱 업로드 시작!\n파일 개수: ${event.target.files ? event.target.files.length : 0}\n모바일: ${/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'Yes' : 'No'}`);
+    
     // 모바일에서 파일 선택 확인
     if (!event.target.files) {
         console.error('❌ Files object is null - mobile browser issue?');
@@ -1224,7 +1187,9 @@ function handleImageUpload(event) {
         lastModified: file.lastModified
     });
     
+    // 파일 정보 alert 표시
     const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
+    alert(`📷 파일 선택됨!\n이름: ${file.name}\n크기: ${fileSizeMB}MB\n타입: ${file.type}`);
     
     // 즉시 로컬 프리뷰 표시 (가장 우선)
     console.log('🔧 Starting FileReader for preview...');
@@ -1235,7 +1200,10 @@ function handleImageUpload(event) {
         console.log('✅ FileReader completed, data length:', e.target.result.length);
         console.log('📱 Preview data type:', typeof e.target.result);
         console.log('📱 Preview data starts with:', e.target.result.substring(0, 50));
-                
+        
+        // FileReader 완료 alert
+        alert(`📖 파일 읽기 완료!\n데이터 길이: ${e.target.result.length}자\n타입: ${typeof e.target.result}\n시작: ${e.target.result.substring(0, 30)}...`);
+        
         // 이미지 데이터 유효성 검사
         if (e.target.result && e.target.result.startsWith('data:image/')) {
             // 데이터 URL 검증
@@ -1260,8 +1228,8 @@ function handleImageUpload(event) {
             const testImg = new Image();
             testImg.onload = function() {
                 console.log('✅ Data URL validation passed - image can be loaded');
+                alert(`✅ 테스트 성공!\n길이: ${dataURL.length}자\n크기: ${sizeInMB.toFixed(1)}MB\n이제 프리뷰에 표시합니다.`);
                 uploadedImage = dataURL;
-                                
                 updatePinnedItemsDisplay();
                 console.log('✅ Image processing completed');
             };
@@ -1565,15 +1533,18 @@ function removeUploadedImage() {
 
 async function saveOOTD() {
     const dateString = formatDateForInput(currentDate);
-        
+    
+    // uploadedImage 상태 확인
+    alert(`💾 OOTD 저장 시작!\n업로드된 이미지: ${uploadedImage ? '있음' : '없음'}\n타입: ${typeof uploadedImage}\n길이: ${uploadedImage?.length || 0}`);
+    
     // OOTD 데이터 생성 (핀된 아이템 포함)
     const ootdData = {
         date: dateString,
         location: currentLocation || 'SEOCHO-GU, SEOUL', // OOTD 테이블에는 짧은 주소 저장
-        weather: weatherData.weather,
-        temp_min: weatherData.tempMin,
-        temp_max: weatherData.tempMax,
-        precipitation: weatherData.precipitation,
+        weather: weatherData.weather || 'SUNNY',
+        temp_min: weatherData.tempMin || 16,
+        temp_max: weatherData.tempMax || 24,
+        precipitation: weatherData.precipitation || 0,
         items: pinnedItems.map(item => ({
             id: item.item_id,
             brand: item.brand,
@@ -1615,93 +1586,11 @@ async function saveOOTD() {
         const result = await response.json();
         console.log('✅ OOTD saved successfully:', result);
         
-        // 착용 로그 기록
-        if (pinnedItems.length > 0) {
-            console.log('📝 Recording item wear logs...');
-            await recordItemWearLogs(dateString, pinnedItems);
-            
-            // 아이템 조합 기록
-            console.log('🔗 Recording item combinations...');
-            await recordItemCombinations(ootdData);
-        }
-        
         alert(`저장 완료!\n- PIN된 아이템: ${pinnedItems.length}개\n- 업로드 이미지: ${uploadedImage ? '있음' : '없음'}\n- 날짜: ${dateString}\n- 위치: ${currentLocation}`);
-        
-        // 저장 완료 후 VIEW 탭으로 자동 이동
-        switchTab('view');
         
     } catch (error) {
         console.error('❌ Save error:', error);
         alert(`저장 중 오류가 발생했습니다:\n${error.message}`);
-    }
-}
-
-async function recordItemWearLogs(wearDate, items) {
-    try {
-        console.log('📝 Starting item wear logs recording...');
-        
-        const wearLogData = {
-            wear_date: wearDate,
-            min_temp: weatherData.tempMin,
-            max_temp: weatherData.tempMax,
-            ootd_image_url: uploadedImage,
-            location: fullCurrentLocation || currentLocation,
-            weather: weatherData.weather,
-            precipitation: weatherData.precipitation,
-            items: items.map(item => item.item_id)
-        };
-        
-        console.log('📝 Wear log data:', wearLogData);
-        
-        const response = await fetch('/api/item_wear_logs', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-            },
-            body: JSON.stringify(wearLogData)
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Wear log save failed:', response.status, errorText);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('✅ Item wear logs saved successfully:', result);
-        
-    } catch (error) {
-        console.error('❌ Error recording item wear logs:', error);
-        // 착용 로그 저장 실패해도 OOTD 저장은 완료된 상태이므로 에러는 로그만 남김
-    }
-}
-
-async function recordItemCombinations(ootdData) {
-    try {
-        console.log('🔗 Starting item combinations recording...');
-        
-        const response = await fetch('/api/item_combinations', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-            },
-            body: JSON.stringify(ootdData)
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Combinations save failed:', response.status, errorText);
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('✅ Item combinations recorded successfully:', result);
-        
-    } catch (error) {
-        console.error('❌ Error recording item combinations:', error);
-        // 조합 기록 실패해도 OOTD 저장은 완료된 상태이므로 에러는 로그만 남김
     }
 }
 
@@ -2017,15 +1906,9 @@ async function loadSavedOOTDs() {
         container.innerHTML = savedOOTDs.map(ootd => `
             <div class="ootd_entry" onclick="loadOOTDForEdit('${ootd.date}')">
                 <div class="ootd_date_header">
-                    <span class="ootd_date">${ootd.date}</span>
-                    <span class="ootd_weather_info">${(ootd.weather)}, ${ootd.precipitation}% | ${ootd.temp_min}-${ootd.temp_max}</span>
+                    ${ootd.date} | ${(ootd.weather).toLowerCase()}, ${ootd.precipitation}%, ${ootd.temp_min}-${ootd.temp_max}
                 </div>
                 <div class="ootd_items_grid">
-                    ${ootd.uploaded_image ? `
-                        <div class="ootd_item_card">
-                            <img src="${ootd.uploaded_image}" alt="OOTD" class="ootd_item_image">
-                        </div>
-                    ` : ''}
                     ${ootd.items && ootd.items.length > 0 ? ootd.items.map(item => `
                         <div class="ootd_item_card">
                             ${item.images && item.images.length > 0 
@@ -2034,6 +1917,11 @@ async function loadSavedOOTDs() {
                             }
                         </div>
                     `).join('') : ''}
+                    ${ootd.uploaded_image ? `
+                        <div class="ootd_item_card">
+                            <img src="${ootd.uploaded_image}" alt="OOTD" class="ootd_item_image">
+                        </div>
+                    ` : ''}
                     ${(!ootd.items || ootd.items.length === 0) && !ootd.uploaded_image ? '<div class="no_items">No items saved</div>' : ''}
                 </div>
             </div>
